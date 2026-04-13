@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GS-QUAD // OPERATIONAL INTEL</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- Background System -->
+    <div class="bg-layer">
+        <div class="bg-glow bg-glow-1"></div>
+        <div class="bg-glow bg-glow-2"></div>
+        <div class="bg-grid"></div>
+    </div>
+
+    <div class="app-layout">
+
+        <!-- ===================== SIDEBAR ===================== -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <div class="logo-mark">GS</div>
+                <div class="logo-text">
+                    <span class="logo-name">GS-QUAD</span>
+                    <span class="logo-sub">INTEL OPS v2.1</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav" id="sidebar-nav">
+
+                <a href="#view-visao" class="nav-item active" data-target="view-visao">
+                    <span class="nav-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                            <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+                        </svg>
+                    </span>
+                    <span class="nav-label">VISÃO GERAL</span>
+                </a>
+
+                <a href="#view-curva" class="nav-item" data-target="view-curva">
+                    <span class="nav-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/>
+                            <line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/>
+                        </svg>
+                    </span>
+                    <span class="nav-label">CURVA ABC</span>
+                </a>
+
+                <a href="#view-monitor" class="nav-item" data-target="view-monitor">
+                    <span class="nav-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                        </svg>
+                    </span>
+                    <span class="nav-label">MONITOR</span>
+                    <span class="nav-badge" id="nav-badge-monitor">3</span>
+                </a>
+
+                <a href="#view-growth" class="nav-item" data-target="view-growth">
+                    <span class="nav-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                            <polyline points="17 6 23 6 23 12"/>
+                        </svg>
+                    </span>
+                    <span class="nav-label">GROWTH_PLAN</span>
+                </a>
+
+                <a href="#view-chat" class="nav-item" data-target="view-chat">
+                    <span class="nav-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        </svg>
+                    </span>
+                    <span class="nav-label">NEURAL_CHAT</span>
+                </a>
+
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="system-status">
+                    <div class="status-beacon"></div>
+                    <div>
+                        <div class="status-label">SYSTEM ONLINE</div>
+                        <div class="status-sub">LATENCY 42ms · WS</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ===================== MAIN ===================== -->
+        <main class="main-content">
+
+            <!-- Topbar -->
+            <header class="topbar">
+                <div class="enter-1">
+                    <h1 class="page-title">WAR_ROOM<span class="title-dot">.</span></h1>
+                    <p class="page-sub">N8N CLOUD ↔ SUPABASE REALTIME ↔ CLAUDE AI</p>
+                </div>
+                <div class="user-pill enter-1">
+                    <div class="user-avatar">GS</div>
+                    <div class="user-info">
+                        <span class="user-role">ADMIN COMMAND</span>
+                        <span class="user-id">ID: 8077295</span>
+                    </div>
+                    <div class="user-pulse"></div>
+                </div>
+            </header>
+
+            <!-- ======= VIEW 1: VISÃO GERAL ======= -->
+            <div id="view-visao" class="spa-view active">
+
+                <div class="metrics-row">
+
+                    <article class="metric-card accent-green enter-2">
+                        <div class="metric-header">
+                            <span class="metric-label">RECEITA 24H</span>
+                            <span class="metric-badge live">● LIVE</span>
+                        </div>
+                        <div class="metric-value" id="vendas-hoje">R$&nbsp;0,00</div>
+                        <div class="metric-sparkline" id="sparkline-vendas"></div>
+                        <div class="metric-footer">
+                            <span class="metric-trend up">
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                                TENDÊNCIA DE ALTA
+                            </span>
+                        </div>
+                    </article>
+
+                    <article class="metric-card accent-red enter-3">
+                        <div class="metric-header">
+                            <span class="metric-label">ALERTAS ATIVOS</span>
+                            <span class="metric-badge warn">⚠ VERIFICAR</span>
+                        </div>
+                        <div class="metric-value critical" id="alertas-ativas">00</div>
+                        <div class="metric-bar">
+                            <div class="metric-bar-fill red" id="bar-alertas" style="width: 0%"></div>
+                        </div>
+                        <div class="metric-footer">
+                            <span class="metric-trend warn">REQUEREM AÇÃO — CURVA A</span>
+                        </div>
+                    </article>
+
+                    <article class="metric-card accent-blue enter-4">
+                        <div class="metric-header">
+                            <span class="metric-label">CATÁLOGO MLB</span>
+                            <span class="metric-badge ok">✓ SYNC</span>
+                        </div>
+                        <div class="metric-value" id="total-produtos">000</div>
+                        <div class="metric-bar">
+                            <div class="metric-bar-fill blue" id="bar-produtos" style="width: 82%"></div>
+                        </div>
+                        <div class="metric-footer">
+                            <span class="metric-trend neutral">PRODUTOS SINCRONIZADOS</span>
+                        </div>
+                    </article>
+
+                </div>
+
+                <!-- Terminal Feed -->
+                <div class="terminal-card enter-5">
+                    <div class="terminal-header">
+                        <div class="terminal-title-left">
+                            <div class="terminal-dots">
+                                <span class="terminal-dot red"></span>
+                                <span class="terminal-dot yellow"></span>
+                                <span class="terminal-dot green"></span>
+                            </div>
+                            <span class="terminal-name">TERMINAL_LIVE_FEED</span>
+                            <span class="terminal-cursor"></span>
+                        </div>
+                        <button class="btn-ghost">EXPORT LOGS</button>
+                    </div>
+                    <div class="terminal-body">
+                        <ul class="feed-list" id="feed-list"></ul>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ======= VIEW 2: CURVA ABC ======= -->
+            <div id="view-curva" class="spa-view hidden">
+                <div class="view-header">
+                    <h2 class="view-title">MATRIZ ESTATÍSTICA <span class="view-title-accent">PARETO</span></h2>
+                    <p class="view-sub">DISTRIBUIÇÃO 80/15/5 — ANÁLISE DE PORTFÓLIO</p>
+                </div>
+
+                <!-- KPI cards da Curva ABC -->
+                <div class="metrics-row" id="abc-kpis" style="margin-bottom:1.5rem;">
+                    <article class="metric-card accent-green">
+                        <div class="metric-header">
+                            <span class="metric-label">CURVA A</span>
+                            <span class="metric-badge ok">TOP 80% RECEITA</span>
+                        </div>
+                        <div class="metric-value" id="abc-count-a">--</div>
+                        <div class="metric-footer">
+                            <span class="metric-trend up" id="abc-receita-a">R$ --</span>
+                        </div>
+                    </article>
+                    <article class="metric-card accent-blue">
+                        <div class="metric-header">
+                            <span class="metric-label">CURVA B</span>
+                            <span class="metric-badge ok">80–95% RECEITA</span>
+                        </div>
+                        <div class="metric-value" id="abc-count-b">--</div>
+                        <div class="metric-footer">
+                            <span class="metric-trend neutral" id="abc-receita-b">R$ --</span>
+                        </div>
+                    </article>
+                    <article class="metric-card accent-red">
+                        <div class="metric-header">
+                            <span class="metric-label">CURVA C</span>
+                            <span class="metric-badge warn">INTERVENÇÃO</span>
+                        </div>
+                        <div class="metric-value critical" id="abc-count-c">--</div>
+                        <div class="metric-footer">
+                            <span class="metric-trend warn" id="abc-receita-c">R$ --</span>
+                        </div>
+                    </article>
+                </div>
+
+                <!-- Filtro de Curva -->
+                <div style="display:flex; gap:0.5rem; margin-bottom:1rem; flex-wrap:wrap;">
+                    <button class="btn-ghost abc-filter active" data-curva="all">TODOS</button>
+                    <button class="btn-ghost abc-filter" data-curva="A" style="color:var(--acid)">CURVA A</button>
+                    <button class="btn-ghost abc-filter" data-curva="B" style="color:var(--blue)">CURVA B</button>
+                    <button class="btn-ghost abc-filter" data-curva="C" style="color:var(--red)">CURVA C</button>
+                    <input id="abc-search" type="text" placeholder="Buscar SKU / título..."
+                        style="margin-left:auto;background:var(--bg-panel);border:1px solid var(--border-2);
+                               color:var(--text-1);padding:0.4rem 0.75rem;border-radius:6px;font-size:0.8rem;min-width:200px;">
+                </div>
+
+                <!-- Tabela Curva ABC -->
+                <div class="terminal-card">
+                    <div class="terminal-header">
+                        <div class="terminal-title-left">
+                            <div class="terminal-dots">
+                                <span class="terminal-dot red"></span>
+                                <span class="terminal-dot yellow"></span>
+                                <span class="terminal-dot green"></span>
+                            </div>
+                            <span class="terminal-name">PORTFOLIO_MATRIX</span>
+                            <span class="terminal-cursor"></span>
+                        </div>
+                        <span id="abc-total-label" style="font-size:0.75rem;color:var(--text-3);">carregando...</span>
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <table id="abc-table" style="width:100%;border-collapse:collapse;font-size:0.78rem;">
+                            <thead>
+                                <tr style="border-bottom:1px solid var(--border-2);color:var(--text-3);text-align:left;">
+                                    <th style="padding:0.6rem 0.8rem;">CURVA</th>
+                                    <th style="padding:0.6rem 0.8rem;">SKU</th>
+                                    <th style="padding:0.6rem 0.8rem;">TÍTULO</th>
+                                    <th style="padding:0.6rem 0.8rem;text-align:right;">RECEITA 30D</th>
+                                    <th style="padding:0.6rem 0.8rem;">CICLO</th>
+                                    <th style="padding:0.6rem 0.8rem;">TENDÊNCIA</th>
+                                    <th style="padding:0.6rem 0.8rem;">ALERTA</th>
+                                </tr>
+                            </thead>
+                            <tbody id="abc-tbody">
+                                <tr><td colspan="7" style="padding:2rem;text-align:center;color:var(--text-3);">
+                                    Carregando portfólio...
+                                </td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======= VIEW 3: GROWTH PLAN ======= -->
+            <div id="view-growth" class="spa-view hidden">
+                <div class="view-header">
+                    <h2 class="view-title">PLAYBOOK TÁTICO: <span class="view-title-accent">GERALDO GROWTH</span></h2>
+                    <p class="view-sub">DECISÕES TÁTICAS GERADAS POR IA — SUPABASE SYNC</p>
+                </div>
+                <div class="tactical-board" id="growth-board">
+                    <div class="placeholder-panel">
+                        <p>Escutando sinais de Inteligência vindos do Supabase...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======= VIEW 4: MONITOR ======= -->
+            <div id="view-monitor" class="spa-view hidden">
+                <div class="view-header">
+                    <h2 class="view-title">CENTRAL DE <span class="view-title-accent" style="color: var(--red)">ALERTAS</span></h2>
+                    <p class="view-sub">ALERTAS OPERACIONAIS PENDENTES — CURVA A E C</p>
+                </div>
+                <div class="alert-panel" style="padding:0;">
+                    <p style="color:var(--text-3);padding:2rem;text-align:center;">Carregando alertas operacionais...</p>
+                </div>
+            </div>
+
+            <!-- ======= VIEW 5: NEURAL CHAT ======= -->
+            <div id="view-chat" class="spa-view hidden">
+                <div class="view-header">
+                    <h2 class="view-title">MÓDULO DE INTELIGÊNCIA: <span class="view-title-accent">CLAUDE AI</span></h2>
+                    <p class="view-sub">INTERFACE NEURAL — CLAUDE 3.5 SONNET</p>
+                </div>
+                <div class="chat-container">
+                    <div class="chat-history" id="chat-history">
+                        <div class="chat-bubble ai-bubble">
+                            <div class="bubble-avatar">AI</div>
+                            <div class="bubble-content">
+                                <span class="bubble-meta">SQUAD_AI · agora</span>
+                                <div class="bubble-text">
+                                    Conexão estabelecida. Terminal neural ativo. Como posso auxiliar a equipe operacional?
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chat-input-area">
+                        <input type="text" id="chat-input" placeholder="Digite sua requisição ou comando tático..." autocomplete="off">
+                        <button id="chat-send" class="btn-send">ENVIAR</button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script type="module" src="js/supabase.js"></script>
+    <script type="module" src="js/dashboard.js"></script>
+</body>
+</html>

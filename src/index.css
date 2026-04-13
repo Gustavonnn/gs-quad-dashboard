@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+@theme {
+  --font-inter: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --font-display: "Space Grotesk", sans-serif;
+
+  --color-gs-bg: #030303;
+  --color-gs-panel: #0A0A0A;
+  --color-gs-border: #1F1F1F;
+  --color-gs-text: #EDEDED;
+  --color-gs-muted: #888888;
+  
+  --color-gs-green: #00FF66;
+  --color-gs-red: #FF3333;
+  --color-gs-blue: #0066FF;
+  --color-gs-yellow: #FFD700;
+
+  --animate-fade-in: fade-in 0.4s ease-out forwards;
+  --animate-slide-up: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@layer base {
+  body {
+    @apply bg-gs-bg text-gs-text font-inter antialiased;
+    background-image: 
+      radial-gradient(circle at 15% 50%, rgba(255, 255, 255, 0.015), transparent 25%),
+      radial-gradient(circle at 85% 30%, rgba(255, 255, 255, 0.015), transparent 25%);
+  }
+
+  /* Custom Scrollbar for a luxurious feel */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gs-border;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gs-muted;
+  }
+}

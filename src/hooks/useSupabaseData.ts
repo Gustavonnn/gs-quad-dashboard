@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
-import type { Venda, CurvaABCItem, IAAlerta, IAGrowthPlan, Mensagem, MLPriceTimeline } from '../types'
+import type { Venda, CurvaABCItem, IAAlerta, IAGrowthPlan, MLPriceTimeline } from '../types'
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
@@ -189,36 +189,7 @@ export function usePriceTimeline() {
   return { data, loading, refetch: fetch }
 }
 
-// ─── Chat Messages ──────────────────────────────────────────────
-export function useMensagens() {
-  const [data, setData] = useState<Mensagem[]>([])
-  const [loading, setLoading] = useState(true)
 
-  const fetch = useCallback(async () => {
-    setLoading(true)
-    const { data: rows, error } = await supabase
-      .from('mensagens_equipe')
-      .select('*')
-      .order('created_at', { ascending: true })
-      .limit(50)
-
-    if (!error && rows) {
-      setData(rows as Mensagem[])
-    } else {
-      setData([])
-    }
-    setLoading(false)
-  }, [])
-
-  useEffect(() => { fetch() }, [fetch])
-
-  return { data, loading, refetch: fetch }
-}
-
-export async function sendMessage(text: string) {
-  const { error } = await supabase.from('mensagens_equipe').insert([{ role: 'user', content: text }])
-  return !error
-}
 
 // ─── Realtime Subscription ───────────────────────────────────────
 export function useRealtime(channel: string, onInsert: (payload: any) => void) {
@@ -226,7 +197,6 @@ export function useRealtime(channel: string, onInsert: (payload: any) => void) {
     const channelRef = supabase.channel(channel)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'live_vendas' }, onInsert)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ia_growth_plans' }, onInsert)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mensagens_equipe' }, onInsert)
       .subscribe()
 
     return () => { supabase.removeChannel(channelRef) }

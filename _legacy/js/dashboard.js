@@ -120,7 +120,7 @@ function initRouter() {
             }
 
             if (targetId === 'view-growth') loadGrowthPlans();
-            else if (targetId === 'view-chat') loadChatHistory();
+
             else if (targetId === 'view-curva') loadCurvaABC();
             else if (targetId === 'view-monitor') loadMonitorAlertas();
         });
@@ -418,83 +418,7 @@ async function loadGrowthPlans() {
 }
 
 // ─── Chat ─────────────────────────────────────────────────────
-function renderMessages(msgs, historyBox) {
-    historyBox.innerHTML = `
-        <div class="chat-bubble ai-bubble">
-            <div class="bubble-avatar">AI</div>
-            <div class="bubble-content">
-                <span class="bubble-meta">SQUAD_AI · online</span>
-                <div class="bubble-text">Terminal neural habilitado. Conexão OK. Qual a requisição?</div>
-            </div>
-        </div>`;
 
-    msgs.forEach((msg) => {
-        const isUser = msg.role === 'user';
-        const time = new Date(msg.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-        const bubble = document.createElement('div');
-        bubble.className = `chat-bubble ${isUser ? 'user-bubble' : 'ai-bubble'}`;
-        bubble.innerHTML = `
-            <div class="bubble-avatar">${isUser ? 'OP' : 'AI'}</div>
-            <div class="bubble-content">
-                <span class="bubble-meta">${isUser ? 'OPERADOR' : 'SQUAD_AI'} · ${time}</span>
-                <div class="bubble-text">${msg.content.replace(/\n/g, '<br>')}</div>
-            </div>`;
-        historyBox.appendChild(bubble);
-    });
-
-    setTimeout(() => { historyBox.scrollTop = historyBox.scrollHeight; }, 50);
-}
-
-async function loadChatHistory() {
-    const historyBox = document.getElementById('chat-history');
-    if (!historyBox) return;
-
-    const { data: msgs, error } = await supabase
-        .from('mensagens_equipe')
-        .select('*')
-        .order('created_at', { ascending: true })
-        .limit(50);
-
-    if (!error && msgs) renderMessages(msgs, historyBox);
-}
-
-async function sendChatMessage() {
-    const input = document.getElementById('chat-input');
-    const text = input?.value.trim();
-    if (!text) return;
-    input.value = '';
-
-    const historyBox = document.getElementById('chat-history');
-    if (!historyBox) return;
-
-    // Optimistic render
-    const now = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    const userBubble = document.createElement('div');
-    userBubble.className = 'chat-bubble user-bubble';
-    userBubble.style.opacity = '0.6';
-    userBubble.innerHTML = `
-        <div class="bubble-avatar">OP</div>
-        <div class="bubble-content">
-            <span class="bubble-meta">OPERADOR · ${now}</span>
-            <div class="bubble-text">${text}</div>
-        </div>`;
-    historyBox.appendChild(userBubble);
-
-    const typingBubble = document.createElement('div');
-    typingBubble.id = 'typing-indicator';
-    typingBubble.className = 'chat-bubble ai-bubble';
-    typingBubble.style.opacity = '0.5';
-    typingBubble.innerHTML = `
-        <div class="bubble-avatar">AI</div>
-        <div class="bubble-content">
-            <span class="bubble-meta">SQUAD_AI · processando</span>
-            <div class="bubble-text"><span class="terminal-cursor"></span></div>
-        </div>`;
-    historyBox.appendChild(typingBubble);
-    historyBox.scrollTop = historyBox.scrollHeight;
-
-    await supabase.from('mensagens_equipe').insert([{ role: 'user', content: text }]);
-}
 
 // ─── Realtime ─────────────────────────────────────────────────
 function initRealtime() {
@@ -510,11 +434,7 @@ function initRealtime() {
                 const growthView = document.getElementById('view-growth');
                 if (growthView && !growthView.classList.contains('hidden')) loadGrowthPlans();
             })
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mensagens_equipe' },
-            () => {
-                const chatView = document.getElementById('view-chat');
-                if (chatView && !chatView.classList.contains('hidden')) loadChatHistory();
-            })
+
         .subscribe((status) => {
             if (status === 'SUBSCRIBED') {
                 logToFeed('WS_BRIDGE: [ STABLE ] Canal em tempo real conectado.', 'system');
@@ -522,11 +442,7 @@ function initRealtime() {
         });
 }
 
-// Chat polling fallback
-setInterval(() => {
-    const chatView = document.getElementById('view-chat');
-    if (chatView && !chatView.classList.contains('hidden')) loadChatHistory();
-}, 3000);
+
 
 // ─── Init ─────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -534,8 +450,5 @@ document.addEventListener('DOMContentLoaded', () => {
     loadInitialMetrics();
     initRealtime();
 
-    document.getElementById('chat-send')?.addEventListener('click', sendChatMessage);
-    document.getElementById('chat-input')?.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendChatMessage();
-    });
+
 });

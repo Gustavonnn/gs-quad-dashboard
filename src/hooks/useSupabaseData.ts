@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
-import type { Venda, CurvaABCItem, IAAlerta, IAGrowthPlan, Mensagem } from '../types'
+import type { Venda, CurvaABCItem, IAAlerta, IAGrowthPlan, Mensagem, MLPriceTimeline } from '../types'
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
@@ -126,6 +126,58 @@ export function useGrowthPlans() {
 
     if (!error && rows) {
       setData(rows as IAGrowthPlan[])
+    } else {
+      setData([])
+    }
+    setLoading(false)
+  }, [])
+
+  useEffect(() => { fetch() }, [fetch])
+
+  return { data, loading, refetch: fetch }
+}
+
+// ─── ML Insights ────────────────────────────────────────────────
+export function useMLInsights() {
+  const [data, setData] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetch = useCallback(async () => {
+    setLoading(true)
+    const { data: rows, error } = await supabase
+      .from('ml_insights')
+      .select('*')
+      .order('rupture_risk', { ascending: false })
+      .limit(200)
+
+    if (!error && rows) {
+      setData(rows)
+    } else {
+      setData([])
+    }
+    setLoading(false)
+  }, [])
+
+  useEffect(() => { fetch() }, [fetch])
+
+  return { data, loading, refetch: fetch }
+}
+
+// ─── Price Timeline ─────────────────────────────────────────────
+export function usePriceTimeline() {
+  const [data, setData] = useState<MLPriceTimeline[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetch = useCallback(async () => {
+    setLoading(true)
+    const { data: rows, error } = await supabase
+      .from('ml_price_timeline')
+      .select('*')
+      .order('evento_data', { ascending: false })
+      .limit(100)
+
+    if (!error && rows) {
+      setData(rows as MLPriceTimeline[])
     } else {
       setData([])
     }

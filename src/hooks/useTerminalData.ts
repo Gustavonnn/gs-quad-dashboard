@@ -152,12 +152,12 @@ export function useTerminalData() {
         const skuKey = String(s.id || '').trim();
         const myVendas = vendasMap[skuKey] || {};
         const myMlbs = mlbMap[skuKey] || [];
-        
+
         // Prepara chartData (30 dias base)
         const chartData = dateKeys.map(k => {
           const vd = myVendas[k] || { revenue: 0, sales: 0 };
           return {
-             date: k.substring(8, 10) + '/' + k.substring(5, 7), 
+             date: k.substring(8, 10) + '/' + k.substring(5, 7),
              revenue: typeof vd.revenue === 'number' ? vd.revenue : 0,
              sales: typeof vd.sales === 'number' ? vd.sales : 0,
           };
@@ -169,6 +169,8 @@ export function useTerminalData() {
 
         return {
           sku: s.id,
+          sku_master: (s as any).sku_master || null,
+          is_master: (s as any).is_master || false,
           title: s.titulo,
           abc_class: s.curva_abc,
           total_revenue_30d: s.receita_30d,

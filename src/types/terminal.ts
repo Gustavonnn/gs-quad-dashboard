@@ -12,6 +12,8 @@ export interface MlbItem {
 
 export interface TerminalSkuItem {
   sku: string;
+  sku_master?: string;      // SKU mestre deste MLB (maior receita)
+  is_master?: boolean;       // TRUE se este SKU é o mestre do MLB
   title: string;
   abc_class: 'A' | 'B' | 'C' | string;
   total_revenue_30d: number;

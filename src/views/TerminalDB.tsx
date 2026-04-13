@@ -134,9 +134,16 @@ export function TerminalDB() {
                   <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-gs-green shadow-[0_0_8px_#00ff66]" />
                 )}
                 <div className="flex items-start justify-between w-full mb-1.5 pl-1">
-                  <span className={`font-mono font-bold text-xs ${selectedSku?.sku === item.sku ? 'text-gs-green' : 'text-gs-text group-hover:text-white'}`}>
-                    {item.sku}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className={`font-mono font-bold text-xs ${selectedSku?.sku === item.sku ? 'text-gs-green' : 'text-gs-text group-hover:text-white'}`}>
+                      {item.sku}
+                    </span>
+                    {item.is_master === false && (
+                      <span className="text-[8px] font-mono tracking-widest px-1 border rounded-sm border-gs-yellow/30 text-gs-yellow bg-gs-yellow/10" title="SKU secundário (compartilha MLB)">
+                        ML
+                      </span>
+                    )}
+                  </div>
                   <span className={`text-[10px] font-display font-black tracking-widest px-1.5 border rounded-sm ${ABC_COLORS[item.abc_class]}`}>
                     {item.abc_class}
                   </span>
@@ -169,10 +176,25 @@ export function TerminalDB() {
                      CURVA {selectedSku.abc_class}
                    </div>
                    <h3 className="font-mono text-xl font-bold text-gs-text">{selectedSku.sku}</h3>
+                   {selectedSku.is_master === true && (
+                     <span className="px-2 py-0.5 text-[9px] font-mono tracking-widest uppercase rounded-sm border border-gs-green/30 text-gs-green bg-gs-green/10">
+                       MASTER
+                     </span>
+                   )}
+                   {selectedSku.is_master === false && (
+                     <span className="px-2 py-0.5 text-[9px] font-mono tracking-widest uppercase rounded-sm border border-gs-yellow/30 text-gs-yellow bg-gs-yellow/10">
+                       SECONDARY
+                     </span>
+                   )}
                    {selectedSku.trend === 'UP' && <TrendingUp className="w-4 h-4 text-gs-green" />}
                    {selectedSku.trend === 'DOWN' && <TrendingUp className="w-4 h-4 text-gs-red transform rotate-180" />}
                 </div>
                 <p className="text-sm text-gs-muted font-mono">{selectedSku.title}</p>
+                {selectedSku.sku_master && selectedSku.sku_master !== selectedSku.sku && (
+                  <p className="text-[10px] text-gs-muted font-mono mt-1">
+                    MLB Mestre: <span className="text-gs-yellow">{selectedSku.sku_master}</span>
+                  </p>
+                )}
               </div>
 
               <div className="flex gap-4">

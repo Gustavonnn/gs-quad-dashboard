@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
-import { LayoutDashboard, BarChart3, Activity, TrendingUp, MessageSquare } from 'lucide-react'
+import { LayoutDashboard, BarChart3, Activity, TrendingUp, MessageSquare, Brain, History } from 'lucide-react'
 
-type ViewId = 'visao' | 'curva' | 'monitor' | 'growth' | 'chat'
+type ViewId = 'visao' | 'curva' | 'monitor' | 'growth' | 'chat' | 'ml_intel' | 'price_history'
 
 interface NavItem {
   id: ViewId
@@ -22,6 +22,8 @@ const navItems: NavItem[] = [
   { id: 'monitor', label: 'MONITOR', icon: <Activity size={14} strokeWidth={2.5} />, badge: 0 },
   { id: 'growth', label: 'GROWTH_PLAN', icon: <TrendingUp size={14} strokeWidth={2.5} /> },
   { id: 'chat', label: 'NEURAL_CHAT', icon: <MessageSquare size={14} strokeWidth={2.5} /> },
+  { id: 'ml_intel', label: 'NEURAL_INTEL', icon: <Brain size={14} strokeWidth={2.5} /> },
+  { id: 'price_history', label: 'PRICE_REACTION', icon: <History size={14} strokeWidth={2.5} /> },
 ]
 
 export function Sidebar({ activeView, onNavigate, alertCount = 0 }: SidebarProps) {

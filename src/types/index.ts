@@ -47,3 +47,44 @@ export interface LiveMetrics {
   totalProdutos: number
   sparkData: number[]
 }
+
+export interface MLPriceTimeline {
+  sku: string
+  evento_data: string
+  preco_anterior: number
+  preco_novo: number
+  delta_preco_pct: number
+  volume_7d_antes: number
+  volume_7d_depois: number
+  delta_volume_pct: number
+  absorcao_status: 'ABSORVIDO' | 'REJEITADO' | 'INEFICAZ'
+}
+
+export interface MLInsight {
+  sku: string
+  titulo: string
+  curva_abc: string
+  rupture_risk: number
+  forecast_7d: number
+  anomaly_score: number
+  anomaly_severity: string
+  ml_cluster: string
+  abc_divergence: string
+  elasticity: number
+  price_sensitivity: string
+  synced_at: string
+}
+
+export interface MLPriceTimeline {
+  id: string
+  sku: string
+  evento_data: string
+  preco_anterior: number
+  preco_novo: number
+  delta_preco_pct: number
+  volume_7d_antes: number
+  volume_7d_depois: number
+  delta_volume_pct: number
+  absorcao_status: 'ABSORVIDO' | 'REJEITADO' | 'INEFICAZ'
+  synced_at: string
+}

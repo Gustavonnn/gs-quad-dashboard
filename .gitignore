@@ -27,3 +27,6 @@ dist-ssr
 .env
 .env.*
 !.env.example
+
+# Downloaded/external JS files
+downloaded_js.js

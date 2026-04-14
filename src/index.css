@@ -20,10 +20,15 @@
   --color-gs-green-dim: rgba(0, 224, 128, 0.15);
   --color-gs-blue: #007AFF;
   --color-gs-blue-dim: rgba(0, 122, 255, 0.15);
+  --color-gs-cyan: #00D4FF;
+  --color-gs-cyan-dim: rgba(0, 212, 255, 0.15);
   --color-gs-red: #FF3333;
   --color-gs-red-dim: rgba(255, 51, 51, 0.15);
   --color-gs-yellow: #FFD700;
   --color-gs-yellow-dim: rgba(255, 215, 0, 0.15);
+  --color-gs-subtle: #555555;
+  --color-gs-orange: #FF6B00;
+  --color-gs-orange-dim: rgba(255, 107, 0, 0.15);
 
   /* Glassmorphism */
   --glass-border: rgba(255, 255, 255, 0.06);
@@ -136,6 +141,18 @@
 
   .glow-green:hover {
     box-shadow: 0 0 20px rgba(0, 224, 128, 0.3), 0 0 40px rgba(0, 224, 128, 0.1);
+  }
+
+  /* AdFactory specific utilities */
+  .gs-panel-hover {
+    background: #0f0f0f;
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   /* Sidebar transition */

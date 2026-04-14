@@ -244,26 +244,36 @@ export function usePriceTimeline() {
 export function useKanbanCards() {
   const [data, setData] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   const fetch = useCallback(async () => {
     setLoading(true)
-    const { data: rows, error } = await supabase
-      .from('ia_kanban_cards')
-      .select('*')
-      .order('created_at', { ascending: false })
+    setError(null)
+    try {
+      const { data: rows, error: err } = await supabase
+        .from('ia_kanban_cards')
+        .select('*')
+        .order('created_at', { ascending: false })
 
-    if (!error && rows) {
-      setData(rows)
-    } else {
-      console.error('[useKanbanCards] error:', error)
+      if (err) {
+        console.warn('[useKanbanCards] Supabase error:', err.message)
+        // Don't crash — show empty state with warning
+        setData([])
+        setError(err.message)
+      } else if (rows) {
+        setData(rows)
+      }
+    } catch (catchErr) {
+      console.warn('[useKanbanCards] fetch error:', catchErr)
       setData([])
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }, [])
 
   useEffect(() => { fetch() }, [fetch])
 
-  return { data, loading, refetch: fetch }
+  return { data, loading, refetch: fetch, error }
 }
 
 export async function createKanbanCard(card: {
@@ -362,15 +372,42 @@ export function useRealtime(channel: string, onInsert: (payload: any) => void) {
 // ─── Realtime Kanban Cards ───────────────────────────────────────
 export function useRealtimeKanbanCards(onChange: (payload: any) => void) {
   useEffect(() => {
-    const channelRef = supabase
-      .channel('kanban-cards-realtime')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'ia_kanban_cards' },
-        onChange
-      )
-      .subscribe()
+    // Skip realtime if Supabase URL is not configured (dev without env)
+    if (!supabase.supabaseUrl) return
 
-    return () => { supabase.removeChannel(channelRef) }
+    let channelRef: ReturnType<typeof supabase.channel> | null = null
+
+    try {
+      channelRef = supabase
+        .channel('kanban-cards-realtime')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'ia_kanban_cards' },
+          (payload) => {
+            // Safely invoke callback, ignore errors
+            try {
+              onChange(payload)
+            } catch (e) {
+              console.warn('[Realtime] onChange error:', e)
+            }
+          }
+        )
+        .subscribe((status) => {
+          // Only log errors, not expected WebSocket failures
+          if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
+            console.warn('[Realtime] Kanban subscription status:', status)
+          }
+        })
+    } catch (err) {
+      console.warn('[Realtime] Failed to subscribe to kanban cards:', err)
+    }
+
+    return () => {
+      if (channelRef) {
+        try {
+          supabase.removeChannel(channelRef)
+        } catch (_) { /* ignore cleanup errors */ }
+      }
+    }
   }, [onChange])
 }

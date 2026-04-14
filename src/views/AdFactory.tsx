@@ -310,20 +310,22 @@ function DraftModal({ card, isOpen, onClose, onUpdate }: DraftModalProps) {
 
   const handleApplyWinningFormula = () => {
     if (!wf) return
-    setManualData({
-      titulo: wf.sugestao_titulo,
-      descricao: wf.descricao_template,
-      preco: wf.preco_recomendado,
-      tags: wf.tags_usadas,
-    })
-    setActiveTab('titulo')
+    setManualData({})
+    setTimeout(() => {
+      setManualData({
+        titulo: wf.sugestao_titulo,
+        descricao: wf.descricao_template,
+        preco: wf.preco_recomendado,
+        tags: wf.tags_usadas,
+      })
+      setActiveTab('titulo')
+    }, 50)
   }
 
   const handleSave = async () => {
     setLoading(true)
     try {
       await onUpdate(manualData)
-      onClose()
     } catch (err) {
       console.error(err)
     } finally {
@@ -350,7 +352,7 @@ function DraftModal({ card, isOpen, onClose, onUpdate }: DraftModalProps) {
               {card.sku}
             </span>
             <span className={`font-mono text-[10px] px-2 py-1 rounded ${
-              card.type === 'hybrid' ? 'bg-[var(--color-gs-blue)]/10 text-[var(--color-gs-blue)]' : 'bg-[[var(--color-gs-orange)]]/10 text-[[var(--color-gs-orange)]]'
+              card.type === 'hybrid' ? 'bg-[var(--color-gs-blue)]/10 text-[var(--color-gs-blue)]' : 'bg-[var(--color-gs-orange)]/10 text-[var(--color-gs-orange)]'
             }`}>
               {card.type.toUpperCase()}
             </span>
@@ -843,7 +845,7 @@ function KanbanCardComponent({ card, onDragStart, onViewDraft, onDelete, onGener
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <span className={`font-mono text-[10px] px-1.5 py-0.5 rounded ${
-            card.type === 'hybrid' ? 'bg-[var(--color-gs-blue)]/10 text-[var(--color-gs-blue)]' : 'bg-[[var(--color-gs-orange)]]/10 text-[[var(--color-gs-orange)]]'
+            card.type === 'hybrid' ? 'bg-[var(--color-gs-blue)]/10 text-[var(--color-gs-blue)]' : 'bg-[var(--color-gs-orange)]/10 text-[var(--color-gs-orange)]'
           }`}>
             {card.type.toUpperCase()}
           </span>
@@ -1081,7 +1083,7 @@ function KanbanColumn({
 // ─── Main AdFactory Component ───────────────────────────────────────────────
 
 export function AdFactory() {
-  const { data: cards, loading, refetch } = useKanbanCards()
+  const { data: cards, loading, refetch, error: cardsError } = useKanbanCards()
   const [showNewCardModal, setShowNewCardModal] = useState(false)
   const [showDraftModal, setShowDraftModal] = useState(false)
   const [selectedCard, setSelectedCard] = useState<KanbanCard | null>(null)
@@ -1266,6 +1268,61 @@ export function AdFactory() {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 size={32} className="animate-spin text-[var(--color-gs-blue)]" />
+      </div>
+    )
+  }
+
+  // Error state — show empty board with error message
+  if (cardsError) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="font-display font-bold text-xl text-[var(--color-gs-text)] tracking-wide">
+              AdFactory<span className="text-[var(--color-gs-red)]">.</span>
+            </h2>
+            <p className="font-mono text-[10px] text-[var(--color-gs-muted)] mt-1 uppercase tracking-widest">
+              Hybrid Kanban • AI-Powered Listing Creation
+            </p>
+          </div>
+          <button
+            onClick={() => setShowNewCardModal(true)}
+            className="flex items-center gap-2 px-4 py-2 rounded-md bg-[var(--color-gs-green)]/10 border border-[var(--color-gs-green)]/30 font-mono text-xs text-[var(--color-gs-green)] hover:bg-[var(--color-gs-green)]/20 transition-colors"
+          >
+            <Plus size={14} />
+            New Card
+          </button>
+        </div>
+
+        <div className="flex flex-col items-center justify-center py-16 text-center border border-[var(--color-gs-red)]/20 rounded-xl bg-[var(--color-gs-red)]/5">
+          <AlertCircle size={32} className="text-[var(--color-gs-red)] mb-4" />
+          <h3 className="font-display font-bold text-lg text-[var(--color-gs-text)] mb-2">Falha ao carregar Kanban</h3>
+          <p className="font-mono text-xs text-[var(--color-gs-muted)] max-w-md mb-4">{cardsError}</p>
+          <p className="font-mono text-[10px] text-[var(--color-gs-subtle)] mb-6">
+            Verifique se a tabela ia_kanban_cards existe no Supabase e se as políticas RLS estão configuradas corretamente.
+          </p>
+          <div className="flex gap-3">
+            <button
+              onClick={refetch}
+              className="px-4 py-2 rounded-md bg-[var(--color-gs-blue)]/10 border border-[var(--color-gs-blue)]/30 font-mono text-xs text-[var(--color-gs-blue)] hover:bg-[var(--color-gs-blue)]/20 transition-colors"
+            >
+              Tentar novamente
+            </button>
+            <button
+              onClick={() => setShowNewCardModal(true)}
+              className="px-4 py-2 rounded-md bg-[var(--color-gs-green)]/10 border border-[var(--color-gs-green)]/30 font-mono text-xs text-[var(--color-gs-green)] hover:bg-[var(--color-gs-green)]/20 transition-colors"
+            >
+              <Plus size={12} className="inline mr-1" />
+              Criar Card
+            </button>
+          </div>
+        </div>
+
+        <NewCardModal
+          isOpen={showNewCardModal}
+          onClose={() => setShowNewCardModal(false)}
+          onCreated={() => { refetch() }}
+        />
       </div>
     )
   }

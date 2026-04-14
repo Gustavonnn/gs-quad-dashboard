@@ -85,6 +85,7 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
         <div className="flex flex-col">
           <h2 className="font-display font-bold text-2xl tracking-wide uppercase text-gs-text flex items-center gap-3">
             <span className="text-gs-green">&gt;_</span> VISUAL_DB TERMINAL
+            <span className="text-[10px] font-mono text-gs-muted/40 border border-gs-muted/20 px-1.5 py-0.5 rounded-sm">V1.08</span>
           </h2>
           <p className="font-mono text-xs text-gs-muted tracking-widest uppercase">CONSTRUÇÃO N-TREE: SKU ➔ MLBS ➔ MÉTRICAS TÁTICAS</p>
         </div>
@@ -334,7 +335,10 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
                   {selectedSku.mlbs.map((mlb) => (
                     <div 
                       key={mlb.mlb_id} 
-                      onClick={() => setSelectedMlbId(selectedMlbId === mlb.mlb_id ? null : mlb.mlb_id)}
+                      onClick={() => {
+                        console.log('[TerminalDB] Clicked MLB:', mlb.mlb_id);
+                        setSelectedMlbId(selectedMlbId === mlb.mlb_id ? null : mlb.mlb_id);
+                      }}
                       className={`group border transition-all duration-300 rounded-sm p-4 flex flex-col gap-3 cursor-pointer relative overflow-hidden ${
                         selectedMlbId === mlb.mlb_id 
                           ? 'border-gs-green bg-gs-green/5 shadow-[0_0_20px_rgba(0,255,102,0.1)]' 

@@ -142,8 +142,12 @@ export function useTerminalData() {
       for (let i = 29; i >= 0; i--) {
         const d = new Date();
         d.setDate(d.getDate() - i);
-        dateKeys.push(d.toISOString().split('T')[0]);
+        // Usar data local para o keying para bater com o split('T')[0] do loop anterior
+        const dateKey = d.toISOString().split('T')[0];
+        dateKeys.push(dateKey);
       }
+
+      console.log('[TerminalDB] DateKeys Range:', dateKeys[0], 'to', dateKeys[dateKeys.length - 1]);
 
       // 4. Mapeamento de Produtos (MLBs) Atrelados aos SKUs
       const mlbMap: Record<string, MlbItem[]> = {};
@@ -153,15 +157,28 @@ export function useTerminalData() {
 
         const mlbId = p.item_id ? 'MLB' + String(p.item_id).replace(/\D/g, '') : 'MLB_UNKNOWN';
         const myMlbVendas = (mlbVendasMap[s] || {})[mlbId] || {};
+        
+        // DATA_ENGINE: 1.08-STRICT
+        const m7 = dateKeys.slice(-7).reduce((acc, k) => acc + (myMlbVendas[k]?.sales || 0), 0);
+        const m15 = dateKeys.slice(-15).reduce((acc, k) => acc + (myMlbVendas[k]?.sales || 0), 0);
+        const m30 = dateKeys.reduce((acc, k) => acc + (myMlbVendas[k]?.sales || 0), 0);
+
+        if (myMlbVendas[yesterdayIso]) {
+           console.log(`[TerminalDB] Match found for MLB ${mlbId} on sku ${s}`);
+        }
+
+        if (myMlbVendas[yesterdayIso]) {
+           console.log(`[TerminalDB] Match found for MLB ${mlbId} on sku ${s}`);
+        }
 
         if (!mlbMap[s]) mlbMap[s] = [];
         mlbMap[s].push({
           mlb_id: mlbId,
           title: p.titulo || 'Produto não catalogado',
           price: typeof p.preco === 'number' ? p.preco : parseFloat(p.preco || '0'),
-          sales_7d: typeof p.vendas_7d === 'number' ? p.vendas_7d : 0,
-          sales_15d: typeof p.vendas_15d === 'number' ? p.vendas_15d : 0,
-          sales_30d: typeof p.vendas_total === 'number' ? p.vendas_total : parseInt(p.vendas_total || '0', 10),
+          sales_7d: m7,
+          sales_15d: m15,
+          sales_30d: m30,
           sales_yesterday: myMlbVendas[yesterdayIso]?.sales || 0,
           status: (() => {
             const raw = (p.status || '').toLowerCase().trim();

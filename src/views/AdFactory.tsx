@@ -22,6 +22,10 @@ import {
   GripVertical,
   Play,
   Check,
+  Zap,
+  Cpu,
+  Database,
+  LineChart,
 } from 'lucide-react'
 import {
   useKanbanCards,
@@ -30,6 +34,8 @@ import {
   updateKanbanCardBriefing,
   updateKanbanCardManual,
   deleteKanbanCard,
+  triggerKanbanAnalysis,
+  useRealtimeKanbanCards,
 } from '../hooks/useSupabaseData'
 import type { KanbanCard, KanbanStatus, BriefingData, ManualData } from '../types'
 
@@ -456,15 +462,8 @@ function DraftModal({ card, isOpen, onClose, onUpdate }: DraftModalProps) {
                   </button>
                 </>
               ) : (
-                <div className="text-center py-12">
-                  <Brain className="mx-auto text-gs-muted mb-4" size={48} strokeWidth={1} />
-                  <p className="font-mono text-sm text-gs-muted mb-2">Briefing não gerado</p>
-                  <p className="font-mono text-xs text-gs-subtle">
-                    {card.type === 'hybrid'
-                      ? 'Cards hybrid geram briefing automaticamente ao entrar em Neural Analysis'
-                      : 'Cards manual não possuem briefing AI'}
-                  </p>
-                </div>
+                /* Neural Analysis Trigger — quando não há briefing */
+                <NeuralAnalysisPanel card={card} onClose={onClose} />
               )}
             </div>
           )}
@@ -578,6 +577,210 @@ function DraftModal({ card, isOpen, onClose, onUpdate }: DraftModalProps) {
   )
 }
 
+// ─── NeuralAnalysisPanel ─────────────────────────────────────────────────────
+// Painel de Gatilho Manual da IA — Exibe os 3 agentes e o botão de ação
+
+interface NeuralAnalysisPanelProps {
+  card: KanbanCard
+  onClose: () => void
+}
+
+function NeuralAnalysisPanel({ card, onClose }: NeuralAnalysisPanelProps) {
+  const [triggering, setTriggering] = useState(false)
+  const [triggered, setTriggered] = useState(false)
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null)
+
+  const isHybrid = card.type === 'hybrid'
+  const isProcessing = card.status === 'processing' || card.trigger_analysis === true
+
+  const handleTriggerSquad = async () => {
+    if (!isHybrid || triggering) return
+
+    setTriggering(true)
+    try {
+      const { error } = await triggerKanbanAnalysis(card.id)
+      if (error) throw error
+      setTriggered(true)
+      setToast({ message: 'Squad Briefing ativado! Worker em execução...', type: 'info' })
+      setTimeout(() => {
+        onClose() // Fecha modal e deixa card no board atualizar via realtime
+      }, 1500)
+    } catch (err) {
+      console.error(err)
+      setToast({ message: 'Erro ao acionar Squad. Tente novamente.', type: 'error' })
+    } finally {
+      setTriggering(false)
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="text-center py-6">
+        <div className="relative inline-flex mb-6">
+          {/* Animated neural network rings */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-24 h-24 rounded-full border border-gs-blue/20 animate-ping" style={{ animationDuration: '3s' }} />
+          </div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-20 h-20 rounded-full border border-gs-cyan/30 animate-pulse" style={{ animationDuration: '2s', animationDelay: '0.5s' }} />
+          </div>
+          <div className="relative w-16 h-16 rounded-full bg-gs-bg border-2 border-gs-blue flex items-center justify-center">
+            <Brain className="text-gs-blue" size={28} strokeWidth={1.5} />
+          </div>
+        </div>
+
+        <h3 className="font-display font-bold text-lg text-gs-text mb-2">
+          Neural Analysis
+        </h3>
+        <p className="font-mono text-xs text-gs-muted max-w-sm mx-auto">
+          {isHybrid
+            ? 'O Squad IA vai consultar o DuckDB, Playbook e Motor ML para gerar a Winning Formula deste SKU.'
+            : 'Cards manuais não utilizam análise IA.'}
+        </p>
+      </div>
+
+      {/* Agent Pipeline Visualization */}
+      <div className="bg-gs-bg rounded-lg border border-gs-border p-4 space-y-3">
+        <p className="font-mono text-[10px] text-gs-muted uppercase tracking-widest mb-4">
+          Pipeline de Inteligência
+        </p>
+
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-[#FF6B00]/10 border border-[#FF6B00]/30 flex items-center justify-center shrink-0">
+            <Database size={14} className="text-[#FF6B00]" />
+          </div>
+          <div className="flex-1">
+            <p className="font-mono text-xs text-gs-text font-bold">Chica Cientista</p>
+            <p className="font-mono text-[10px] text-gs-muted">Consulta DuckDB: Playbook, Curva ABC, Elasticidade</p>
+          </div>
+          <div className="w-4 h-4 rounded-full bg-gs-border flex items-center justify-center">
+            <TrendingUp size={8} className="text-gs-muted" />
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-gs-blue/10 border border-gs-blue/30 flex items-center justify-center shrink-0">
+            <LineChart size={14} className="text-gs-blue" />
+          </div>
+          <div className="flex-1">
+            <p className="font-mono text-xs text-gs-text font-bold">Ana Analista</p>
+            <p className="font-mono text-[10px] text-gs-muted">Classifica produto e identifica padrões de sucesso</p>
+          </div>
+          <div className="w-4 h-4 rounded-full bg-gs-border flex items-center justify-center">
+            <TrendingUp size={8} className="text-gs-muted" />
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-gs-green/10 border border-gs-green/30 flex items-center justify-center shrink-0">
+            <Cpu size={14} className="text-gs-green" />
+          </div>
+          <div className="flex-1">
+            <p className="font-mono text-xs text-gs-text font-bold">Geraldo Growth</p>
+            <p className="font-mono text-[10px] text-gs-muted">Define metodologia e resultado esperado</p>
+          </div>
+          <div className="w-4 h-4 rounded-full bg-gs-green flex items-center justify-center">
+            <Check size={8} className="text-gs-bg" />
+          </div>
+        </div>
+      </div>
+
+      {/* Output Preview */}
+      <div className="bg-gs-bg rounded-lg border border-gs-border p-4">
+        <p className="font-mono text-[10px] text-gs-muted uppercase tracking-widest mb-3">
+          Output Esperado
+        </p>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-gs-panel rounded-md p-2 border border-gs-border">
+            <p className="font-mono text-[9px] text-gs-subtle uppercase mb-1">Título</p>
+            <p className="font-mono text-[10px] text-gs-text truncate">Sugestão de título otimizado...</p>
+          </div>
+          <div className="bg-gs-panel rounded-md p-2 border border-gs-border">
+            <p className="font-mono text-[9px] text-gs-subtle uppercase mb-1">Preço</p>
+            <p className="font-mono text-[10px] text-gs-green font-bold">R$ XXX,XX</p>
+          </div>
+          <div className="bg-gs-panel rounded-md p-2 border border-gs-border">
+            <p className="font-mono text-[9px] text-gs-subtle uppercase mb-1">Metodologia</p>
+            <p className="font-mono text-[10px] text-gs-blue">Bundle Plus</p>
+          </div>
+          <div className="bg-gs-panel rounded-md p-2 border border-gs-border">
+            <p className="font-mono text-[9px] text-gs-subtle uppercase mb-1">Tags</p>
+            <p className="font-mono text-[10px] text-gs-muted">8 tags sugeridas</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Trigger Button */}
+      {isHybrid ? (
+        <button
+          onClick={handleTriggerSquad}
+          disabled={triggering || triggered || isProcessing}
+          className={`
+            w-full flex items-center justify-center gap-3 px-6 py-4 rounded-lg
+            font-mono text-sm font-bold uppercase tracking-wider
+            transition-all duration-300
+            ${triggered
+              ? 'bg-gs-green/20 border border-gs-green/50 text-gs-green'
+              : triggering
+                ? 'bg-gs-blue/20 border border-gs-blue/50 text-gs-blue animate-pulse'
+                : isProcessing
+                  ? 'bg-gs-blue/10 border border-gs-blue/30 text-gs-blue/50 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-gs-blue/20 to-gs-cyan/20 border border-gs-blue/50 text-gs-blue hover:from-gs-blue/30 hover:to-gs-cyan/30 hover:shadow-[0_0_20px_rgba(0,136,255,0.2)]'
+            }
+          `}
+        >
+          {triggered ? (
+            <>
+              <Check size={18} />
+              Squad Acionado!
+            </>
+          ) : triggering ? (
+            <>
+              <Loader2 size={18} className="animate-spin" />
+              Acionando Squad...
+            </>
+          ) : isProcessing ? (
+            <>
+              <Loader2 size={18} className="animate-spin" />
+              Processando...
+            </>
+          ) : (
+            <>
+              <Zap size={18} />
+              Gerar Winning Formula com Squad
+            </>
+          )}
+        </button>
+      ) : (
+        <div className="text-center py-4 bg-[#FF6B00]/10 border border-[#FF6B00]/30 rounded-lg">
+          <p className="font-mono text-xs text-[#FF6B00]">
+            Card Manual — Análise IA não disponível
+          </p>
+        </div>
+      )}
+
+      {/* Toast */}
+      {toast && (
+        <div className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border font-mono text-xs ${
+          toast.type === 'success' ? 'bg-gs-green/10 border-gs-green/30 text-gs-green' :
+          toast.type === 'error' ? 'bg-gs-red/10 border-gs-red/30 text-gs-red' :
+          'bg-gs-blue/10 border-gs-blue/30 text-gs-blue'
+        }`}>
+          {toast.type === 'success' && <Check size={14} />}
+          {toast.type === 'error' && <AlertCircle size={14} />}
+          {toast.type === 'info' && <Sparkles size={14} />}
+          {toast.message}
+        </div>
+      )}
+
+      <p className="text-center font-mono text-[10px] text-gs-subtle">
+        O worker processa em background • Card atualizado automaticamente via realtime
+      </p>
+    </div>
+  )
+}
+
 // ─── Trophy Icon ────────────────────────────────────────────────────────────
 
 function Trophy({ className, size }: { className?: string; size?: number }) {
@@ -618,7 +821,7 @@ function KanbanCardComponent({ card, onDragStart, onViewDraft, onDelete, onGener
   const briefingStatus = getBriefingStatus(card)
   const wf = card.briefing_data?.winning_formula
 
-  const isProcessing = card.status === 'processing'
+  const isProcessing = card.status === 'processing' || card.trigger_analysis === true
   const canDrag = !isProcessing
 
   return (
@@ -632,6 +835,7 @@ function KanbanCardComponent({ card, onDragStart, onViewDraft, onDelete, onGener
         hover:bg-gs-panel-hover hover:shadow-lg hover:-translate-y-0.5
         ${isProcessing ? 'opacity-80 cursor-not-allowed' : ''}
         ${card.status === 'live' ? 'shadow-[0_0_20px_rgba(0,255,102,0.1)]' : ''}
+        ${card.trigger_analysis ? 'border-gs-blue/50 shadow-[0_0_15px_rgba(0,136,255,0.1)]' : ''}
       `}
     >
       {/* Header */}
@@ -642,19 +846,26 @@ function KanbanCardComponent({ card, onDragStart, onViewDraft, onDelete, onGener
           }`}>
             {card.type.toUpperCase()}
           </span>
+          {/* Neural Trigger Badge */}
+          {card.trigger_analysis && (
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded font-mono text-[9px] bg-gs-blue/20 text-gs-blue animate-pulse">
+              <Zap size={8} />
+              AI ATIVA
+            </span>
+          )}
         </div>
 
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           {/* AI Status Badge */}
-          {card.type === 'hybrid' && card.status !== 'backlog' && (
+          {card.type === 'hybrid' && (
             <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded font-mono text-[9px] ${
               briefingStatus === 'ready' ? 'bg-gs-green/10 text-gs-green' :
-              briefingStatus === 'processing' ? 'bg-gs-blue/10 text-gs-blue animate-pulse' :
-              'bg-gs-border/50 text-gs-muted'
+              briefingStatus === 'processing' || card.trigger_analysis ? 'bg-gs-blue/10 text-gs-blue animate-pulse' :
+              card.status === 'backlog' ? 'bg-gs-border/50 text-gs-subtle' : 'bg-gs-border/50 text-gs-muted'
             }`}>
               {briefingStatus === 'ready' && <Sparkles size={8} />}
-              {briefingStatus === 'processing' && <Loader2 size={8} className="animate-spin" />}
-              {briefingStatus === 'pending' && <Brain size={8} />}
+              {(briefingStatus === 'processing' || card.trigger_analysis) && <Loader2 size={8} className="animate-spin" />}
+              {briefingStatus === 'pending' && !card.trigger_analysis && <Brain size={8} />}
             </span>
           )}
         </div>
@@ -675,7 +886,7 @@ function KanbanCardComponent({ card, onDragStart, onViewDraft, onDelete, onGener
         </p>
       ) : (
         <p className="font-mono text-xs text-gs-subtle mb-3 italic">
-          Sem título definido
+          {card.trigger_analysis ? '🔮 Processando Squad Briefing...' : 'Sem título definido'}
         </p>
       )}
 
@@ -721,14 +932,24 @@ function KanbanCardComponent({ card, onDragStart, onViewDraft, onDelete, onGener
         )}
       </div>
 
-      {/* Processing Animation */}
+      {/* Neural Processing Animation */}
       {isProcessing && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gs-panel/90 rounded-lg">
-          <div className="text-center">
-            <Loader2 size={24} className="animate-spin text-gs-blue mx-auto mb-2" />
-            <p className="font-mono text-[10px] text-gs-blue animate-pulse">
-              Consultando Squad...
-            </p>
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gs-panel/95 backdrop-blur-sm rounded-lg z-10">
+          {/* Neural network animation */}
+          <div className="relative w-16 h-16 mb-3">
+            <div className="absolute inset-0 rounded-full border-2 border-gs-blue/30 animate-ping" style={{ animationDuration: '2s' }} />
+            <div className="absolute inset-2 rounded-full border border-gs-cyan/40 animate-pulse" style={{ animationDuration: '1.5s' }} />
+            <div className="absolute inset-4 rounded-full bg-gs-blue/20 flex items-center justify-center">
+              <Brain className="text-gs-blue animate-pulse" size={16} />
+            </div>
+          </div>
+          <p className="font-mono text-[10px] text-gs-blue animate-pulse mb-1">
+            {card.trigger_analysis ? '🔮 SQUAD ATIVO' : 'Consultando Squad...'}
+          </p>
+          <div className="flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#FF6B00] animate-pulse" />
+            <span className="w-1.5 h-1.5 rounded-full bg-gs-blue animate-pulse" style={{ animationDelay: '0.2s' }} />
+            <span className="w-1.5 h-1.5 rounded-full bg-gs-green animate-pulse" style={{ animationDelay: '0.4s' }} />
           </div>
         </div>
       )}
@@ -879,6 +1100,13 @@ export function AdFactory() {
   const dismissToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id))
   }, [])
+
+  // Realtime subscription — auto-refresh when worker updates cards
+  useRealtimeKanbanCards(
+    useCallback(() => {
+      refetch()
+    }, [refetch])
+  )
 
   // Filter cards by search term
   const filteredCards = cards.filter((card: KanbanCard) =>

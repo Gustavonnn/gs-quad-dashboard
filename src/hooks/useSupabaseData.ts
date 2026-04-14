@@ -313,6 +313,19 @@ export async function updateKanbanCardBriefing(cardId: string, briefingData: any
   return { error }
 }
 
+export async function triggerKanbanAnalysis(cardId: string) {
+  const { error } = await supabase
+    .from('ia_kanban_cards')
+    .update({
+      trigger_analysis: true,
+      analysis_requested_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', cardId)
+
+  return { error }
+}
+
 export async function updateKanbanCardManual(cardId: string, manualData: any) {
   const { error } = await supabase
     .from('ia_kanban_cards')
@@ -344,4 +357,20 @@ export function useRealtime(channel: string, onInsert: (payload: any) => void) {
 
     return () => { supabase.removeChannel(channelRef) }
   }, [channel, onInsert])
+}
+
+// ─── Realtime Kanban Cards ───────────────────────────────────────
+export function useRealtimeKanbanCards(onChange: (payload: any) => void) {
+  useEffect(() => {
+    const channelRef = supabase
+      .channel('kanban-cards-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'ia_kanban_cards' },
+        onChange
+      )
+      .subscribe()
+
+    return () => { supabase.removeChannel(channelRef) }
+  }, [onChange])
 }

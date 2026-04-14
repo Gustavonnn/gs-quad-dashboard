@@ -158,4 +158,7 @@ export interface KanbanCard {
   updated_at: string
   created_by: string | null
   processed_at: string | null
+  // AI trigger fields
+  trigger_analysis?: boolean
+  analysis_requested_at?: string | null
 }

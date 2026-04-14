@@ -1,6 +1,6 @@
 import { useMLInsights } from '../hooks/useSupabaseData'
 import type { MLInsight } from '../types'
-import { Brain, AlertTriangle, TrendingDown, Target, Zap, Activity } from 'lucide-react'
+import { Brain, AlertTriangle, TrendingDown, Target, Zap } from 'lucide-react'
 
 // Helper para formatar probabilidade
 const formatPct = (val: number | null) => {
@@ -8,7 +8,11 @@ const formatPct = (val: number | null) => {
   return `${(val * 100).toFixed(0)}%`
 }
 
-export function MLIntel() {
+interface MLIntelProps {
+  onSelectSku: (sku: string) => void
+}
+
+export function MLIntel({ onSelectSku }: MLIntelProps) {
   const { data, loading } = useMLInsights()
 
   if (loading) {
@@ -68,7 +72,11 @@ export function MLIntel() {
             {ruptures.length === 0 ? (
               <div className="text-center py-10 font-mono text-xs text-gs-muted">SEM RISCOS DE RUPTURA DETECTADOS.</div>
             ) : ruptures.map((item: MLInsight) => (
-              <div key={item.sku} className="group relative border border-gs-border bg-gs-bg p-3 rounded-sm hover:-translate-y-0.5 transition-all duration-200">
+              <div 
+                key={item.sku} 
+                onClick={() => onSelectSku(item.sku)}
+                className="group relative border border-gs-border bg-gs-bg p-3 rounded-sm hover:-translate-y-0.5 transition-all duration-200 cursor-pointer hover:border-gs-yellow/50"
+              >
                 <div className="absolute top-0 left-0 w-1 h-full bg-gs-yellow rounded-l-sm" />
                 <div className="pl-3">
                   <div className="flex justify-between items-start">
@@ -110,7 +118,11 @@ export function MLIntel() {
             {anomalies.length === 0 ? (
               <div className="text-center py-10 font-mono text-xs text-gs-muted">TRÁFEGO E VENDAS NORMAIS.</div>
             ) : anomalies.map((item: MLInsight) => (
-              <div key={item.sku} className="group relative border border-gs-red/30 bg-gs-red/5 p-3 rounded-sm">
+              <div 
+                key={item.sku} 
+                onClick={() => onSelectSku(item.sku)}
+                className="group relative border border-gs-red/30 bg-gs-red/5 p-3 rounded-sm cursor-pointer hover:border-gs-red/60 transition-all"
+              >
                 <div className="flex justify-between items-start">
                   <div>
                     <span className="font-mono text-xs text-gs-text font-bold block flex items-center gap-2">
@@ -148,7 +160,11 @@ export function MLIntel() {
             {clusters.length === 0 ? (
               <div className="text-center py-4 font-mono text-xs text-gs-muted">NENHUMA DIVERGÊNCIA.</div>
             ) : clusters.map((item: MLInsight) => (
-              <div key={item.sku} className="border border-gs-border bg-gs-bg p-3 rounded-sm flex items-center justify-between">
+              <div 
+                key={item.sku} 
+                onClick={() => onSelectSku(item.sku)}
+                className="border border-gs-border bg-gs-bg p-3 rounded-sm flex items-center justify-between cursor-pointer hover:border-gs-green/50 transition-all"
+              >
                 <div>
                   <span className="font-mono text-xs text-gs-text font-bold block">{item.sku}</span>
                   <span className="font-mono text-[10px] text-gs-muted">ML Sugere: Curva {item.ml_cluster}</span>
@@ -164,7 +180,11 @@ export function MLIntel() {
 
             <div className="font-mono text-[10px] text-gs-muted uppercase tracking-widest mt-6 mb-1">Top SKUs Elásticos</div>
             {data.filter(d => d.elasticity !== null && d.elasticity < -1).sort((a,b) => (a.elasticity || 0) - (b.elasticity || 0)).slice(0, 5).map((item: MLInsight) => (
-              <div key={item.sku} className="border border-gs-border bg-gs-bg p-3 rounded-sm">
+              <div 
+                key={item.sku} 
+                onClick={() => onSelectSku(item.sku)}
+                className="border border-gs-border bg-gs-bg p-3 rounded-sm cursor-pointer hover:border-gs-yellow/50 transition-all"
+              >
                 <div className="flex justify-between items-center mb-2">
                   <span className="font-mono text-xs text-gs-text font-bold">{item.sku}</span>
                   <Zap size={14} className="text-gs-yellow" />

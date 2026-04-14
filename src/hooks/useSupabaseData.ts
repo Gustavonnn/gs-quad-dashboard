@@ -1,10 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
-import type { Venda, CurvaABCItem, IAAlerta, IAGrowthPlan, MLPriceTimeline } from '../types'
-
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
-}
+import type { CurvaABCItem, IAAlerta, IAGrowthPlan, MLPriceTimeline, StockAlert } from '../types'
 
 // ─── Live Metrics ───────────────────────────────────────────────
 export function useLiveMetrics() {
@@ -109,6 +105,32 @@ export async function resolveAlerta(alertId: string) {
     .update({ resolvido: true, status: 'RESOLVIDO', data_resolucao: new Date().toISOString() })
     .eq('id', alertId)
   return !error
+}
+
+// ─── Stock Alerts ──────────────────────────────────────────────
+export function useStockAlerts() {
+  const [data, setData] = useState<StockAlert[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetch = useCallback(async () => {
+    setLoading(true)
+    const { data: rows, error } = await supabase
+      .from('live_produtos')
+      .select('sku, titulo, estoque, curva_abc')
+      .eq('estoque', 0)
+      .limit(100)
+
+    if (!error && rows) {
+      setData(rows as unknown as StockAlert[])
+    } else {
+      setData([])
+    }
+    setLoading(false)
+  }, [])
+
+  useEffect(() => { fetch() }, [fetch])
+
+  return { data, loading, refetch: fetch }
 }
 
 // ─── Growth Plans ───────────────────────────────────────────────

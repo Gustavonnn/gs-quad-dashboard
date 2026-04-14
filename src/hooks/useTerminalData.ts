@@ -124,7 +124,7 @@ export function useTerminalData() {
 
         if (!mlbMap[s]) mlbMap[s] = [];
         mlbMap[s].push({
-          mlb_id: p.item_id || 'MLB_UNKNOWN',
+          mlb_id: p.item_id ? 'MLB' + String(p.item_id).replace(/\D/g, '') : 'MLB_UNKNOWN',
           title: p.titulo || 'Produto não catalogado',
           price: typeof p.preco === 'number' ? p.preco : parseFloat(p.preco || '0'),
           sales_7d: typeof p.vendas_7d === 'number' ? p.vendas_7d : 0,

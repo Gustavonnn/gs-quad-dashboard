@@ -25,6 +25,14 @@ export interface IAAlerta {
   data_resolucao: string | null
 }
 
+export interface StockAlert {
+  sku: string
+  titulo: string
+  estoque: number
+  curva_abc: string
+}
+
+
 export interface IAGrowthPlan {
   id: string
   sku: string
@@ -68,6 +76,8 @@ export interface MLInsight {
   forecast_7d: number
   anomaly_score: number
   anomaly_severity: string
+  anomaly_type: string
+  anomaly_probability: number
   ml_cluster: string
   abc_divergence: string
   elasticity: number

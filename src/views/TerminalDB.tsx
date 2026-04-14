@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useTerminalData } from '../hooks/useTerminalData';
-import type { TerminalSkuItem, MlbItem } from '../types/terminal';
+import type { TerminalSkuItem } from '../types/terminal';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { Box, Package, Activity, TrendingUp, Search, AlertTriangle } from 'lucide-react';
 
@@ -8,13 +8,17 @@ function formatCurrency(value: number) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 }
 
-const ABC_COLORS = {
+const ABC_COLORS: Record<string, string> = {
   A: 'text-gs-green border-gs-green/30 bg-gs-green/5',
   B: 'text-gs-blue border-gs-blue/30 bg-gs-blue/5',
   C: 'text-gs-text border-gs-border/50 bg-gs-panel',
 };
 
-export function TerminalDB() {
+interface TerminalDBProps {
+  preSelectedSkuId?: string | null
+}
+
+export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
   const { data, loading, error } = useTerminalData();
   const [selectedSku, setSelectedSku] = useState<TerminalSkuItem | null>(null);
   const [search, setSearch] = useState('');
@@ -28,12 +32,18 @@ export function TerminalDB() {
     });
   }, [data, search, filterClass]);
 
-  // Set initial selected item when data loads
+  // Set initial selected item when data loads or preSelectedSkuId changes
   useEffect(() => {
-    if (!selectedSku && filteredData.length > 0) {
+    if (preSelectedSkuId && data.length > 0) {
+      const target = data.find(item => item.sku === preSelectedSkuId);
+      if (target) {
+        setSelectedSku(target);
+        setSearch(target.sku); // Opcional: filtrar a lista para mostrar apenas ele
+      }
+    } else if (!selectedSku && filteredData.length > 0) {
       setSelectedSku(filteredData[0]);
     }
-  }, [filteredData]);
+  }, [data, preSelectedSkuId, filteredData, selectedSku]);
 
   if (loading) {
     return (

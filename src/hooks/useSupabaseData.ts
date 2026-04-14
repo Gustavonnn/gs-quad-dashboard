@@ -114,18 +114,45 @@ export function useStockAlerts() {
 
   const fetch = useCallback(async () => {
     setLoading(true)
-    const { data: rows, error } = await supabase
-      .from('live_produtos')
-      .select('sku, titulo, estoque, curva_abc')
-      .eq('estoque', 0)
-      .limit(100)
+    try {
+      // 1. Fetch curva (SKU identifiers and classifications)
+      // 2. Fetch all products (to calculate global stock)
+      const [curvaRes, produtosRes] = await Promise.all([
+        supabase.from('curva_abc').select('id, titulo, curva_abc').limit(200),
+        supabase.from('live_produtos').select('sku, estoque').limit(2000)
+      ])
 
-    if (!error && rows) {
-      setData(rows as unknown as StockAlert[])
-    } else {
+      const skus = curvaRes.data || []
+      const ads = produtosRes.data || []
+
+      // 3. Aggregate stock per SKU
+      const stockMap: Record<string, number> = {}
+      ads.forEach(ad => {
+        const sku = String(ad.sku || '').trim()
+        if (!sku) return
+        stockMap[sku] = (stockMap[sku] || 0) + (ad.estoque || 0)
+      })
+
+      // 4. Map back to StockAlerts where total stock is 0
+      const alerts: StockAlert[] = skus
+        .filter(s => {
+          const skuKey = String(s.id || '').trim()
+          return stockMap[skuKey] === 0
+        })
+        .map(s => ({
+          sku: s.id,
+          titulo: s.titulo || 'Produto sem título',
+          estoque: 0,
+          curva_abc: s.curva_abc || 'C'
+        }))
+
+      setData(alerts)
+    } catch (err) {
+      console.error('[useStockAlerts] error:', err)
       setData([])
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }, [])
 
   useEffect(() => { fetch() }, [fetch])

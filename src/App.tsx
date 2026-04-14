@@ -1,4 +1,5 @@
-import { useState } from 'react'
+// GS-QUAD Dashboard v3.0.1 - AdFactory Manual Trigger Patch
+import { useState, useEffect } from 'react'
 import { Layout } from './components/Layout'
 import { VisaoGeral } from './views/VisaoGeral'
 import { TerminalDB } from './views/TerminalDB'

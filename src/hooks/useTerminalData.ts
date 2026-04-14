@@ -29,6 +29,10 @@ function generateMockFallback(): TerminalSkuItem[] {
       abc_class: isA ? 'A' : isB ? 'B' : 'C',
       total_revenue_30d: rev,
       total_sales_units: Math.floor(rev / 50),
+      sales_7d: Math.floor(rev / 50 * 7 / 30),
+      sales_15d: Math.floor(rev / 50 * 15 / 30),
+      sales_30d: Math.floor(rev / 50),
+      sales_yesterday: Math.floor(Math.random() * 10),
       global_stock: Math.floor(Math.random() * 200),
       trend: Math.random() > 0.5 ? 'UP' : 'DOWN',
       mlbs: Array.from({ length: Math.floor(Math.random() * 4) + 1 }).map((_, j) => {
@@ -224,6 +228,10 @@ export function useTerminalData() {
           console.log(`[TerminalDB] TOP SKU ${s.id}: mlbs=${myMlbs.length}, chartDays with revenue=${chartData.filter(d => d.revenue > 0).length}`);
         }
         const totalSalesUnits = myMlbs.reduce((acc, m) => acc + m.sales_30d, 0) || Math.floor((s.receita_30d || 0) / 100);
+        const s7 = myMlbs.reduce((acc, m) => acc + m.sales_7d, 0);
+        const s15 = myMlbs.reduce((acc, m) => acc + m.sales_15d, 0);
+        const s30 = totalSalesUnits;
+        const sYest = myMlbs.reduce((acc, m) => acc + m.sales_yesterday, 0);
 
         return {
           sku: s.id,
@@ -233,7 +241,11 @@ export function useTerminalData() {
           abc_class: s.curva_abc,
           total_revenue_30d: s.receita_30d,
           total_sales_units: totalSalesUnits,
-          global_stock: myMlbs.reduce((acc, m) => acc + (m.stock || 0), 0),
+          sales_7d: s7,
+          sales_15d: s15,
+          sales_30d: s30,
+          sales_yesterday: sYest,
+          global_stock: myMlbs.length > 0 ? Math.max(...myMlbs.map(m => m.stock || 0)) : 0,
           trend: (() => {
             const t = (s.tendencia || '').toLowerCase();
             if (t.includes('acelerando') || t.includes('crescendo') || t.includes('subindo')) return 'UP';

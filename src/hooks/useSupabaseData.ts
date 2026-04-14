@@ -240,6 +240,100 @@ export function usePriceTimeline() {
 
 
 
+// ─── Kanban Cards ─────────────────────────────────────────────────
+export function useKanbanCards() {
+  const [data, setData] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetch = useCallback(async () => {
+    setLoading(true)
+    const { data: rows, error } = await supabase
+      .from('ia_kanban_cards')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (!error && rows) {
+      setData(rows)
+    } else {
+      console.error('[useKanbanCards] error:', error)
+      setData([])
+    }
+    setLoading(false)
+  }, [])
+
+  useEffect(() => { fetch() }, [fetch])
+
+  return { data, loading, refetch: fetch }
+}
+
+export async function createKanbanCard(card: {
+  sku: string
+  type: 'hybrid' | 'manual'
+  categoria?: string
+  created_by?: string
+}) {
+  const { data, error } = await supabase
+    .from('ia_kanban_cards')
+    .insert({
+      sku: card.sku,
+      type: card.type,
+      categoria: card.categoria || null,
+      status: 'backlog',
+      created_by: card.created_by || 'Admin',
+    })
+    .select()
+    .single()
+
+  return { data, error }
+}
+
+export async function updateKanbanCardStatus(cardId: string, status: string) {
+  const { error } = await supabase
+    .from('ia_kanban_cards')
+    .update({
+      status,
+      updated_at: new Date().toISOString(),
+      ...(status === 'processing' ? { processed_at: new Date().toISOString() } : {}),
+    })
+    .eq('id', cardId)
+
+  return { error }
+}
+
+export async function updateKanbanCardBriefing(cardId: string, briefingData: any) {
+  const { error } = await supabase
+    .from('ia_kanban_cards')
+    .update({
+      briefing_data: briefingData,
+      updated_at: new Date().toISOString(),
+      processed_at: new Date().toISOString(),
+    })
+    .eq('id', cardId)
+
+  return { error }
+}
+
+export async function updateKanbanCardManual(cardId: string, manualData: any) {
+  const { error } = await supabase
+    .from('ia_kanban_cards')
+    .update({
+      manual_data: manualData,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', cardId)
+
+  return { error }
+}
+
+export async function deleteKanbanCard(cardId: string) {
+  const { error } = await supabase
+    .from('ia_kanban_cards')
+    .delete()
+    .eq('id', cardId)
+
+  return { error }
+}
+
 // ─── Realtime Subscription ───────────────────────────────────────
 export function useRealtime(channel: string, onInsert: (payload: any) => void) {
   useEffect(() => {

@@ -6,9 +6,10 @@ import { Monitor } from './views/Monitor'
 import { GrowthPlan } from './views/GrowthPlan'
 import { MLIntel } from './views/MLIntel'
 import { PriceTimeline } from './views/PriceTimeline'
+import { AdFactory } from './views/AdFactory'
 import { useIAAlertas, useStockAlerts } from './hooks/useSupabaseData'
 
-type ViewId = 'visao' | 'curva' | 'monitor' | 'growth' | 'ml_intel' | 'price_history'
+type ViewId = 'visao' | 'curva' | 'monitor' | 'growth' | 'ml_intel' | 'price_history' | 'adfactory'
 
 export default function App() {
   const [activeView, setActiveView] = useState<ViewId>('visao')
@@ -32,6 +33,7 @@ export default function App() {
 
       {activeView === 'ml_intel' && <MLIntel onSelectSku={handleSelectSku} />}
       {activeView === 'price_history' && <PriceTimeline />}
+      {activeView === 'adfactory' && <AdFactory />}
     </Layout>
   )
 }

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
-import { LayoutDashboard, BarChart3, Activity, TrendingUp, MessageSquare, Brain, History } from 'lucide-react'
+import { LayoutDashboard, BarChart3, Activity, TrendingUp, MessageSquare, Brain, History, Factory } from 'lucide-react'
 
-type ViewId = 'visao' | 'curva' | 'monitor' | 'growth' | 'ml_intel' | 'price_history'
+type ViewId = 'visao' | 'curva' | 'monitor' | 'growth' | 'ml_intel' | 'price_history' | 'adfactory'
 
 interface NavItem {
   id: ViewId
@@ -23,6 +23,7 @@ const navItems: NavItem[] = [
   { id: 'growth', label: 'GROWTH_PLAN', icon: <TrendingUp size={14} strokeWidth={2.5} /> },
   { id: 'ml_intel', label: 'NEURAL_INTEL', icon: <Brain size={14} strokeWidth={2.5} /> },
   { id: 'price_history', label: 'PRICE_REACTION', icon: <History size={14} strokeWidth={2.5} /> },
+  { id: 'adfactory', label: 'ADFACTORY', icon: <Factory size={14} strokeWidth={2.5} /> },
 ]
 
 export function Sidebar({ activeView, onNavigate, alertCount = 0 }: SidebarProps) {
@@ -120,12 +121,23 @@ interface LayoutProps {
   alertCount?: number
 }
 
+const VIEW_TITLES: Record<ViewId, { title: string; subtitle: string }> = {
+  visao: { title: 'WAR_ROOM', subtitle: 'N8N CLOUD ↔ SUPABASE REALTIME ↔ CLAUDE AI' },
+  curva: { title: 'TERMINAL_DB', subtitle: 'CATÁLOGO COMPLETO • SISTEMA DE BANCO DE DADOS' },
+  monitor: { title: 'MONITOR', subtitle: 'ALERTAS OPERACIONAIS • SINAIS DE RUPTURA' },
+  growth: { title: 'GROWTH_PLAN', subtitle: 'ESTRATÉGIAS VALIDADAS • PLAYBOOK INTELIGENTE' },
+  ml_intel: { title: 'NEURAL_INTEL', subtitle: 'MACHINE LEARNING • PREVISÕES E CLUSTERS' },
+  price_history: { title: 'PRICE_REACTION', subtitle: 'TIMELINE DE PREÇOS • ABSORÇÃO DE MERCADO' },
+  adfactory: { title: 'ADFACTORY', subtitle: 'KANBAN HÍBRIDO • CRIAÇÃO INTELIGENTE DE ANÚNCIOS' },
+}
+
 export function Layout({ children, activeView, onNavigate, alertCount }: LayoutProps) {
+  const viewInfo = VIEW_TITLES[activeView]
   return (
     <div className="flex h-screen bg-gs-bg text-gs-text font-inter overflow-hidden">
       <Sidebar activeView={activeView} onNavigate={onNavigate} alertCount={alertCount} />
       <div className="flex-1 flex flex-col relative">
-        <Topbar title="WAR_ROOM" subtitle="N8N CLOUD ↔ SUPABASE REALTIME ↔ CLAUDE AI" />
+        <Topbar title={viewInfo.title} subtitle={viewInfo.subtitle} />
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gs-bg">
           <div className="p-8 max-w-[1600px] mx-auto animate-fade-in w-full">
             {children}

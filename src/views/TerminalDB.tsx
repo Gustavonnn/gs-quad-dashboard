@@ -100,8 +100,17 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
           </div>
           <div className="w-[1px] bg-gs-border"></div>
           <div className="flex flex-col items-end">
-            <span className="text-[9px] text-gs-muted font-mono tracking-widest uppercase">TTL SKUs Rankeados</span>
-            <span className="text-sm font-bold text-gs-text font-mono">{data.length}</span>
+            <span className="text-[9px] text-gs-muted font-mono tracking-widest uppercase">Sales Yesterday</span>
+            <span className="text-sm font-bold text-gs-green font-mono">
+              {data.reduce((a, b) => a + b.sales_yesterday, 0)} <span className="text-[9px] opacity-50 font-normal">un</span>
+            </span>
+          </div>
+          <div className="w-[1px] bg-gs-border"></div>
+          <div className="flex flex-col items-end">
+            <span className="text-[9px] text-gs-muted font-mono tracking-widest uppercase">Global Stock</span>
+            <span className="text-sm font-bold text-gs-text font-mono">
+              {data.reduce((a, b) => a + b.global_stock, 0)} <span className="text-[9px] opacity-50 font-normal">un</span>
+            </span>
           </div>
         </div>
       </div>
@@ -240,6 +249,24 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
                     <Package className="w-3 h-3" /> Estoque Global
                   </span>
                   <span className="text-lg font-bold text-gs-text font-mono leading-none">{selectedSku.global_stock} <span className="text-[10px] text-gs-muted font-normal ml-1">un.</span></span>
+                </div>
+                <div className="flex gap-1.5 ml-auto border-l border-gs-border/50 pl-4 items-center">
+                   <div className="flex flex-col items-center px-3 py-1 bg-white/5 border border-white/5 rounded-sm">
+                      <span className="text-[8px] text-gs-muted font-mono uppercase">7D</span>
+                      <span className="text-sm font-bold font-mono text-gs-text">{selectedSku.sales_7d}</span>
+                   </div>
+                   <div className="flex flex-col items-center px-3 py-1 bg-white/5 border border-white/5 rounded-sm">
+                      <span className="text-[8px] text-gs-muted font-mono uppercase">15D</span>
+                      <span className="text-sm font-bold font-mono text-gs-text">{selectedSku.sales_15d}</span>
+                   </div>
+                   <div className="flex flex-col items-center px-3 py-1 bg-white/5 border border-white/5 rounded-sm">
+                      <span className="text-[8px] text-gs-muted font-mono uppercase">30D</span>
+                      <span className="text-sm font-bold font-mono text-gs-green">{selectedSku.sales_30d}</span>
+                   </div>
+                   <div className="flex flex-col items-center px-3 py-1 bg-gs-green/10 border border-gs-green/20 rounded-sm ring-1 ring-gs-green/30 pulse-border">
+                      <span className="text-[8px] text-gs-green font-mono uppercase">Ontem</span>
+                      <span className="text-sm font-bold font-mono text-gs-green">{selectedSku.sales_yesterday}</span>
+                   </div>
                 </div>
               </div>
             </div>

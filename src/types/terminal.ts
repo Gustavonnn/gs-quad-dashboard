@@ -20,6 +20,10 @@ export interface TerminalSkuItem {
   abc_class: 'A' | 'B' | 'C' | string;
   total_revenue_30d: number;
   total_sales_units: number;
+  sales_7d: number;
+  sales_15d: number;
+  sales_30d: number;
+  sales_yesterday: number;
   global_stock: number;
   trend: 'UP' | 'DOWN' | 'STABLE' | string;
   mlbs: MlbItem[];

@@ -40,6 +40,7 @@ import {
 import type { KanbanCard, KanbanStatus, BriefingData, ManualData } from '../types'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
+console.log('--- GS-QUAD AD-FACTORY DEBUG: Component Loaded ---');
 
 const STATUS_CONFIG: Record<KanbanStatus, { label: string; icon: React.ReactNode; color: string; borderColor: string; bgColor: string }> = {
   backlog: {

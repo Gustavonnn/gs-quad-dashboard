@@ -1,55 +1,149 @@
 @import "tailwindcss";
 
 @theme {
-  --font-inter: "Inter", sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
+  /* Typography */
   --font-display: "Space Grotesk", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --font-heading: "Outfit", sans-serif;
 
+  /* Core Palette */
+  --color-gs-deep: #050505;
   --color-gs-bg: #030303;
+  --color-gs-surface: #0A0A0A;
   --color-gs-panel: #0A0A0A;
   --color-gs-border: #1F1F1F;
   --color-gs-text: #EDEDED;
   --color-gs-muted: #888888;
-  
-  --color-gs-green: #00FF66;
-  --color-gs-red: #FF3333;
-  --color-gs-blue: #0066FF;
-  --color-gs-yellow: #FFD700;
 
+  /* Accents */
+  --color-gs-green: #00E080;
+  --color-gs-green-dim: rgba(0, 224, 128, 0.15);
+  --color-gs-blue: #007AFF;
+  --color-gs-blue-dim: rgba(0, 122, 255, 0.15);
+  --color-gs-red: #FF3333;
+  --color-gs-red-dim: rgba(255, 51, 51, 0.15);
+  --color-gs-yellow: #FFD700;
+  --color-gs-yellow-dim: rgba(255, 215, 0, 0.15);
+
+  /* Glassmorphism */
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --glass-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  --glass-highlight: rgba(255, 255, 255, 0.03);
+
+  /* Animations */
   --animate-fade-in: fade-in 0.4s ease-out forwards;
   --animate-slide-up: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-glow-pulse: glow-pulse 2s ease-in-out infinite;
 }
 
 @keyframes fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
 @keyframes slide-up {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(0, 224, 128, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(0, 224, 128, 0.6);
+  }
 }
 
 @layer base {
-  body {
-    @apply bg-gs-bg text-gs-text font-inter antialiased;
-    background-image: 
-      radial-gradient(circle at 15% 50%, rgba(255, 255, 255, 0.015), transparent 25%),
-      radial-gradient(circle at 85% 30%, rgba(255, 255, 255, 0.015), transparent 25%);
+  * {
+    font-family: var(--font-display);
   }
 
-  /* Custom Scrollbar for a luxurious feel */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+  body {
+    background-color: var(--color-gs-deep);
+    color: var(--color-gs-text);
+    font-family: var(--font-display);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-image:
+      radial-gradient(ellipse at 15% 50%, rgba(0, 224, 128, 0.015), transparent 30%),
+      radial-gradient(ellipse at 85% 30%, rgba(0, 122, 255, 0.01), transparent 30%),
+      radial-gradient(ellipse at 50% 100%, rgba(0, 224, 128, 0.008), transparent 40%);
   }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+  }
+
+  code, pre, .font-mono {
+    font-family: var(--font-mono);
+  }
+
+  /* Ultra-fine industrial scrollbar */
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
   ::-webkit-scrollbar-track {
     background: transparent;
   }
+
   ::-webkit-scrollbar-thumb {
-    @apply bg-gs-border;
-    border-radius: 3px;
+    background: #1A1A1A;
+    border-radius: 2px;
   }
+
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-gs-muted;
+    background: #2A2A2A;
+  }
+}
+
+@layer utilities {
+  /* Glassmorphism Panel */
+  .glass-panel {
+    background: rgba(10, 10, 10, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+  }
+
+  /* Card with premium shadow */
+  .card-premium {
+    background: var(--color-gs-surface);
+    border: 1px solid var(--color-gs-border);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), 0 0 40px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .card-premium:hover {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 60px rgba(0, 224, 128, 0.05);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+
+  /* Glow effect on hover */
+  .glow-green {
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .glow-green:hover {
+    box-shadow: 0 0 20px rgba(0, 224, 128, 0.3), 0 0 40px rgba(0, 224, 128, 0.1);
+  }
+
+  /* Sidebar transition */
+  .sidebar-expanded {
+    width: 18rem;
+  }
+
+  .sidebar-collapsed {
+    width: 5rem;
   }
 }

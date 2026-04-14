@@ -21,6 +21,7 @@ interface TerminalDBProps {
 export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
   const { data, loading, error } = useTerminalData();
   const [selectedSku, setSelectedSku] = useState<TerminalSkuItem | null>(null);
+  const [selectedMlbId, setSelectedMlbId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [filterClass, setFilterClass] = useState<'ALL' | 'A' | 'B' | 'C'>('ALL');
 
@@ -38,12 +39,31 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
       const target = data.find(item => item.sku === preSelectedSkuId);
       if (target) {
         setSelectedSku(target);
-        setSearch(target.sku); // Opcional: filtrar a lista para mostrar apenas ele
+        setSelectedMlbId(null); // Reset MLB selection on SKU change
+        setSearch(target.sku); 
       }
     } else if (!selectedSku && filteredData.length > 0) {
       setSelectedSku(filteredData[0]);
+      setSelectedMlbId(null);
     }
   }, [data, preSelectedSkuId, filteredData, selectedSku]);
+
+  // Handle SKU switch from manual list click
+  const handleSkuSelect = (item: TerminalSkuItem) => {
+    setSelectedSku(item);
+    setSelectedMlbId(null);
+  };
+
+  const chartInfo = useMemo(() => {
+    if (!selectedSku) return { data: [], label: 'NENHUM DADO' };
+    
+    if (selectedMlbId) {
+      const mlb = selectedSku.mlbs.find(m => m.mlb_id === selectedMlbId);
+      if (mlb) return { data: mlb.chartData, label: `FILTRO: ${mlb.mlb_id}` };
+    }
+    
+    return { data: selectedSku.chartData, label: 'VELOCIDADE AGREGADA SKU' };
+  }, [selectedSku, selectedMlbId]);
 
   if (loading) {
     return (
@@ -133,7 +153,7 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
             {filteredData.map((item) => (
               <button
                 key={item.sku}
-                onClick={() => setSelectedSku(item)}
+                onClick={() => handleSkuSelect(item)}
                 className={`flex flex-col p-3 text-left border rounded-sm transition-all duration-200 group relative overflow-hidden ${
                   selectedSku?.sku === item.sku
                     ? 'border-gs-green/60 bg-gs-green/5 shadow-[0_0_15px_rgba(0,255,102,0.05)]'
@@ -231,14 +251,23 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-[10px] text-gs-muted font-mono tracking-widest uppercase flex items-center gap-2">
                     <div className="w-1.5 h-1.5 bg-gs-blue rounded-full animate-pulse"></div>
-                    VELOCIDADE DE SAÍDA (30D)
+                    {chartInfo.label}
                   </span>
-                  <span className="text-[10px] font-mono text-gs-text">UNIDADES/DIA: {selectedSku.total_sales_units}</span>
+                  {selectedMlbId ? (
+                    <button 
+                      onClick={() => setSelectedMlbId(null)}
+                      className="text-[9px] font-mono text-gs-green border border-gs-green/30 px-2 py-0.5 rounded-sm hover:bg-gs-green/10 transition-colors"
+                    >
+                      &gt;_ VER_AGREGADO
+                    </button>
+                  ) : (
+                    <span className="text-[10px] font-mono text-gs-text">UNIDADES/DIA: {selectedSku.total_sales_units}</span>
+                  )}
                 </div>
                 <div className="flex-1 w-full" style={{ minHeight: '180px' }}>
-                  <ResponsiveContainer width="99%" height="100%" key={`chart-render-${selectedSku.sku}`}>
+                  <ResponsiveContainer width="99%" height="100%" key={`chart-${selectedSku.sku}-${selectedMlbId}`}>
                     <AreaChart 
-                      data={selectedSku.chartData} 
+                      data={chartInfo.data} 
                       margin={{ top: 20, right: 10, left: -20, bottom: 0 }}
                     >
                       <defs>
@@ -303,19 +332,31 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
                 
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 pb-8">
                   {selectedSku.mlbs.map((mlb) => (
-                    <div key={mlb.mlb_id} className="group border border-gs-border/40 bg-black/30 hover:border-gs-border transition-colors rounded-sm p-4 flex flex-col gap-3">
+                    <div 
+                      key={mlb.mlb_id} 
+                      onClick={() => setSelectedMlbId(selectedMlbId === mlb.mlb_id ? null : mlb.mlb_id)}
+                      className={`group border transition-all duration-300 rounded-sm p-4 flex flex-col gap-3 cursor-pointer relative overflow-hidden ${
+                        selectedMlbId === mlb.mlb_id 
+                          ? 'border-gs-green bg-gs-green/5 shadow-[0_0_20px_rgba(0,255,102,0.1)]' 
+                          : 'border-gs-border/40 bg-black/30 hover:border-gs-border/80'
+                      }`}
+                    >
+                      {selectedMlbId === mlb.mlb_id && (
+                        <div className="absolute top-0 right-0 p-1">
+                          <Activity size={12} className="text-gs-green animate-pulse" />
+                        </div>
+                      )}
                       <div className="flex justify-between items-start">
                         <div className="flex flex-col">
                            <a 
                              href={`https://www.mercadolivre.com.br/anuncios/lista?filters=OMNI_ACTIVE|OMNI_INACTIVE|CHANNEL_NO_PROXIMITY_AND_NO_MP_MERCHANTS&page=1&search=${mlb.mlb_id.replace(/\D/g, '')}&sort=DEFAULT`}
                              target="_blank"
                              rel="noopener noreferrer"
-                             className="font-mono font-bold text-sm text-gs-blue hover:text-[#4da6ff] hover:underline transition-colors cursor-pointer flex items-center gap-1"
+                             onClick={(e) => e.stopPropagation()}
+                             className="font-mono font-bold text-sm text-gs-blue hover:text-[#4da6ff] hover:underline transition-colors cursor-pointer flex items-center gap-1 z-20"
                            >
                              {mlb.mlb_id}
-                             <svg className="w-3 h-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                             </svg>
+                             <Activity size={10} className="opacity-40" />
                            </a>
                            <span className="text-[10px] text-gs-muted uppercase font-mono max-w-[200px] truncate">{mlb.title}</span>
                         </div>
@@ -332,6 +373,12 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
                         <div className="flex flex-col">
                           <span className="text-[8px] text-gs-muted uppercase font-mono">Preço</span>
                           <span className="text-xs font-mono font-bold text-gs-text">{formatCurrency(mlb.price)}</span>
+                        </div>
+                        <div className="flex flex-col border-l border-white/5 pl-2">
+                          <span className="text-[8px] text-gs-muted uppercase font-mono">Ontem</span>
+                          <span className="text-xs font-mono font-bold text-gs-green flex items-center gap-1">
+                            {mlb.sales_yesterday} <span className="text-[8px] opacity-50">UN</span>
+                          </span>
                         </div>
                         <div className="flex flex-col border-l border-white/5 pl-2">
                           <span className="text-[8px] text-gs-muted uppercase font-mono">Estoque</span>

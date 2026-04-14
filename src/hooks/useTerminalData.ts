@@ -40,9 +40,15 @@ function generateMockFallback(): TerminalSkuItem[] {
           sales_7d: Math.floor(totalSales * 7 / 30),
           sales_15d: Math.floor(totalSales * 15 / 30),
           sales_30d: totalSales,
+          sales_yesterday: Math.floor(Math.random() * 5),
           status: Math.random() > 0.8 ? 'paused' : 'active',
           stock: Math.floor(Math.random() * 50),
-          visits: Math.floor(Math.random() * 500)
+          visits: Math.floor(Math.random() * 500),
+          chartData: dateKeys.map(k => ({
+            date: k.substring(8, 10) + '/' + k.substring(5, 7),
+            revenue: Math.floor(Math.random() * 100),
+            sales: Math.floor(Math.random() * 3)
+          }))
         };
       }),
       chartData
@@ -63,10 +69,17 @@ export function useTerminalData() {
 
       try {
         // 1. Array Paralelo de Promessas consumindo toda a malha no DB.
+        const cutoff = new Date();
+        cutoff.setDate(cutoff.getDate() - 32); 
+        const cutoffIso = cutoff.toISOString();
+
         const [curvaRes, produtosRes, vendasRes] = await Promise.all([
           supabase.from('curva_abc').select('*').order('receita_30d', { ascending: false }).limit(200),
           supabase.from('live_produtos').select('*').limit(2000),
-          supabase.from('live_vendas').select('*').limit(5000)
+          supabase.from('live_vendas')
+            .select('*')
+            .gte('data_venda', cutoffIso)
+            .limit(50000)
         ]);
 
       const skus = curvaRes.data || [];
@@ -87,28 +100,45 @@ export function useTerminalData() {
         return;
       }
 
-      // 2. Mapeamento de Vendas por SKUs para montar o Gráfico Temporal
-      // Agrupa { "SKU_X": { "2026-04-01": { revenue: 100, sales: 2 } } }
+      // 2. Mapeamento de Vendas por SKUs e MLBs para montar o Gráfico Temporal
+      // Agrupa SKU -> Data e também SKU -> MLB -> Data
       const vendasMap: Record<string, Record<string, { revenue: number, sales: number }>> = {};
+      const mlbVendasMap: Record<string, Record<string, Record<string, { revenue: number, sales: number }>>> = {};
       
       vendas.forEach(v => {
-        // Sanitização: trim() para remover espaços invisíveis do BD
-        const s = String(v.sku || '').trim();
-        // Guard: new Date(undefined).toISOString() throws RangeError
+        // Normalização garantida: UpperCase + Trim
+        const s = String(v.sku || '').trim().toUpperCase();
+        const m = v.item_id ? 'MLB' + String(v.item_id).replace(/\D/g, '') : null;
         if (!s || !v.data_venda) return;
-        // Normalização ISO para evitar problemas de fuso horário
+        
         const d = new Date(v.data_venda).toISOString().split('T')[0];
         if (!d) return;
 
+        // Agrupamento por SKU (Geral)
         if (!vendasMap[s]) vendasMap[s] = {};
         if (!vendasMap[s][d]) vendasMap[s][d] = { revenue: 0, sales: 0 };
-        
         vendasMap[s][d].revenue += parseFloat(v.receita_total || '0');
         vendasMap[s][d].sales += parseInt(v.quantidade || '0', 10);
+
+        // Agrupamento por MLB (Granular)
+        if (m) {
+          if (!mlbVendasMap[s]) mlbVendasMap[s] = {};
+          if (!mlbVendasMap[s][m]) mlbVendasMap[s][m] = {};
+          if (!mlbVendasMap[s][m][d]) mlbVendasMap[s][m][d] = { revenue: 0, sales: 0 };
+          mlbVendasMap[s][m][d].revenue += parseFloat(v.receita_total || '0');
+          mlbVendasMap[s][m][d].sales += parseInt(v.quantidade || '0', 10);
+        }
       });
+
+      console.log('[TerminalDB] mlbVendasMap keys:', Object.keys(mlbVendasMap).slice(0, 5));
+      if (vendas.length > 0) console.log('[TerminalDB] Sample venda keys:', Object.keys(vendas[0]));
 
       // 3. Montar calendário dinâmico dos últimos 30 dias para normalizar e preencher buracos "zeros" no gráfico (Recharts ama array sequencial).
       const dateKeys: string[] = [];
+      const yesterdayDate = new Date();
+      yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+      const yesterdayIso = yesterdayDate.toISOString().split('T')[0];
+
       for (let i = 29; i >= 0; i--) {
         const d = new Date();
         d.setDate(d.getDate() - i);
@@ -118,18 +148,21 @@ export function useTerminalData() {
       // 4. Mapeamento de Produtos (MLBs) Atrelados aos SKUs
       const mlbMap: Record<string, MlbItem[]> = {};
       produtos.forEach(p => {
-        // Sanitização: trim() para remover espaços invisíveis do BD
-        const s = String(p.sku || '').trim();
+        const s = String(p.sku || '').trim().toUpperCase();
         if (!s) return;
+
+        const mlbId = p.item_id ? 'MLB' + String(p.item_id).replace(/\D/g, '') : 'MLB_UNKNOWN';
+        const myMlbVendas = (mlbVendasMap[s] || {})[mlbId] || {};
 
         if (!mlbMap[s]) mlbMap[s] = [];
         mlbMap[s].push({
-          mlb_id: p.item_id ? 'MLB' + String(p.item_id).replace(/\D/g, '') : 'MLB_UNKNOWN',
+          mlb_id: mlbId,
           title: p.titulo || 'Produto não catalogado',
           price: typeof p.preco === 'number' ? p.preco : parseFloat(p.preco || '0'),
           sales_7d: typeof p.vendas_7d === 'number' ? p.vendas_7d : 0,
           sales_15d: typeof p.vendas_15d === 'number' ? p.vendas_15d : 0,
           sales_30d: typeof p.vendas_total === 'number' ? p.vendas_total : parseInt(p.vendas_total || '0', 10),
+          sales_yesterday: myMlbVendas[yesterdayIso]?.sales || 0,
           status: (() => {
             const raw = (p.status || '').toLowerCase().trim();
             if (raw === 'ativo' || raw === 'active') return 'active';
@@ -139,6 +172,14 @@ export function useTerminalData() {
           })(),
           stock: typeof p.estoque === 'number' ? p.estoque : parseInt(p.estoque || '0', 10),
           visits: typeof p.visitas_total === 'number' ? p.visitas_total : parseInt(p.visitas_total || '0', 10),
+          chartData: dateKeys.map(k => {
+            const vd = myMlbVendas[k] || { revenue: 0, sales: 0 };
+            return {
+               date: k.substring(8, 10) + '/' + k.substring(5, 7),
+               revenue: vd.revenue,
+               sales: vd.sales,
+            };
+          }),
         });
       });
 
@@ -148,8 +189,8 @@ export function useTerminalData() {
       console.log('[TerminalDB] First SKU from curva_abc:', skus[0]?.id);
 
       const populatedData: TerminalSkuItem[] = skus.map(s => {
-        // Sanitização: usar SKU com trim para lookup
-        const skuKey = String(s.id || '').trim();
+        // Sanitização: usar SKU com trim + Upper para lookup
+        const skuKey = String(s.id || '').trim().toUpperCase();
         const myVendas = vendasMap[skuKey] || {};
         const myMlbs = mlbMap[skuKey] || [];
 

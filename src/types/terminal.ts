@@ -8,6 +8,8 @@ export interface MlbItem {
   sales_7d: number;
   sales_15d: number;
   sales_30d: number;
+  sales_yesterday: number;
+  chartData: { date: string; revenue: number; sales: number }[];
 }
 
 export interface TerminalSkuItem {

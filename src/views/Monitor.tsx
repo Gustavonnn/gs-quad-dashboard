@@ -1,6 +1,6 @@
 import { useIAAlertas, resolveAlerta, useStockAlerts } from '../hooks/useSupabaseData'
 import { Card } from '../components/ui'
-import { AlertCircle, Package, Activity } from 'lucide-react'
+import { AlertCircle, Activity } from 'lucide-react'
 
 const SEV_COLOR: Record<string, string> = {
   'CRÍTICO': 'border-l-gs-red',
@@ -16,7 +16,11 @@ const SEV_TEXT_COLOR: Record<string, string> = {
   'BAIXO': 'text-gs-muted',
 }
 
-export function Monitor() {
+interface MonitorProps {
+  onSelectSku: (sku: string) => void
+}
+
+export function Monitor({ onSelectSku }: MonitorProps) {
   const { data, loading, refetch } = useIAAlertas()
   const { data: stockData, loading: stockLoading } = useStockAlerts()
 
@@ -68,22 +72,17 @@ export function Monitor() {
           <div className="flex items-center gap-3 border-b border-gs-red/30 pb-2 mb-2">
             <AlertCircle className="text-gs-red" size={20} />
             <h3 className="font-display font-bold text-sm tracking-widest text-gs-red uppercase">Ruptura de Estoque (Zero Stock)</h3>
-            <span className="font-mono text-[10px] bg-gs-red/10 text-gs-red px-2 py-0.5 rounded-sm">
-              {stockData.length} SKUs CRÍTICOS
-            </span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {stockData.map((item) => (
-              <Card key={item.sku} className="border-l-4 border-l-gs-red p-4 bg-gs-red/5 border-y border-r border-gs-red/20 flex flex-col relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
-                   <Package size={48} />
-                </div>
+              <Card 
+                key={item.sku} 
+                onClick={() => onSelectSku(item.sku)}
+                className="border-l-4 border-l-gs-red p-4 bg-gs-red/5 border-y border-r border-gs-red/20 flex flex-col relative overflow-hidden group cursor-pointer hover:border-gs-red/50 transition-all"
+              >
                 <div className="flex justify-between items-start mb-2">
                   <span className="font-mono text-sm font-bold text-gs-red tracking-wider">
                     [RUPTURA] {item.sku}
-                  </span>
-                  <span className="font-display font-black text-[10px] px-1.5 py-0.5 border border-gs-red/30 text-gs-red rounded-sm">
-                    CURVA {item.curva_abc}
                   </span>
                 </div>
                 <p className="text-[11px] text-gs-text uppercase font-mono tracking-widest mb-1 opacity-90 truncate">{item.titulo}</p>
@@ -106,7 +105,11 @@ export function Monitor() {
           </div>
           <div className="flex flex-col gap-4">
             {data.map((alerta) => (
-              <Card key={alerta.id} className={`border-l-4 ${SEV_COLOR[alerta.severity] ?? 'border-l-gs-muted'} p-5 flex flex-col border-y border-r border-gs-border shadow-lg hover:border-r-gs-muted/50 transition-colors`}>
+              <Card 
+                key={alerta.id} 
+                onClick={() => onSelectSku(alerta.sku)}
+                className={`border-l-4 ${SEV_COLOR[alerta.severity] ?? 'border-l-gs-muted'} p-5 flex flex-col border-y border-r border-gs-border shadow-lg hover:border-r-gs-muted/50 transition-colors cursor-pointer group`}
+              >
                 <div className="flex items-start justify-between mb-3">
                   <span className={`font-mono text-sm font-bold tracking-wider uppercase ${SEV_TEXT_COLOR[alerta.severity] ?? 'text-gs-muted'}`}>
                     [{alerta.severity}] {alerta.sku}

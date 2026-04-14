@@ -27,7 +27,7 @@ export default function App() {
     <Layout activeView={activeView} onNavigate={setActiveView} alertCount={totalAlerts}>
       {activeView === 'visao' && <VisaoGeral />}
       {activeView === 'curva' && <TerminalDB preSelectedSkuId={selectedSkuId} />}
-      {activeView === 'monitor' && <Monitor />}
+      {activeView === 'monitor' && <Monitor onSelectSku={handleSelectSku} />}
       {activeView === 'growth' && <GrowthPlan />}
 
       {activeView === 'ml_intel' && <MLIntel onSelectSku={handleSelectSku} />}

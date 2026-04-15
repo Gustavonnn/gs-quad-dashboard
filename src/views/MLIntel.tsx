@@ -1,5 +1,5 @@
-import { useMLInsights } from '../hooks/useSupabaseData'
-import type { MLInsight } from '../types'
+import { useMLInsights } from '@/hooks'
+import type { MLInsight } from '@/lib/schemas'
 import { Brain, AlertTriangle, TrendingDown, Target, Zap } from 'lucide-react'
 
 // Helper para formatar probabilidade
@@ -13,9 +13,9 @@ interface MLIntelProps {
 }
 
 export function MLIntel({ onSelectSku }: MLIntelProps) {
-  const { data, loading } = useMLInsights()
+  const { data, isLoading } = useMLInsights()
 
-  if (loading) {
+  if (isLoading || !data) {
     return (
       <div className="flex h-[80vh] items-center justify-center">
         <div className="flex flex-col items-center gap-4">

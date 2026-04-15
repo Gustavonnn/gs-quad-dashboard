@@ -1,4 +1,5 @@
-import { useState, useEffect, type ReactNode } from 'react'
+import { useState, useEffect, useRef, type ReactNode } from 'react'
+import { NavLink, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard,
   BarChart3,
@@ -6,287 +7,393 @@ import {
   TrendingUp,
   Brain,
   History,
-  Factory,
+  Database,
+  Zap,
+  RefreshCw,
+  Search,
+  Settings,
   Menu,
   X,
+  Command,
+  Target,
+  Radar,
 } from 'lucide-react'
-
-type ViewId = 'visao' | 'curva' | 'monitor' | 'growth' | 'ml_intel' | 'price_history' | 'adfactory'
+import { useUIStore } from '@/stores/uiStore'
+import { getRouteMeta } from '@/app/routes'
+import { ThemeToggle } from '@/components/ThemeToggle'
 
 interface NavItem {
-  id: ViewId
+  id: string
   label: string
+  sublabel?: string
   icon: ReactNode
+  path: string
+  group: 'INTEL' | 'FERRAMENTAS' | 'SISTEMA'
+  accent?: 'green' | 'amber' | 'red'
 }
 
-const navItems: NavItem[] = [
-  { id: 'visao', label: 'VISÃO GERAL', icon: <LayoutDashboard size={16} strokeWidth={2.5} /> },
-  { id: 'curva', label: 'TERMINAL_DB', icon: <BarChart3 size={16} strokeWidth={2.5} /> },
-  { id: 'monitor', label: 'MONITOR', icon: <Activity size={16} strokeWidth={2.5} /> },
-  { id: 'growth', label: 'GROWTH_PLAN', icon: <TrendingUp size={16} strokeWidth={2.5} /> },
-  { id: 'ml_intel', label: 'NEURAL_INTEL', icon: <Brain size={16} strokeWidth={2.5} /> },
-  { id: 'price_history', label: 'PRICE_REACTION', icon: <History size={16} strokeWidth={2.5} /> },
-  { id: 'adfactory', label: 'ADFACTORY', icon: <Factory size={16} strokeWidth={2.5} /> },
+const MODULE_ITEMS: NavItem[] = [
+  { id: 'visao',    label: 'WAR_ROOM',      sublabel: 'Visão geral',       icon: <LayoutDashboard size={15} strokeWidth={2} />, path: '/',          group: 'INTEL' },
+  { id: 'terminal', label: 'TERMINAL_DB',   sublabel: 'Catálogo SKU',      icon: <BarChart3        size={15} strokeWidth={2} />, path: '/terminal',  group: 'INTEL' },
+  { id: 'monitor',  label: 'MONITOR',       sublabel: 'Alertas táticos',   icon: <Activity         size={15} strokeWidth={2} />, path: '/monitor',   group: 'INTEL' },
+  { id: 'growth',   label: 'GROWTH_PLAN',   sublabel: 'Playbook',          icon: <TrendingUp       size={15} strokeWidth={2} />, path: '/growth',    group: 'INTEL' },
+  { id: 'ml',       label: 'NEURAL_INTEL',  sublabel: 'ML · Previsões',    icon: <Brain            size={15} strokeWidth={2} />, path: '/ml',        group: 'INTEL' },
+  { id: 'price',    label: 'PRICE_REACT',   sublabel: 'Timeline preços',   icon: <History          size={15} strokeWidth={2} />, path: '/price',     group: 'INTEL' },
+  { id: 'adsradar', label: 'ADS_RADAR',     sublabel: 'Performance ads',   icon: <Radar            size={15} strokeWidth={2} />, path: '/ads-radar', group: 'INTEL', accent: 'green' },
 ]
 
-/* ── Nav Button ─────────────────────────────────────────── */
-function NavButton({
-  item,
-  isActive,
-  expanded,
-  alertCount,
-  onClick,
-}: {
-  item: NavItem
-  isActive: boolean
-  expanded: boolean
-  alertCount: number
-  onClick: () => void
-}) {
+const TOOL_ITEMS: NavItem[] = [
+  { id: 'explorer',   label: 'DATA_EXPLORER', sublabel: 'Query Supabase',  icon: <Database   size={15} strokeWidth={2} />, path: '/explorer',  group: 'FERRAMENTAS' },
+  { id: 'activity',   label: 'ACTIVITY',      sublabel: 'Event timeline',  icon: <Zap        size={15} strokeWidth={2} />, path: '/activity',  group: 'FERRAMENTAS' },
+  { id: 'sync',       label: 'SYNC_CTRL',     sublabel: 'DuckDB pipeline', icon: <RefreshCw  size={15} strokeWidth={2} />, path: '/sync',      group: 'FERRAMENTAS' },
+  { id: 'adfactory',  label: 'AD_FACTORY',    sublabel: 'Kanban ads',      icon: <Target     size={15} strokeWidth={2} />, path: '/adfactory', group: 'FERRAMENTAS' },
+  { id: 'search',     label: 'GLOBAL_SRCH',   sublabel: 'Busca integrada', icon: <Search     size={15} strokeWidth={2} />, path: '/search',    group: 'FERRAMENTAS' },
+]
+
+const SYSTEM_ITEMS: NavItem[] = [
+  { id: 'settings', label: 'SETTINGS', sublabel: 'Preferências', icon: <Settings size={15} strokeWidth={2} />, path: '/settings', group: 'SISTEMA' },
+]
+
+// ─── Nav Button ───────────────────────────────────────────────────────────────
+
+function NavButton({ item, expanded }: { item: NavItem; expanded: boolean }) {
   return (
-    <button
-      onClick={onClick}
-      className={`
-        group relative w-full flex items-center rounded-md text-left
-        font-medium font-mono uppercase tracking-wider
-        transition-all duration-[300ms] cursor-pointer
-        ${isActive
-          ? 'bg-[var(--color-gs-text)] text-[var(--color-gs-bg)] shadow-[0_0_20px_rgba(237,237,237,0.15)]'
-          : 'text-[var(--color-gs-muted)] hover:text-[var(--color-gs-text)] hover:bg-[var(--color-gs-border)]/50'
-        }
-      `}
-      style={{ transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)' }}
+    <NavLink
+      to={item.path}
+      title={!expanded ? item.label : undefined}
+      className={({ isActive }) =>
+        `group relative flex items-center w-full rounded-[3px] transition-all duration-200 ease-out overflow-hidden select-none ${
+          isActive
+            ? 'bg-[var(--color-gs-text)] text-[var(--color-gs-bg)]'
+            : 'text-[var(--color-gs-muted)] hover:text-[var(--color-gs-text)] hover:bg-white/[0.05]'
+        }`
+      }
+      style={{ textDecoration: 'none', height: '36px' }}
     >
-      {isActive && (
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-5 bg-[var(--color-gs-green)] rounded-r shadow-[0_0_8px_var(--color-gs-green)]" />
+      {({ isActive }) => (
+        <>
+          {/* Active accent line */}
+          {isActive && (
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-4 bg-[var(--color-gs-green)] rounded-r"
+              style={{ boxShadow: '0 0 8px var(--color-gs-green)' }}
+            />
+          )}
+
+          {/* New badge accent */}
+          {item.accent === 'green' && !isActive && (
+            <div className="absolute top-1.5 right-1.5 w-1 h-1 rounded-full bg-[var(--color-gs-green)] opacity-70"
+              style={{ boxShadow: '0 0 4px var(--color-gs-green)' }}
+            />
+          )}
+
+          {/* Icon cell */}
+          <div className="shrink-0 w-10 h-full flex items-center justify-center">
+            <span className={`transition-all duration-200 ${isActive ? 'text-[var(--color-gs-bg)]' : 'text-[var(--color-gs-muted)] group-hover:text-[var(--color-gs-text)]'}`}>
+              {item.icon}
+            </span>
+          </div>
+
+          {/* Label + sublabel */}
+          <div
+            className="flex flex-col justify-center overflow-hidden"
+            style={{
+              opacity: expanded ? 1 : 0,
+              width: expanded ? '160px' : '0px',
+              transition: 'opacity 180ms ease, width 280ms cubic-bezier(0.16, 1, 0.3, 1)',
+              transitionDelay: expanded ? '60ms' : '0ms',
+            }}
+          >
+            <span className="font-mono text-[10px] font-bold tracking-widest uppercase leading-none whitespace-nowrap truncate">
+              {item.label}
+            </span>
+            {item.sublabel && (
+              <span className={`text-[9px] font-mono tracking-wide mt-0.5 whitespace-nowrap truncate ${isActive ? 'opacity-60' : 'text-[var(--color-gs-muted)] opacity-70'}`}>
+                {item.sublabel}
+              </span>
+            )}
+          </div>
+        </>
       )}
-      <div className="shrink-0 flex items-center justify-center h-9 w-9 rounded-md transition-all duration-[300ms]">
-        {item.icon}
-      </div>
-      <span
-        className="flex-1 truncate transition-all duration-300 overflow-hidden whitespace-nowrap"
-        style={{
-          opacity: expanded ? 1 : 0,
-          maxWidth: expanded ? '200px' : '0px',
-          transitionDelay: expanded ? '80ms' : '0ms',
-          paddingLeft: expanded ? '12px' : '0px',
-        }}
-      >
-        {item.label}
-      </span>
-      {item.id === 'monitor' && alertCount > 0 && (
-        <span
-          className={`text-[9px] px-1.5 py-0.5 rounded-[3px] font-bold tracking-widest shrink-0 transition-all duration-300 mr-2 ${
-            isActive ? 'bg-[var(--color-gs-red)] text-white' : 'bg-[var(--color-gs-red)]/10 text-[var(--color-gs-red)]'
-          }`}
-          style={{ opacity: expanded ? 1 : 0 }}
-        >
-          {alertCount}
-        </span>
-      )}
-    </button>
+    </NavLink>
   )
 }
 
-/* ── Desktop Sidebar (Hover-Retractable) ─────────────────── */
-function DesktopSidebar({
-  activeView,
-  onNavigate,
-  alertCount,
-}: {
-  activeView: ViewId
-  onNavigate: (view: ViewId) => void
-  alertCount: number
-}) {
-  const [expanded, setExpanded] = useState(false)
+// ─── Nav Group ────────────────────────────────────────────────────────────────
+
+function NavGroup({ items, label, expanded }: { items: NavItem[]; label: string; expanded: boolean }) {
+  return (
+    <div className="flex flex-col gap-0.5">
+      <div
+        className="overflow-hidden whitespace-nowrap"
+        style={{
+          opacity: expanded ? 1 : 0,
+          maxHeight: expanded ? '20px' : '0px',
+          marginBottom: expanded ? '4px' : '6px',
+          transition: 'all 250ms cubic-bezier(0.16, 1, 0.3, 1)',
+          transitionDelay: expanded ? '40ms' : '0ms',
+        }}
+      >
+        <span className="font-mono text-[8px] text-[var(--color-gs-muted)] tracking-[0.25em] uppercase px-2 opacity-50">
+          {label}
+        </span>
+      </div>
+      {items.map(item => (
+        <NavButton key={item.id} item={item} expanded={expanded} />
+      ))}
+    </div>
+  )
+}
+
+// ─── Desktop Sidebar ──────────────────────────────────────────────────────────
+
+function DesktopSidebar() {
+  const [hovered, setHovered] = useState(false)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const handleMouseEnter = () => {
+    if (timerRef.current) clearTimeout(timerRef.current)
+    setHovered(true)
+  }
+
+  const handleMouseLeave = () => {
+    timerRef.current = setTimeout(() => setHovered(false), 120)
+  }
+
+  const expanded = hovered
+  const W_EXPANDED = '220px'
+  const W_COLLAPSED = '52px'
 
   return (
     <aside
-      onMouseEnter={() => setExpanded(true)}
-      onMouseLeave={() => setExpanded(false)}
-      className="hidden lg:flex flex-col h-screen shrink-0 bg-[var(--color-gs-panel)] border-r border-[var(--color-gs-border)] overflow-hidden"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      className="hidden lg:flex flex-col h-screen shrink-0 relative z-20"
       style={{
-        width: expanded ? '18rem' : '5rem',
+        width: expanded ? W_EXPANDED : W_COLLAPSED,
         transition: 'width 300ms cubic-bezier(0.16, 1, 0.3, 1)',
+        background: 'var(--color-gs-panel)',
+        borderRight: '1px solid var(--color-gs-border)',
       }}
     >
-      {/* Logo area */}
+      {/* Ambient top glow when expanded */}
+      {expanded && (
+        <div
+          className="absolute top-0 left-0 right-0 h-[1px] pointer-events-none"
+          style={{ background: 'linear-gradient(90deg, transparent, rgba(0,255,102,0.3), transparent)', opacity: 0.8 }}
+        />
+      )}
+
+      {/* ── Logo Zone ── */}
       <div
-        className="h-16 shrink-0 border-b border-[var(--color-gs-border)] bg-[var(--color-gs-bg)] flex items-center"
+        className="shrink-0 flex items-center overflow-hidden"
         style={{
-          justifyContent: expanded ? 'flex-start' : 'center',
-          paddingLeft: expanded ? '1rem' : '0',
-          paddingRight: expanded ? '1rem' : '0',
-          transition: 'all 300ms cubic-bezier(0.16, 1, 0.3, 1)',
+          height: '60px',
+          borderBottom: '1px solid var(--color-gs-border)',
+          padding: '0 6px',
         }}
       >
+        {/* Logo mark — always visible */}
         <div
-          className="flex items-center gap-3 min-w-0"
+          className="shrink-0 flex items-center justify-center font-heading font-black text-[11px] uppercase tracking-tighter"
           style={{
-            opacity: expanded ? 1 : 0,
-            transition: 'opacity 150ms ease',
-            transitionDelay: expanded ? '100ms' : '0ms',
+            width: '40px',
+            height: '40px',
+            background: 'var(--color-gs-text)',
+            color: 'var(--color-gs-bg)',
+            borderRadius: '2px',
+            letterSpacing: '-0.05em',
+            flexShrink: 0,
           }}
         >
-          <div className="w-8 h-8 bg-[var(--color-gs-text)] text-[var(--color-gs-bg)] flex items-center justify-center font-heading font-bold text-sm uppercase tracking-tighter shrink-0">
-            GS
+          GS
+        </div>
+
+        {/* Brand text */}
+        <div
+          className="overflow-hidden"
+          style={{
+            opacity: expanded ? 1 : 0,
+            width: expanded ? '150px' : '0px',
+            transition: 'opacity 160ms ease, width 280ms cubic-bezier(0.16, 1, 0.3, 1)',
+            transitionDelay: expanded ? '80ms' : '0ms',
+            paddingLeft: expanded ? '10px' : '0px',
+          }}
+        >
+          <div className="font-heading font-black text-sm tracking-wide leading-none whitespace-nowrap" style={{ color: 'var(--color-gs-text)' }}>
+            GS-QUAD
           </div>
-          <div className="flex flex-col overflow-hidden">
-            <span className="font-heading font-bold text-sm text-[var(--color-gs-text)] tracking-wide leading-none truncate">GS-QUAD</span>
-            <span className="font-mono text-[9px] text-[var(--color-gs-muted)] tracking-[0.2em] mt-1">INTEL OPS v2.1</span>
+          <div className="font-mono text-[8px] tracking-[0.22em] uppercase mt-1 whitespace-nowrap" style={{ color: 'var(--color-gs-muted)' }}>
+            INTEL OPS v2.1
           </div>
         </div>
-        {!expanded && (
-          <div className="w-8 h-8 bg-[var(--color-gs-text)] text-[var(--color-gs-bg)] flex items-center justify-center font-heading font-bold text-sm uppercase tracking-tighter shrink-0">
-            GS
-          </div>
-        )}
       </div>
 
-      {/* Nav */}
-      <nav className="flex-1 px-2 py-3 space-y-1 overflow-y-auto">
-        <div
-          className="font-mono text-[10px] text-[var(--color-gs-muted)] tracking-[0.2em] uppercase mb-3 ml-2 whitespace-nowrap overflow-hidden"
-          style={{
-            opacity: expanded ? 1 : 0,
-            maxWidth: expanded ? '200px' : '0px',
-            transition: 'all 300ms cubic-bezier(0.16, 1, 0.3, 1)',
-            transitionDelay: expanded ? '60ms' : '0ms',
-          }}
-        >
-          Modules
-        </div>
-        {navItems.map((item) => (
-          <NavButton
-            key={item.id}
-            item={item}
-            isActive={activeView === item.id}
-            expanded={expanded}
-            alertCount={alertCount}
-            onClick={() => onNavigate(item.id)}
-          />
-        ))}
+      {/* ── Navigation ── */}
+      <nav
+        className="flex-1 overflow-y-auto overflow-x-hidden py-3 flex flex-col gap-4"
+        style={{ padding: '12px 6px' }}
+      >
+        <NavGroup items={MODULE_ITEMS} label="Intel" expanded={expanded} />
+        <div style={{ height: '1px', background: 'var(--color-gs-border)', margin: '2px 0', opacity: 0.5 }} />
+        <NavGroup items={TOOL_ITEMS} label="Ferramentas" expanded={expanded} />
+        <div style={{ height: '1px', background: 'var(--color-gs-border)', margin: '2px 0', opacity: 0.5 }} />
+        <NavGroup items={SYSTEM_ITEMS} label="Sistema" expanded={expanded} />
       </nav>
 
-      {/* Status footer */}
+      {/* ── System Status Footer ── */}
       <div
-        className="h-[68px] shrink-0 border-t border-[var(--color-gs-border)] bg-[var(--color-gs-bg)] flex items-center px-4 overflow-hidden"
+        className="shrink-0 overflow-hidden"
         style={{
-          justifyContent: expanded ? 'flex-start' : 'center',
-          transition: 'all 300ms cubic-bezier(0.16, 1, 0.3, 1)',
+          borderTop: '1px solid var(--color-gs-border)',
+          height: '52px',
+          display: 'flex',
+          alignItems: 'center',
+          padding: '0 6px',
+          gap: '8px',
         }}
       >
+        {/* Pulse dot — always visible */}
+        <div className="relative flex shrink-0" style={{ width: '40px', justifyContent: 'center' }}>
+          <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full opacity-60"
+            style={{ backgroundColor: 'var(--color-gs-green)' }}
+          />
+          <span className="relative inline-flex rounded-full h-2 w-2"
+            style={{ backgroundColor: 'var(--color-gs-green)' }}
+          />
+        </div>
+
+        {/* Status text */}
         <div
-          className="flex items-center gap-3"
+          className="overflow-hidden"
           style={{
             opacity: expanded ? 1 : 0,
-            transition: 'opacity 150ms ease',
-            transitionDelay: expanded ? '100ms' : '0ms',
+            width: expanded ? '160px' : '0px',
+            transition: 'opacity 160ms ease, width 280ms cubic-bezier(0.16, 1, 0.3, 1)',
+            transitionDelay: expanded ? '80ms' : '0ms',
           }}
         >
-          <div className="relative flex h-2 w-2 shrink-0">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--color-gs-green)] opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--color-gs-green)]" />
+          <div className="font-mono text-[9px] font-bold tracking-[0.18em] uppercase whitespace-nowrap"
+            style={{ color: 'var(--color-gs-green)' }}>
+            SYSTEM ONLINE
           </div>
-          <div className="flex flex-col">
-            <span className="font-mono text-[10px] font-bold text-[var(--color-gs-green)] tracking-[0.2em]">SYSTEM ONLINE</span>
-            <span className="font-mono text-[9px] text-[var(--color-gs-muted)] tracking-widest mt-0.5">LATENCY 42ms · WS</span>
+          <div className="font-mono text-[8px] tracking-widest mt-0.5 whitespace-nowrap"
+            style={{ color: 'var(--color-gs-muted)' }}>
+            LATENCY 42ms · WS
           </div>
         </div>
-        {!expanded && (
-          <div className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--color-gs-green)] opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--color-gs-green)]" />
-          </div>
-        )}
       </div>
     </aside>
   )
 }
 
-/* ── Mobile Drawer ───────────────────────────────────────── */
-function MobileDrawer({
-  activeView,
-  onNavigate,
-  alertCount,
-  mobileOpen,
-  setMobileOpen,
-}: {
-  activeView: ViewId
-  onNavigate: (view: ViewId) => void
-  alertCount: number
-  mobileOpen: boolean
-  setMobileOpen: (open: boolean) => void
-}) {
+// ─── Mobile Drawer ────────────────────────────────────────────────────────────
+
+function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   return (
     <div className="lg:hidden">
+      {/* Backdrop */}
       <div
-        className={`fixed inset-0 z-40 bg-black/70 backdrop-blur-sm transition-opacity duration-300 ${
-          mobileOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-        }`}
-        onClick={() => setMobileOpen(false)}
+        className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm transition-opacity duration-300"
+        style={{ opacity: open ? 1 : 0, pointerEvents: open ? 'auto' : 'none' }}
+        onClick={onClose}
       />
+
+      {/* Drawer */}
       <aside
-        className="fixed top-0 left-0 z-50 h-full w-72 bg-[var(--color-gs-panel)] border-r border-[var(--color-gs-border)] flex flex-col transition-transform duration-[300ms]"
+        className="fixed top-0 left-0 z-50 h-full flex flex-col"
         style={{
-          transform: mobileOpen ? 'translateX(0)' : 'translateX(-100%)',
-          transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
+          width: '260px',
+          background: 'var(--color-gs-panel)',
+          borderRight: '1px solid var(--color-gs-border)',
+          transform: open ? 'translateX(0)' : 'translateX(-100%)',
+          transition: 'transform 300ms cubic-bezier(0.16, 1, 0.3, 1)',
         }}
       >
-        <div className="h-16 flex items-center justify-between px-4 border-b border-[var(--color-gs-border)] bg-[var(--color-gs-bg)] shrink-0">
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 shrink-0"
+          style={{ height: '60px', borderBottom: '1px solid var(--color-gs-border)' }}>
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-[var(--color-gs-text)] text-[var(--color-gs-bg)] flex items-center justify-center font-heading font-bold text-sm uppercase tracking-tighter shrink-0">GS</div>
-            <div className="flex flex-col">
-              <span className="font-heading font-bold text-sm text-[var(--color-gs-text)] tracking-wide leading-none">GS-QUAD</span>
-              <span className="font-mono text-[9px] text-[var(--color-gs-muted)] tracking-widest mt-1">INTEL OPS v2.1</span>
+            <div className="w-8 h-8 flex items-center justify-center font-heading font-black text-[11px] uppercase"
+              style={{ background: 'var(--color-gs-text)', color: 'var(--color-gs-bg)', borderRadius: '2px' }}>
+              GS
+            </div>
+            <div>
+              <div className="font-heading font-black text-sm tracking-wide" style={{ color: 'var(--color-gs-text)', lineHeight: 1 }}>GS-QUAD</div>
+              <div className="font-mono text-[8px] tracking-[0.2em] mt-1" style={{ color: 'var(--color-gs-muted)' }}>INTEL OPS v2.1</div>
             </div>
           </div>
-          <button onClick={() => setMobileOpen(false)} className="p-1.5 rounded text-[var(--color-gs-muted)] hover:text-[var(--color-gs-text)] hover:bg-[var(--color-gs-border)] transition-colors" aria-label="Close menu">
-            <X size={18} />
+          <button onClick={onClose}
+            className="p-2 rounded transition-colors hover:bg-white/5"
+            style={{ color: 'var(--color-gs-muted)' }}
+            aria-label="Fechar menu"
+          >
+            <X size={16} />
           </button>
         </div>
 
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          {navItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => { onNavigate(item.id); setMobileOpen(false) }}
-              className={`
-                group relative w-full flex items-center gap-3 px-3 py-3 rounded-md text-left
-                font-medium font-mono uppercase tracking-wider
-                transition-all duration-200
-                ${activeView === item.id
-                  ? 'bg-[var(--color-gs-text)] text-[var(--color-gs-bg)] shadow-[0_0_20px_rgba(237,237,237,0.15)]'
-                  : 'text-[var(--color-gs-muted)] hover:text-[var(--color-gs-text)] hover:bg-[var(--color-gs-border)]/50'
-                }
-              `}
-            >
-              {activeView === item.id && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-5 bg-[var(--color-gs-green)] rounded-r shadow-[0_0_8px_var(--color-gs-green)]" />
-              )}
-              <span className={activeView === item.id ? 'text-[var(--color-gs-bg)]' : 'text-[var(--color-gs-muted)] group-hover:text-[var(--color-gs-text)]'}>
-                {item.icon}
-              </span>
-              <span className="flex-1">{item.label}</span>
-              {item.id === 'monitor' && alertCount > 0 && (
-                <span className="text-[9px] px-1.5 py-0.5 rounded-[3px] font-bold tracking-widest bg-[var(--color-gs-red)]/10 text-[var(--color-gs-red)]">
-                  {alertCount}
-                </span>
-              )}
-            </button>
+        {/* Nav */}
+        <nav className="flex-1 overflow-y-auto py-3 flex flex-col gap-4" style={{ padding: '12px 8px' }}>
+          {[
+            { label: 'Intel', items: MODULE_ITEMS },
+            { label: 'Ferramentas', items: TOOL_ITEMS },
+            { label: 'Sistema', items: SYSTEM_ITEMS },
+          ].map(({ label, items }) => (
+            <div key={label}>
+              <div className="font-mono text-[8px] tracking-[0.25em] uppercase px-2 mb-2 opacity-40"
+                style={{ color: 'var(--color-gs-muted)' }}>
+                {label}
+              </div>
+              <div className="flex flex-col gap-0.5">
+                {items.map(item => (
+                  <NavLink
+                    key={item.id}
+                    to={item.path}
+                    onClick={onClose}
+                    className={({ isActive }) =>
+                      `relative flex items-center gap-3 px-3 py-2.5 rounded-[3px] font-mono text-[10px] font-bold uppercase tracking-widest transition-all duration-150 ${
+                        isActive
+                          ? 'bg-[var(--color-gs-text)] text-[var(--color-gs-bg)]'
+                          : 'text-[var(--color-gs-muted)] hover:text-[var(--color-gs-text)] hover:bg-white/5'
+                      }`
+                    }
+                    style={{ textDecoration: 'none' }}
+                  >
+                    {({ isActive }) => (
+                      <>
+                        {isActive && (
+                          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-4 rounded-r"
+                            style={{ background: 'var(--color-gs-green)', boxShadow: '0 0 6px var(--color-gs-green)' }}
+                          />
+                        )}
+                        <span className={isActive ? 'text-[var(--color-gs-bg)]' : 'text-[var(--color-gs-muted)]'}>{item.icon}</span>
+                        <div className="flex flex-col">
+                          <span>{item.label}</span>
+                          {item.sublabel && <span className="text-[8px] capitalize font-normal opacity-60 mt-0.5">{item.sublabel}</span>}
+                        </div>
+                      </>
+                    )}
+                  </NavLink>
+                ))}
+              </div>
+              <div className="my-3" style={{ height: '1px', background: 'var(--color-gs-border)', opacity: 0.4 }} />
+            </div>
           ))}
         </nav>
 
-        <div className="p-4 border-t border-[var(--color-gs-border)] bg-[var(--color-gs-bg)] shrink-0">
-          <div className="flex items-center gap-3 px-2">
-            <div className="relative flex h-2 w-2 shrink-0">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--color-gs-green)] opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--color-gs-green)]" />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-mono text-[10px] font-bold text-[var(--color-gs-green)] tracking-[0.2em]">SYSTEM ONLINE</span>
-              <span className="font-mono text-[9px] text-[var(--color-gs-muted)] tracking-widest mt-0.5">LATENCY 42ms · WS</span>
-            </div>
+        {/* Footer */}
+        <div className="shrink-0 flex items-center gap-3 px-4"
+          style={{ height: '52px', borderTop: '1px solid var(--color-gs-border)' }}>
+          <div className="relative flex">
+            <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full opacity-60"
+              style={{ backgroundColor: 'var(--color-gs-green)' }} />
+            <span className="relative inline-flex rounded-full h-2 w-2"
+              style={{ backgroundColor: 'var(--color-gs-green)' }} />
+          </div>
+          <div>
+            <div className="font-mono text-[9px] font-bold tracking-[0.18em] uppercase"
+              style={{ color: 'var(--color-gs-green)' }}>SYSTEM ONLINE</div>
+            <div className="font-mono text-[8px] tracking-widest mt-0.5"
+              style={{ color: 'var(--color-gs-muted)' }}>LATENCY 42ms · WS</div>
           </div>
         </div>
       </aside>
@@ -294,14 +401,90 @@ function MobileDrawer({
   )
 }
 
-/* ── Sidebar (exported) ──────────────────────────────────── */
-interface SidebarProps {
-  activeView: ViewId
-  onNavigate: (view: ViewId) => void
-  alertCount?: number
+// ─── Topbar ───────────────────────────────────────────────────────────────────
+
+function Topbar({ onMenuClick }: { onMenuClick: () => void }) {
+  const openCommandPalette = useUIStore(s => s.openCommandPalette)
+  const location = useLocation()
+  const routeMeta = getRouteMeta(location.pathname)
+
+  return (
+    <header
+      className="shrink-0 flex items-center justify-between sticky top-0 z-30"
+      style={{
+        height: '60px',
+        padding: '0 24px',
+        borderBottom: '1px solid var(--color-gs-border)',
+        background: 'rgba(3,3,3,0.92)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+      }}
+    >
+      {/* Left: mobile menu + route title */}
+      <div className="flex items-center gap-4">
+        <button
+          onClick={onMenuClick}
+          className="lg:hidden p-2 rounded transition-colors hover:bg-white/5"
+          style={{ color: 'var(--color-gs-muted)' }}
+          aria-label="Abrir menu"
+        >
+          <Menu size={18} />
+        </button>
+
+        <div className="flex flex-col" style={{ gap: '2px' }}>
+          <h1 className="font-heading font-black tracking-wide leading-none" style={{ fontSize: '15px', color: 'var(--color-gs-text)' }}>
+            {routeMeta?.title || 'GS-QUAD'}
+            <span style={{ color: 'var(--color-gs-green)', marginLeft: '2px' }}>.</span>
+          </h1>
+          {routeMeta?.subtitle && (
+            <p className="font-mono uppercase tracking-[0.18em] hidden sm:block"
+              style={{ fontSize: '9px', color: 'var(--color-gs-muted)', opacity: 0.7 }}>
+              {routeMeta.subtitle}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Right: search + theme */}
+      <div className="flex items-center gap-2">
+        <button
+          onClick={openCommandPalette}
+          className="hidden sm:flex items-center gap-2 transition-all"
+          style={{
+            height: '34px',
+            padding: '0 12px',
+            borderRadius: '3px',
+            border: '1px solid var(--color-gs-border)',
+            background: 'transparent',
+            color: 'var(--color-gs-muted)',
+            fontFamily: 'var(--font-mono)',
+            fontSize: '11px',
+            cursor: 'pointer',
+          }}
+          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-gs-muted)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-gs-text)' }}
+          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-gs-border)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-gs-muted)' }}
+        >
+          <Command size={12} />
+          <span>Buscar</span>
+          <kbd style={{
+            marginLeft: '8px',
+            fontSize: '9px',
+            border: '1px solid var(--color-gs-border)',
+            borderRadius: '2px',
+            padding: '1px 5px',
+            color: 'var(--color-gs-muted)',
+          }}>⌘K</kbd>
+        </button>
+
+        <ThemeToggle />
+      </div>
+    </header>
+  )
 }
 
-export function Sidebar({ activeView, onNavigate, alertCount = 0 }: SidebarProps) {
+// ─── Layout Root ──────────────────────────────────────────────────────────────
+
+export function Layout({ children }: { children: ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false)
 
   useEffect(() => {
@@ -316,88 +499,25 @@ export function Sidebar({ activeView, onNavigate, alertCount = 0 }: SidebarProps
   }, [mobileOpen])
 
   return (
-    <>
-      <DesktopSidebar activeView={activeView} onNavigate={onNavigate} alertCount={alertCount} />
+    <div className="flex h-screen overflow-hidden" style={{ background: 'var(--color-gs-deep)', color: 'var(--color-gs-text)' }}>
+      <DesktopSidebar />
 
-      <button
-        onClick={() => setMobileOpen(true)}
-        className="lg:hidden fixed top-5 left-4 z-[60] p-2 rounded-md bg-[var(--color-gs-panel)] border border-[var(--color-gs-border)] text-[var(--color-gs-text)] hover:bg-[var(--color-gs-border)] transition-colors shadow-lg"
-        aria-label="Open menu"
-      >
-        <Menu size={20} />
-      </button>
+      <MobileDrawer open={mobileOpen} onClose={() => setMobileOpen(false)} />
 
-      <MobileDrawer
-        activeView={activeView}
-        onNavigate={onNavigate}
-        alertCount={alertCount}
-        mobileOpen={mobileOpen}
-        setMobileOpen={setMobileOpen}
-      />
-    </>
-  )
-}
+      {/* Main area */}
+      <div className="flex-1 flex flex-col relative min-w-0 overflow-hidden">
+        <Topbar onMenuClick={() => setMobileOpen(true)} />
 
-/* ── Topbar ─────────────────────────────────────────────── */
-interface TopbarProps {
-  title: string
-  subtitle?: string
-}
-
-export function Topbar({ title, subtitle }: TopbarProps) {
-  return (
-    <header className="h-16 flex items-center justify-between px-6 lg:px-10 border-b border-[var(--color-gs-border)] bg-[var(--color-gs-bg)]/90 backdrop-blur-xl sticky top-0 z-30">
-      <div className="flex flex-col animate-slide-up pl-8 lg:pl-0" style={{ animationDelay: '50ms' }}>
-        <h1 className="font-heading font-bold text-lg text-[var(--color-gs-text)] tracking-wide leading-none">
-          {title}<span className="text-[var(--color-gs-green)] ml-0.5">.</span>
-        </h1>
-        {subtitle && (
-          <p className="font-mono text-[10px] text-[var(--color-gs-muted)] tracking-[0.15em] mt-1 uppercase hidden sm:block">
-            {subtitle}
-          </p>
-        )}
-      </div>
-      <div className="flex items-center gap-4 animate-slide-up" style={{ animationDelay: '100ms' }}>
-        <div className="text-right flex flex-col">
-          <span className="font-mono text-[10px] font-bold text-[var(--color-gs-text)] tracking-wider uppercase hidden sm:block">ADMIN COMMAND</span>
-          <span className="font-mono text-[9px] text-[var(--color-gs-muted)] tracking-wide mt-0.5">ID: 8077295</span>
-        </div>
-        <div className="w-8 h-8 rounded-sm bg-[var(--color-gs-panel)] border border-[var(--color-gs-border)] flex items-center justify-center font-heading text-xs font-bold text-[var(--color-gs-text)] shadow-[0_0_15px_rgba(255,255,255,0.05)]">
-          C
-        </div>
-      </div>
-    </header>
-  )
-}
-
-/* ── Layout ──────────────────────────────────────────────── */
-interface LayoutProps {
-  children: ReactNode
-  activeView: ViewId
-  onNavigate: (view: ViewId) => void
-  alertCount?: number
-}
-
-const VIEW_TITLES: Record<ViewId, { title: string; subtitle: string }> = {
-  visao: { title: 'WAR_ROOM', subtitle: 'N8N CLOUD ↔ SUPABASE REALTIME ↔ CLAUDE AI' },
-  curva: { title: 'TERMINAL_DB', subtitle: 'CATÁLOGO COMPLETO • SISTEMA DE BANCO DE DADOS' },
-  monitor: { title: 'MONITOR', subtitle: 'ALERTAS OPERACIONAIS • SINAIS DE RUPTURA' },
-  growth: { title: 'GROWTH_PLAN', subtitle: 'ESTRATÉGIAS VALIDADAS • PLAYBOOK INTELIGENTE' },
-  ml_intel: { title: 'NEURAL_INTEL', subtitle: 'MACHINE LEARNING • PREVISÕES E CLUSTERS' },
-  price_history: { title: 'PRICE_REACTION', subtitle: 'TIMELINE DE PREÇOS • ABSORÇÃO DE MERCADO' },
-  adfactory: { title: 'ADFACTORY', subtitle: 'KANBAN HÍBRIDO • CRIAÇÃO INTELIGENTE DE ANÚNCIOS' },
-}
-
-export function Layout({ children, activeView, onNavigate, alertCount }: LayoutProps) {
-  const viewInfo = VIEW_TITLES[activeView]
-
-  return (
-    <div className="flex h-screen bg-[var(--color-gs-deep)] text-[var(--color-gs-text)] overflow-hidden">
-      <Sidebar activeView={activeView} onNavigate={onNavigate} alertCount={alertCount} />
-      <div className="flex-1 flex flex-col relative min-w-0">
-        <Topbar title={viewInfo.title} subtitle={viewInfo.subtitle} />
         <main className="flex-1 overflow-x-hidden overflow-y-auto">
-          <div className="p-4 lg:p-8 max-w-[1600px] mx-auto animate-fade-in w-full">
+          <div
+            className="animate-fade-in"
+            style={{
+              padding: '28px 28px 40px',
+              maxWidth: '1680px',
+              margin: '0 auto',
+              width: '100%',
+            }}
+          >
             {children}
           </div>
         </main>

@@ -26,7 +26,7 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
   const [filterClass, setFilterClass] = useState<'ALL' | 'A' | 'B' | 'C'>('ALL');
 
   const filteredData = useMemo(() => {
-    return data.filter((item) => {
+    return (data ?? []).filter((item) => {
       const matchSearch = item.sku.toLowerCase().includes(search.toLowerCase()) || item.title.toLowerCase().includes(search.toLowerCase());
       const matchClass = filterClass === 'ALL' || item.abc_class === filterClass;
       return matchSearch && matchClass;
@@ -35,7 +35,7 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
 
   // Set initial selected item when data loads or preSelectedSkuId changes
   useEffect(() => {
-    if (preSelectedSkuId && data.length > 0) {
+    if (preSelectedSkuId && data && data.length > 0) {
       const target = data.find(item => item.sku === preSelectedSkuId);
       if (target) {
         setSelectedSku(target);
@@ -77,7 +77,7 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
   }
 
   // Debug: show data count
-  console.log('[TerminalDB View] data:', data.length, 'filtered:', filteredData.length, 'error:', error);
+  console.log('[TerminalDB View] data:', data?.length ?? 0, 'filtered:', filteredData.length, 'error:', error);
 
   return (
     <div className="h-[calc(100vh-140px)] flex flex-col gap-4 animate-fade-in relative z-10">
@@ -121,10 +121,10 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
           <p className="text-red-400 font-mono text-xs">⚠ Erro: {error}</p>
         </div>
       )}
-      {data.length === 0 && !loading && (
+      {(!data || data.length === 0) && !loading && (
         <div className="bg-yellow-500/10 border border-yellow-500/30 p-3 rounded-sm">
           <p className="text-yellow-400 font-mono text-xs">⚠ Nenhum dado encontrado. Verifique o console (F12).</p>
-          <p className="text-gs-muted font-mono text-[10px] mt-1">data: {data.length} | filtered: {filteredData.length}</p>
+          <p className="text-gs-muted font-mono text-[10px] mt-1">data: {data?.length ?? 0} | filtered: {filteredData.length}</p>
         </div>
       )}
 

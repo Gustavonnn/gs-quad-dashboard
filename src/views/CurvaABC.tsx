@@ -16,14 +16,15 @@ export function CurvaABC() {
   const [filter, setFilter] = useState<CurvaFilter>('all')
   const [search, setSearch] = useState('')
 
-  const filtered = data.filter((item) => {
+  const safeData = data ?? []
+  const filtered = safeData.filter((item) => {
     const matchFilter = filter === 'all' || item.curva_abc === filter
     const q = search.toLowerCase()
     const matchSearch = !q || item.id.toLowerCase().includes(q) || item.titulo.toLowerCase().includes(q)
     return matchFilter && matchSearch
   })
 
-  const grupos = { A: data.filter((r) => r.curva_abc === 'A'), B: data.filter((r) => r.curva_abc === 'B'), C: data.filter((r) => r.curva_abc === 'C') }
+  const grupos = { A: safeData.filter((r) => r.curva_abc === 'A'), B: safeData.filter((r) => r.curva_abc === 'B'), C: safeData.filter((r) => r.curva_abc === 'C') }
   const receitaA = grupos.A.reduce((s, r) => s + r.receita_30d, 0)
   const receitaB = grupos.B.reduce((s, r) => s + r.receita_30d, 0)
   const receitaC = grupos.C.reduce((s, r) => s + r.receita_30d, 0)

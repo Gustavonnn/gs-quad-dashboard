@@ -272,6 +272,19 @@ export function useKanbanCards() {
   }, [])
 
   useEffect(() => { fetch() }, [fetch])
+  
+  // Polling Fallback: Refresh every 10 seconds if a card is in processing
+  // or as a general safety measure if Realtime is broken
+  useEffect(() => {
+    const hasProcessingCards = data.some(c => c.status === 'processing' || c.trigger_analysis)
+    if (!hasProcessingCards) return
+
+    const interval = setInterval(() => {
+      fetch()
+    }, 10000)
+
+    return () => clearInterval(interval)
+  }, [data, fetch])
 
   return { data, loading, refetch: fetch, error }
 }
@@ -304,6 +317,21 @@ export async function updateKanbanCardStatus(cardId: string, status: string) {
       status,
       updated_at: new Date().toISOString(),
       ...(status === 'processing' ? { processed_at: new Date().toISOString() } : {}),
+      // Se mover para fora de processing, garante que trigger_analysis seja false
+      ...(status !== 'processing' ? { trigger_analysis: false } : {}),
+    })
+    .eq('id', cardId)
+
+  return { error }
+}
+
+export async function resetKanbanCard(cardId: string) {
+  const { error } = await supabase
+    .from('ia_kanban_cards')
+    .update({
+      status: 'backlog',
+      trigger_analysis: false,
+      updated_at: new Date().toISOString(),
     })
     .eq('id', cardId)
 
@@ -372,9 +400,7 @@ export function useRealtime(channel: string, onInsert: (payload: any) => void) {
 // ─── Realtime Kanban Cards ───────────────────────────────────────
 export function useRealtimeKanbanCards(onChange: (payload: any) => void) {
   useEffect(() => {
-    // Skip realtime if Supabase URL is not configured (dev without env)
-    if (!supabase.supabaseUrl) return
-
+    // Tenta subscrever, o try-catch interno lidará com falhas de configuração
     let channelRef: ReturnType<typeof supabase.channel> | null = null
 
     try {
@@ -393,9 +419,12 @@ export function useRealtimeKanbanCards(onChange: (payload: any) => void) {
           }
         )
         .subscribe((status) => {
-          // Only log errors, not expected WebSocket failures
-          if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
-            console.warn('[Realtime] Kanban subscription status:', status)
+          // Log errors for debugging, but don't show to user yet
+          if (status === 'CHANNEL_ERROR') {
+            console.warn('[Realtime] Kanban subscription status: CHANNEL_ERROR (Fallback polling active)')
+          }
+          if (status === 'CLOSED') {
+            console.warn('[Realtime] Kanban subscription status: CLOSED')
           }
         })
     } catch (err) {

@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
-import { usePriceTimeline } from '../hooks/useSupabaseData'
-import type { MLPriceTimeline } from '../types'
+import { usePriceTimeline } from '@/hooks'
+import type { MLPriceTimeline } from '@/lib/schemas'
 
 function fmt(n: number) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(n)
@@ -119,17 +119,18 @@ function TimelineCard({ event }: { event: MLPriceTimeline }) {
 }
 
 export function PriceTimeline() {
-  const { data, loading, refetch } = usePriceTimeline()
+  const { data, isLoading, refetch } = usePriceTimeline()
   const [activeFilter, setActiveFilter] = useState<string>('TOTAL')
 
   const counts = useMemo(() => ({
-    TOTAL: data.length,
-    ABSORVIDO: data.filter(e => e.absorcao_status === 'ABSORVIDO').length,
-    REJEITADO: data.filter(e => e.absorcao_status === 'REJEITADO').length,
-    INEFICAZ:  data.filter(e => e.absorcao_status === 'INEFICAZ').length,
+    TOTAL: data?.length ?? 0,
+    ABSORVIDO: data?.filter(e => e.absorcao_status === 'ABSORVIDO').length ?? 0,
+    REJEITADO: data?.filter(e => e.absorcao_status === 'REJEITADO').length ?? 0,
+    INEFICAZ:  data?.filter(e => e.absorcao_status === 'INEFICAZ').length ?? 0,
   }), [data])
 
   const filteredData = useMemo(() => {
+    if (!data) return []
     if (activeFilter === 'TOTAL') return data
     return data.filter(e => e.absorcao_status === activeFilter)
   }, [data, activeFilter])
@@ -188,14 +189,14 @@ export function PriceTimeline() {
                 {isActive && <div className="w-1 h-1 rounded-full animate-pulse" style={{ background: item.color }} />}
               </div>
               <div className="font-mono text-3xl font-black" style={{ color: item.color }}>
-                {loading ? '---' : String(item.value).padStart(2, '0')}
+                {isLoading ? '---' : String(item.value).padStart(2, '0')}
               </div>
               <div className="mt-4 h-1 w-full bg-[#111] rounded-full overflow-hidden">
                 <div 
                   className="h-full transition-all duration-1000" 
                   style={{ 
-                    backgroundColor: item.color, 
-                    width: loading ? '0%' : `${(item.value / (counts.TOTAL || 1)) * 100}%` 
+                    backgroundColor: item.color,
+                    width: isLoading ? '0%' : `${(item.value / (counts.TOTAL || 1)) * 100}%` 
                   }} 
                 />
               </div>
@@ -209,11 +210,11 @@ export function PriceTimeline() {
           <span className="font-mono text-[10px] text-[#444] tracking-[0.2em] uppercase">
             Live Feed // Events Log {activeFilter !== 'TOTAL' && `// Filtering: ${activeFilter}`}
           </span>
-          {loading && <span className="font-mono text-[10px] text-[#ff003b] animate-pulse">SCANNING DATABASE...</span>}
+          {isLoading && <span className="font-mono text-[10px] text-[#ff003b] animate-pulse">SCANNING DATABASE...</span>}
         </div>
 
         <div className="p-6">
-          {!loading && filteredData.length === 0 && (
+          {!isLoading && filteredData.length === 0 && (
             <div className="py-20 text-center border border-dashed border-[#222]">
               <div className="font-mono text-[11px] text-[#444] tracking-[0.2em] uppercase">
                 Zero reajustes {activeFilter !== 'TOTAL' ? `com status ${activeFilter}` : ''} detectados no período.

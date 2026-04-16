@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useLiveMetrics, useIAAlertas, useStockAlerts } from '@/hooks';
 import { useAdsRadar } from '@/hooks/useAdsRadar';
 import { AreaChart, Area, ResponsiveContainer, Tooltip, CartesianGrid, XAxis } from 'recharts';

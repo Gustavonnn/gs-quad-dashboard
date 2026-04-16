@@ -32,6 +32,8 @@
   --color-gs-orange: #ff6b00;
   --color-gs-orange-dim: rgba(255, 107, 0, 0.15);
   --color-gs-subtle: #555555;
+  --color-gs-chart-grid: #2a2a2a;
+  --color-gs-chart-label: #a0a0a0;
 
   --glass-border: rgba(255, 255, 255, 0.06);
   --glass-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
@@ -64,6 +66,8 @@
   --color-gs-orange: #ff7733;
   --color-gs-orange-dim: rgba(255, 119, 51, 0.12);
   --color-gs-subtle: #dcdcdc;
+  --color-gs-chart-grid: #dcdcdc;
+  --color-gs-chart-label: #444444;
 
   --glass-border: rgba(0, 0, 0, 0.08);
   --glass-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);

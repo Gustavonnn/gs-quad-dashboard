@@ -372,18 +372,18 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
                     >
                       <defs>
                         <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="var(--color-gs-green)" stopOpacity={0.3} />
+                          <stop offset="5%" stopColor="var(--color-gs-green)" stopOpacity={0.45} />
                           <stop offset="95%" stopColor="var(--color-gs-green)" stopOpacity={0} />
                         </linearGradient>
                       </defs>
                       <CartesianGrid
                         strokeDasharray="3 3"
-                        stroke="var(--color-gs-border)"
+                        stroke="var(--color-gs-chart-grid)"
                         vertical={false}
                       />
                       <XAxis
                         dataKey="date"
-                        stroke="var(--color-gs-border)"
+                        stroke="var(--color-gs-chart-label)"
                         fontSize={9}
                         tickLine={false}
                         axisLine={false}
@@ -391,7 +391,7 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
                         fontFamily="monospace"
                       />
                       <YAxis
-                        stroke="var(--color-gs-border)"
+                        stroke="var(--color-gs-chart-label)"
                         fontSize={9}
                         tickLine={false}
                         axisLine={false}
@@ -420,7 +420,8 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
                         stroke="var(--color-gs-green)"
                         fillOpacity={1}
                         fill="url(#colorSales)"
-                        strokeWidth={2}
+                        strokeWidth={3}
+                        activeDot={{ r: 4, strokeWidth: 0 }}
                         animationDuration={1000}
                       />
                       <Area

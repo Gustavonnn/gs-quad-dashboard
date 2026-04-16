@@ -271,11 +271,11 @@ function Sparkline({ data, color }: { data: number[]; color: string }) {
       <AreaChart data={chartData} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
         <defs>
           <linearGradient id="spark-fill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="10%" stopColor={color} stopOpacity={0.2} />
+            <stop offset="10%" stopColor={color} stopOpacity={0.4} />
             <stop offset="95%" stopColor={color} stopOpacity={0} />
           </linearGradient>
         </defs>
-        <CartesianGrid stroke="var(--color-gs-border)" strokeDasharray="3 6" vertical={false} />
+        <CartesianGrid stroke="var(--color-gs-chart-grid)" strokeDasharray="3 6" vertical={false} />
         <XAxis dataKey="i" hide />
         <Tooltip
           formatter={(v: number) => [fmt(v), 'Receita']}
@@ -292,7 +292,7 @@ function Sparkline({ data, color }: { data: number[]; color: string }) {
           type="monotone"
           dataKey="v"
           stroke={color}
-          strokeWidth={2}
+          strokeWidth={3}
           fill="url(#spark-fill)"
           dot={false}
           animationDuration={800}

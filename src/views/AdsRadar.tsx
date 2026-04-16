@@ -347,18 +347,18 @@ function DiagnosisPanel({ entry }: { entry: AdsMLBEntry }) {
               <AreaChart data={entry.chartData} margin={{ top: 4, right: 4, left: -32, bottom: 0 }}>
                 <defs>
                   <linearGradient id={`grad-${entry.mlb_id}`} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="10%" stopColor={strokeColor} stopOpacity={0.25} />
+                    <stop offset="10%" stopColor={strokeColor} stopOpacity={0.45} />
                     <stop offset="95%" stopColor={strokeColor} stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid
                   strokeDasharray="2 4"
-                  stroke="var(--color-gs-border)"
+                  stroke="var(--color-gs-chart-grid)"
                   vertical={false}
                 />
                 <XAxis
                   dataKey="date"
-                  stroke="var(--color-gs-border)"
+                  stroke="var(--color-gs-chart-label)"
                   fontSize={7}
                   tickLine={false}
                   axisLine={false}
@@ -366,7 +366,7 @@ function DiagnosisPanel({ entry }: { entry: AdsMLBEntry }) {
                   fontFamily="monospace"
                 />
                 <YAxis
-                  stroke="var(--color-gs-border)"
+                  stroke="var(--color-gs-chart-label)"
                   fontSize={7}
                   tickLine={false}
                   axisLine={false}
@@ -380,7 +380,7 @@ function DiagnosisPanel({ entry }: { entry: AdsMLBEntry }) {
                     fontSize: 10,
                     fontFamily: 'monospace',
                   }}
-                  cursor={{ stroke: 'var(--color-gs-border)', strokeWidth: 1 }}
+                  cursor={{ stroke: 'var(--color-gs-chart-label)', strokeWidth: 1 }}
                 />
                 <Area
                   type="monotone"
@@ -388,7 +388,7 @@ function DiagnosisPanel({ entry }: { entry: AdsMLBEntry }) {
                   name="Vendas"
                   stroke={strokeColor}
                   fill={`url(#grad-${entry.mlb_id})`}
-                  strokeWidth={1.5}
+                  strokeWidth={2.5}
                   animationDuration={600}
                 />
               </AreaChart>

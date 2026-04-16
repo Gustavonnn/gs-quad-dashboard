@@ -1,4 +1,4 @@
-import { Toaster as SonnerToaster } from 'sonner'
+import { Toaster as SonnerToaster } from 'sonner';
 
 export function Toaster() {
   return (
@@ -15,11 +15,11 @@ export function Toaster() {
         },
         classNames: {
           success: 'border-l-2 border-l-[var(--color-gs-green)]',
-          error: 'border-l-2 border-l-[var(--color-gs-red)]',
+          error: 'border-l-2 border-l-[var(--color-gs-text)]',
           warning: 'border-l-2 border-l-[var(--color-gs-yellow)]',
           info: 'border-l-2 border-l-[var(--color-gs-blue)]',
         },
       }}
     />
-  )
+  );
 }

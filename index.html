@@ -1,17 +1,45 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GS-QUAD // OPERATIONAL INTEL</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <meta name="theme-color" content="#030303">
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<html lang="pt-BR" data-theme="light">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GS-QUAD // OPERATIONAL INTEL</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <meta name="theme-color" content="#EEEEEE">
+  <style>
+    /* Força cores claras imediatamente */
+    :root,
+    [data-theme="light"] {
+      --color-gs-deep: #EEEEEE !important;
+      --color-gs-bg: #EEEEEE !important;
+      --color-gs-surface: #FFFFFF !important;
+      --color-gs-panel: #FFFFFF !important;
+      --color-gs-border: #E6E6E6 !important;
+      --color-gs-text: #333333 !important;
+      --color-gs-muted: #999999 !important;
+      --color-gs-green: #3483FA !important;
+      --color-gs-blue: #3483FA !important;
+      --color-gs-cyan: #00ADEF !important;
+      --color-gs-red: #FF4444 !important;
+      --color-gs-yellow: #FFE600 !important;
+    }
+
+    body {
+      background-color: #EEEEEE !important;
+      color: #333333 !important;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
 </html>

@@ -1,33 +1,32 @@
-import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
-type Theme = 'dark' | 'light'
-type SidebarState = 'expanded' | 'collapsed' | 'hidden'
+type Theme = 'dark' | 'light';
+type SidebarState = 'expanded' | 'collapsed' | 'hidden';
 
 interface UIState {
-  theme: Theme
-  sidebarState: SidebarState
-  commandPaletteOpen: boolean
+  theme: Theme;
+  sidebarState: SidebarState;
+  commandPaletteOpen: boolean;
 
-  setTheme: (theme: Theme) => void
-  toggleTheme: () => void
-  setSidebarState: (state: SidebarState) => void
-  toggleCommandPalette: () => void
-  openCommandPalette: () => void
-  closeCommandPalette: () => void
+  setTheme: (theme: Theme) => void;
+  toggleTheme: () => void;
+  setSidebarState: (state: SidebarState) => void;
+  toggleCommandPalette: () => void;
+  openCommandPalette: () => void;
+  closeCommandPalette: () => void;
 }
 
 export const useUIStore = create<UIState>()(
   persist(
-    (set, get) => ({
-      theme: 'dark',
+    (set, _get) => ({
+      theme: 'light',
       sidebarState: 'expanded',
       commandPaletteOpen: false,
 
       setTheme: (theme) => set({ theme }),
 
-      toggleTheme: () =>
-        set((state) => ({ theme: state.theme === 'dark' ? 'light' : 'dark' })),
+      toggleTheme: () => set((state) => ({ theme: state.theme === 'dark' ? 'light' : 'dark' })),
 
       setSidebarState: (sidebarState) => set({ sidebarState }),
 
@@ -44,6 +43,11 @@ export const useUIStore = create<UIState>()(
         theme: state.theme,
         sidebarState: state.sidebarState,
       }),
+      merge: (persistedState: unknown, currentState: unknown) => {
+        const merged = { ...(currentState as object), ...(persistedState as object) } as UIState;
+        merged.theme = 'light';
+        return merged;
+      },
     }
   )
-)
+);

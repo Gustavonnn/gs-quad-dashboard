@@ -1,12 +1,26 @@
 import { useState, useMemo } from 'react';
 import {
-  AreaChart, Area, XAxis, YAxis, Tooltip,
-  ResponsiveContainer, CartesianGrid,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
 } from 'recharts';
 import {
-  Zap, AlertTriangle, XCircle, TrendingUp,
-  TrendingDown, Minus, ExternalLink, ChevronDown,
-  ChevronUp, Activity, Target, BarChart2,
+  Zap,
+  AlertTriangle,
+  XCircle,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  ExternalLink,
+  ChevronDown,
+  ChevronUp,
+  Activity,
+  Target,
+  BarChart2,
 } from 'lucide-react';
 import { useAdsRadar } from '../hooks/useAdsRadar';
 import type { AdsMLBEntry, RadarStatus, RadarAction } from '../types/terminal';
@@ -21,21 +35,24 @@ function fmtPct(n: number) {
   return n.toFixed(2) + '%';
 }
 
-const STATUS_CONFIG: Record<RadarStatus, {
-  label: string;
-  color: string;
-  border: string;
-  bg: string;
-  icon: React.ReactNode;
-  glow: string;
-}> = {
+const STATUS_CONFIG: Record<
+  RadarStatus,
+  {
+    label: string;
+    color: string;
+    border: string;
+    bg: string;
+    icon: React.ReactNode;
+    glow: string;
+  }
+> = {
   WINNER: {
     label: 'VENCEDOR',
     color: 'text-gs-green',
     border: 'border-gs-green',
     bg: 'bg-gs-green/8',
     icon: <Zap size={12} />,
-    glow: 'shadow-[0_0_12px_rgba(0,255,102,0.15)]',
+    glow: 'shadow-[0_0_12px_rgba(52,131,250,0.15)]',
   },
   MONITOR: {
     label: 'ATENÇÃO',
@@ -43,15 +60,15 @@ const STATUS_CONFIG: Record<RadarStatus, {
     border: 'border-gs-yellow',
     bg: 'bg-gs-yellow/8',
     icon: <AlertTriangle size={12} />,
-    glow: 'shadow-[0_0_12px_rgba(255,200,0,0.12)]',
+    glow: 'shadow-[0_0_12px_rgba(255,149,0,0.15)]',
   },
   KILL: {
     label: 'DESLIGAR',
-    color: 'text-gs-red',
-    border: 'border-gs-red',
-    bg: 'bg-gs-red/8',
+    color: 'text-gs-text',
+    border: 'border-gs-border',
+    bg: 'bg-black/5',
     icon: <XCircle size={12} />,
-    glow: 'shadow-[0_0_12px_rgba(255,50,50,0.15)]',
+    glow: 'shadow-[0_0_12px_rgba(0,0,0,0.05)]',
   },
 };
 
@@ -70,19 +87,29 @@ const ACTION_COLORS: Record<RadarAction, string> = {
   AJUSTAR_PRECO: 'text-gs-yellow border-gs-yellow/40 bg-gs-yellow/10',
   REABASTECER: 'text-orange-400 border-orange-400/40 bg-orange-400/10',
   PAUSAR: 'text-gs-yellow border-gs-yellow/40 bg-gs-yellow/10',
-  DESLIGAR: 'text-gs-red border-gs-red/40 bg-gs-red/10',
+  DESLIGAR: 'text-gs-text border-gs-border/40 bg-black/10',
 };
 
 // ─── Portfolio Score Gauge ────────────────────────────────────────────────────
 
-function PortfolioGauge({ score, total, winners, monitors, kills }: {
-  score: number; total: number; winners: number; monitors: number; kills: number;
+function PortfolioGauge({
+  score,
+  total,
+  winners,
+  monitors,
+  kills,
+}: {
+  score: number;
+  total: number;
+  winners: number;
+  monitors: number;
+  kills: number;
 }) {
   const radius = 52;
   const circ = 2 * Math.PI * radius;
   const dashLen = (score / 100) * circ * 0.75; // 270° arc
 
-  const color = score >= 65 ? '#00ff66' : score >= 40 ? '#ffc800' : '#ff3232';
+  const color = score >= 65 ? '#3483FA' : score >= 40 ? '#FF9500' : '#333333';
 
   return (
     <div className="flex items-center gap-8">
@@ -91,15 +118,23 @@ function PortfolioGauge({ score, total, winners, monitors, kills }: {
         <svg viewBox="0 0 140 140" className="w-full h-full -rotate-[90deg]">
           {/* Track */}
           <circle
-            cx="70" cy="70" r={radius}
-            fill="none" stroke="#1a1a1a" strokeWidth="8"
+            cx="70"
+            cy="70"
+            r={radius}
+            fill="none"
+            stroke="var(--color-gs-border)"
+            strokeWidth="8"
             strokeDasharray={`${circ * 0.75} ${circ * 0.25}`}
             strokeLinecap="round"
           />
           {/* Fill */}
           <circle
-            cx="70" cy="70" r={radius}
-            fill="none" stroke={color} strokeWidth="8"
+            cx="70"
+            cy="70"
+            r={radius}
+            fill="none"
+            stroke={color}
+            strokeWidth="8"
             strokeDasharray={`${dashLen} ${circ - dashLen}`}
             strokeDashoffset={`-${circ * 0.125}`}
             strokeLinecap="round"
@@ -107,15 +142,21 @@ function PortfolioGauge({ score, total, winners, monitors, kills }: {
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="font-mono font-black text-3xl" style={{ color }}>{score}</span>
-          <span className="text-[8px] font-mono text-gs-muted tracking-widest uppercase">PORTFOLIO</span>
+          <span className="font-mono font-black text-3xl" style={{ color }}>
+            {score}
+          </span>
+          <span className="text-[8px] font-mono text-gs-muted tracking-widest uppercase">
+            PORTFOLIO
+          </span>
         </div>
       </div>
 
       {/* Counters */}
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-3">
-          <span className="text-[9px] font-mono tracking-widest uppercase text-gs-muted w-14">Total MLBs</span>
+          <span className="text-[9px] font-mono tracking-widest uppercase text-gs-muted w-14">
+            Total MLBs
+          </span>
           <span className="font-mono font-bold text-gs-text text-sm">{total}</span>
         </div>
         <div className="w-full h-[1px] bg-gs-border/30" />
@@ -130,9 +171,9 @@ function PortfolioGauge({ score, total, winners, monitors, kills }: {
           <span className="font-mono font-bold text-gs-yellow text-sm">{monitors}</span>
         </div>
         <div className="flex items-center gap-3">
-          <span className="w-2 h-2 rounded-full bg-gs-red shrink-0" />
+          <span className="w-2 h-2 rounded-full bg-gs-text shrink-0" />
           <span className="text-[9px] font-mono uppercase text-gs-muted w-14">Desligar</span>
-          <span className="font-mono font-bold text-gs-red text-sm">{kills}</span>
+          <span className="font-mono font-bold text-gs-text text-sm">{kills}</span>
         </div>
       </div>
     </div>
@@ -144,16 +185,18 @@ function PortfolioGauge({ score, total, winners, monitors, kills }: {
 // ─── Velocity Badge ───────────────────────────────────────────────────────────
 
 function VelocityBadge({ trend }: { trend: AdsMLBEntry['velocity_trend'] }) {
-  if (trend === 'ACELERANDO') return (
-    <span className="flex items-center gap-0.5 text-[9px] font-mono text-gs-green">
-      <TrendingUp size={10} /> ACELERANDO
-    </span>
-  );
-  if (trend === 'CAINDO') return (
-    <span className="flex items-center gap-0.5 text-[9px] font-mono text-gs-red">
-      <TrendingDown size={10} /> CAINDO
-    </span>
-  );
+  if (trend === 'ACELERANDO')
+    return (
+      <span className="flex items-center gap-0.5 text-[9px] font-mono text-gs-green">
+        <TrendingUp size={10} /> ACELERANDO
+      </span>
+    );
+  if (trend === 'CAINDO')
+    return (
+      <span className="flex items-center gap-0.5 text-[9px] font-mono text-gs-muted">
+        <TrendingDown size={10} /> CAINDO
+      </span>
+    );
   return (
     <span className="flex items-center gap-0.5 text-[9px] font-mono text-gs-muted">
       <Minus size={10} /> ESTÁVEL
@@ -165,120 +208,211 @@ function VelocityBadge({ trend }: { trend: AdsMLBEntry['velocity_trend'] }) {
 
 function DiagnosisPanel({ entry }: { entry: AdsMLBEntry }) {
   const cfg = STATUS_CONFIG[entry.radar_status];
-  const strokeColor = entry.radar_status === 'WINNER' ? '#00ff66' : entry.radar_status === 'MONITOR' ? '#ffc800' : '#ff3232';
-  const roasColor = entry.roas_est >= 3 ? '#00ff66' : entry.roas_est >= 1.5 ? '#ffd700' : '#ff5555';
-  const acosColor = entry.acos_est <= 33 ? '#00ff66' : entry.acos_est <= 60 ? '#ffd700' : '#ff5555';
-  const cvColor = entry.conversion_rate >= 2 ? '#00ff66' : entry.conversion_rate >= 0.5 ? '#ffd700' : '#888';
-  const v100Color = entry.sales_per_100_visits >= 2 ? '#00ff66' : '#888';
+  const strokeColor =
+    entry.radar_status === 'WINNER'
+      ? '#3483FA'
+      : entry.radar_status === 'MONITOR'
+        ? '#FF9500'
+        : '#333333';
+  const roasColor = entry.roas_est >= 3 ? '#3483FA' : entry.roas_est >= 1.5 ? '#FF9500' : '#666666';
+  const acosColor = entry.acos_est <= 33 ? '#3483FA' : entry.acos_est <= 60 ? '#FF9500' : '#666666';
+  const cvColor =
+    entry.conversion_rate >= 2 ? '#3483FA' : entry.conversion_rate >= 0.5 ? '#FF9500' : '#999999';
+  const v100Color = entry.sales_per_100_visits >= 2 ? '#3483FA' : '#999999';
 
   const adMetrics = [
-    { lbl: 'ROAS', sub: 'est. retorno/gasto',    val: entry.roas_est > 0 ? entry.roas_est.toFixed(1) + 'x' : '—', color: roasColor, big: true },
-    { lbl: 'ACOS', sub: 'est. custo/receita',     val: entry.acos_est > 0 ? entry.acos_est.toFixed(0) + '%' : '—', color: acosColor, big: true },
-    { lbl: 'V/100 clicks', sub: 'vendas por ads', val: entry.sales_per_100_visits.toFixed(1),                    color: v100Color, big: true },
-    { lbl: 'Custo/Venda', sub: 'spend/conversão', val: entry.cost_per_sale_est > 0 ? fmt(entry.cost_per_sale_est) : '—', color: '#ededed', big: false },
-    { lbl: 'Rev./Visita', sub: 'receita/click',   val: entry.revenue_per_visit > 0 ? fmt(entry.revenue_per_visit) : '—', color: '#ededed', big: false },
-    { lbl: 'CVR', sub: 'taxa de conversão',       val: fmtPct(entry.conversion_rate),                           color: cvColor, big: true },
+    {
+      lbl: 'ROAS',
+      sub: 'est. retorno/gasto',
+      val: entry.roas_est > 0 ? entry.roas_est.toFixed(1) + 'x' : '—',
+      color: roasColor,
+      big: true,
+    },
+    {
+      lbl: 'ACOS',
+      sub: 'est. custo/receita',
+      val: entry.acos_est > 0 ? entry.acos_est.toFixed(0) + '%' : '—',
+      color: acosColor,
+      big: true,
+    },
+    {
+      lbl: 'V/100 clicks',
+      sub: 'vendas por ads',
+      val: entry.sales_per_100_visits.toFixed(1),
+      color: v100Color,
+      big: true,
+    },
+    {
+      lbl: 'Custo/Venda',
+      sub: 'spend/conversão',
+      val: entry.cost_per_sale_est > 0 ? fmt(entry.cost_per_sale_est) : '—',
+      color: 'var(--color-gs-muted)',
+      big: false,
+    },
+    {
+      lbl: 'Rev./Visita',
+      sub: 'receita/click',
+      val: entry.revenue_per_visit > 0 ? fmt(entry.revenue_per_visit) : '—',
+      color: 'var(--color-gs-muted)',
+      big: false,
+    },
+    {
+      lbl: 'CVR',
+      sub: 'taxa de conversão',
+      val: fmtPct(entry.conversion_rate),
+      color: cvColor,
+      big: true,
+    },
   ];
 
   return (
     <div className={`border-t-0 border ${cfg.border}/30 ${cfg.bg} flex flex-col`}>
       {/* ── ADS PERFORMANCE BANNER ── */}
-      <div className="grid border-b border-white/5" style={{ gridTemplateColumns: 'repeat(6, 1fr)' }}>
+      <div
+        className="grid border-b border-white/5"
+        style={{ gridTemplateColumns: 'repeat(6, 1fr)' }}
+      >
         {adMetrics.map((c, i) => (
-          <div key={c.lbl}
+          <div
+            key={c.lbl}
             className="flex flex-col items-center justify-center py-3 px-2 gap-0.5"
-            style={{ borderRight: i < 5 ? '1px solid rgba(255,255,255,0.06)' : 'none' }}
+            style={{ borderRight: i < 5 ? '1px solid rgba(0,0,0,0.06)' : 'none' }}
           >
-            <span className="font-mono text-[7px] uppercase tracking-widest mb-1 text-gs-muted">{c.lbl}</span>
-            <span className="font-heading font-black" style={{ color: c.color, fontSize: c.big ? '20px' : '13px', lineHeight: 1 }}>
+            <span className="font-mono text-[7px] uppercase tracking-widest mb-1 text-gs-muted">
+              {c.lbl}
+            </span>
+            <span
+              className="font-heading font-black"
+              style={{ color: c.color, fontSize: c.big ? '20px' : '13px', lineHeight: 1 }}
+            >
               {c.val}
             </span>
-            <span className="font-mono text-[7px] text-gs-muted opacity-40 text-center">{c.sub}</span>
+            <span className="font-mono text-[7px] text-gs-muted opacity-40 text-center">
+              {c.sub}
+            </span>
           </div>
         ))}
       </div>
 
       <div className="p-4 flex flex-col gap-4">
-      <div className="grid grid-cols-3 gap-3">
-        <div className="flex flex-col gap-1.5">
-          <span className="text-[8px] font-mono uppercase text-gs-green tracking-widest mb-0.5">
-            ✓ Sinais Positivos
-          </span>
-          {entry.win_signals.length > 0
-            ? entry.win_signals.map((s, i) => (
-                <span key={i} className="text-[9px] font-mono text-gs-green/80">• {s}</span>
+        <div className="grid grid-cols-3 gap-3">
+          <div className="flex flex-col gap-1.5">
+            <span className="text-[8px] font-mono uppercase text-gs-green tracking-widest mb-0.5">
+              ✓ Sinais Positivos
+            </span>
+            {entry.win_signals.length > 0 ? (
+              entry.win_signals.map((s, i) => (
+                <span key={i} className="text-[9px] font-mono text-gs-green/80">
+                  • {s}
+                </span>
               ))
-            : <span className="text-[9px] font-mono text-gs-muted/50">Nenhum sinal</span>
-          }
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <span className="text-[8px] font-mono uppercase text-gs-yellow tracking-widest mb-0.5">
-            ⚠ Alertas
-          </span>
-          {entry.monitor_reasons.length > 0
-            ? entry.monitor_reasons.map((s, i) => (
-                <span key={i} className="text-[9px] font-mono text-gs-yellow/80">• {s}</span>
-              ))
-            : <span className="text-[9px] font-mono text-gs-muted/50">Sem alertas</span>
-          }
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <span className="text-[8px] font-mono uppercase text-gs-red tracking-widest mb-0.5">
-            ✕ Motivos Kill
-          </span>
-          {entry.kill_reasons.length > 0
-            ? entry.kill_reasons.map((s, i) => (
-                <span key={i} className="text-[9px] font-mono text-gs-red/80">• {s}</span>
-              ))
-            : <span className="text-[9px] font-mono text-gs-muted/50">Nenhum</span>
-          }
-        </div>
-      </div>
-
-      {/* Mini chart */}
-      {entry.chartData.length > 0 && (
-        <div className="h-[80px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={entry.chartData} margin={{ top: 4, right: 4, left: -32, bottom: 0 }}>
-              <defs>
-                <linearGradient id={`grad-${entry.mlb_id}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="10%" stopColor={strokeColor} stopOpacity={0.25} />
-                  <stop offset="95%" stopColor={strokeColor} stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="2 4" stroke="#1e1e1e" vertical={false} />
-              <XAxis dataKey="date" stroke="#333" fontSize={7} tickLine={false} axisLine={false} minTickGap={18} fontFamily="monospace" />
-              <YAxis stroke="#333" fontSize={7} tickLine={false} axisLine={false} allowDecimals={false} fontFamily="monospace" />
-              <Tooltip
-                contentStyle={{ backgroundColor: '#0a0a0c', border: '1px solid #222', fontSize: 10, fontFamily: 'monospace' }}
-                cursor={{ stroke: '#333', strokeWidth: 1 }}
-              />
-              <Area type="monotone" dataKey="sales" name="Vendas"
-                stroke={strokeColor}
-                fill={`url(#grad-${entry.mlb_id})`}
-                strokeWidth={1.5}
-                animationDuration={600}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      )}
-
-      {/* Base metrics strip */}
-      <div className="grid grid-cols-5 gap-2 pt-2 border-t border-white/5">
-        {[
-          { label: 'Visitas',    value: entry.visits.toString() },
-          { label: 'Rev. 30d',  value: fmt(entry.revenue_30d) },
-          { label: 'Avg/dia 7d', value: entry.avg_daily_7d.toFixed(1) },
-          { label: 'Ticket',    value: fmt(entry.price) },
-          { label: 'Estoque',   value: entry.stock.toString() },
-        ].map(m => (
-          <div key={m.label} className="flex flex-col">
-            <span className="text-[7px] text-gs-muted font-mono uppercase tracking-widest">{m.label}</span>
-            <span className="text-[11px] font-mono font-bold text-gs-text">{m.value}</span>
+            ) : (
+              <span className="text-[9px] font-mono text-gs-muted/50">Nenhum sinal</span>
+            )}
           </div>
-        ))}
-      </div>
+          <div className="flex flex-col gap-1.5">
+            <span className="text-[8px] font-mono uppercase text-gs-yellow tracking-widest mb-0.5">
+              ⚠ Alertas
+            </span>
+            {entry.monitor_reasons.length > 0 ? (
+              entry.monitor_reasons.map((s, i) => (
+                <span key={i} className="text-[9px] font-mono text-gs-yellow/80">
+                  • {s}
+                </span>
+              ))
+            ) : (
+              <span className="text-[9px] font-mono text-gs-muted/50">Sem alertas</span>
+            )}
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <span className="text-[8px] font-mono uppercase text-gs-red tracking-widest mb-0.5">
+              ✕ Motivos Kill
+            </span>
+            {entry.kill_reasons.length > 0 ? (
+              entry.kill_reasons.map((s, i) => (
+                <span key={i} className="text-[9px] font-mono text-gs-text/80">
+                  • {s}
+                </span>
+              ))
+            ) : (
+              <span className="text-[9px] font-mono text-gs-muted/50">Nenhum</span>
+            )}
+          </div>
+        </div>
+
+        {/* Mini chart */}
+        {entry.chartData.length > 0 && (
+          <div className="h-[80px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={entry.chartData} margin={{ top: 4, right: 4, left: -32, bottom: 0 }}>
+                <defs>
+                  <linearGradient id={`grad-${entry.mlb_id}`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="10%" stopColor={strokeColor} stopOpacity={0.25} />
+                    <stop offset="95%" stopColor={strokeColor} stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid
+                  strokeDasharray="2 4"
+                  stroke="var(--color-gs-border)"
+                  vertical={false}
+                />
+                <XAxis
+                  dataKey="date"
+                  stroke="var(--color-gs-border)"
+                  fontSize={7}
+                  tickLine={false}
+                  axisLine={false}
+                  minTickGap={18}
+                  fontFamily="monospace"
+                />
+                <YAxis
+                  stroke="var(--color-gs-border)"
+                  fontSize={7}
+                  tickLine={false}
+                  axisLine={false}
+                  allowDecimals={false}
+                  fontFamily="monospace"
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'var(--color-gs-panel)',
+                    border: '1px solid var(--color-gs-border)',
+                    fontSize: 10,
+                    fontFamily: 'monospace',
+                  }}
+                  cursor={{ stroke: 'var(--color-gs-border)', strokeWidth: 1 }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="sales"
+                  name="Vendas"
+                  stroke={strokeColor}
+                  fill={`url(#grad-${entry.mlb_id})`}
+                  strokeWidth={1.5}
+                  animationDuration={600}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+
+        {/* Base metrics strip */}
+        <div className="grid grid-cols-5 gap-2 pt-2 border-t border-white/5">
+          {[
+            { label: 'Visitas', value: entry.visits.toString() },
+            { label: 'Rev. 30d', value: fmt(entry.revenue_30d) },
+            { label: 'Avg/dia 7d', value: entry.avg_daily_7d.toFixed(1) },
+            { label: 'Ticket', value: fmt(entry.price) },
+            { label: 'Estoque', value: entry.stock.toString() },
+          ].map((m) => (
+            <div key={m.label} className="flex flex-col">
+              <span className="text-[7px] text-gs-muted font-mono uppercase tracking-widest">
+                {m.label}
+              </span>
+              <span className="text-[11px] font-mono font-bold text-gs-text">{m.value}</span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -286,7 +420,11 @@ function DiagnosisPanel({ entry }: { entry: AdsMLBEntry }) {
 
 // ─── MLB Row ──────────────────────────────────────────────────────────────────
 
-function MlbRow({ entry, isExpanded, onToggle }: {
+function MlbRow({
+  entry,
+  isExpanded,
+  onToggle,
+}: {
   entry: AdsMLBEntry;
   isExpanded: boolean;
   onToggle: () => void;
@@ -294,7 +432,9 @@ function MlbRow({ entry, isExpanded, onToggle }: {
   const cfg = STATUS_CONFIG[entry.radar_status];
 
   return (
-    <div className={`border-b border-gs-border/20 transition-colors ${isExpanded ? cfg.bg + ' ' + cfg.glow : 'hover:bg-white/[0.02]'}`}>
+    <div
+      className={`border-b border-gs-border/20 transition-colors ${isExpanded ? cfg.bg + ' ' + cfg.glow : 'hover:bg-white/[0.02]'}`}
+    >
       {/* Main row */}
       <div
         onClick={onToggle}
@@ -303,7 +443,9 @@ function MlbRow({ entry, isExpanded, onToggle }: {
       >
         {/* Status dot */}
         <div className="flex justify-center">
-          <span className={`w-1.5 h-1.5 rounded-full ${entry.radar_status === 'WINNER' ? 'bg-gs-green animate-pulse' : entry.radar_status === 'MONITOR' ? 'bg-gs-yellow' : 'bg-gs-red animate-pulse'}`} />
+          <span
+            className={`w-1.5 h-1.5 rounded-full ${entry.radar_status === 'WINNER' ? 'bg-gs-green animate-pulse' : entry.radar_status === 'MONITOR' ? 'bg-gs-yellow' : 'bg-gs-text'}`}
+          />
         </div>
 
         {/* MLB ID */}
@@ -311,7 +453,7 @@ function MlbRow({ entry, isExpanded, onToggle }: {
           href={`https://www.mercadolivre.com.br/anuncios/${entry.mlb_id.replace(/\D/g, '')}`}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={e => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
           className="font-mono text-xs text-gs-blue hover:text-blue-300 hover:underline flex items-center gap-1 transition-colors"
         >
           {entry.mlb_id}
@@ -325,7 +467,9 @@ function MlbRow({ entry, isExpanded, onToggle }: {
         <span className="font-mono text-[9px] text-gs-muted/60 truncate">{entry.sku}</span>
 
         {/* 7d */}
-        <span className={`font-mono text-[11px] font-bold text-right ${entry.sales_7d > 0 ? 'text-gs-text' : 'text-gs-muted/30'}`}>
+        <span
+          className={`font-mono text-[11px] font-bold text-right ${entry.sales_7d > 0 ? 'text-gs-text' : 'text-gs-muted/30'}`}
+        >
           {entry.sales_7d}
         </span>
         {/* 15d */}
@@ -333,7 +477,9 @@ function MlbRow({ entry, isExpanded, onToggle }: {
         {/* 30d */}
         <span className="font-mono text-[11px] text-gs-muted/70 text-right">{entry.sales_30d}</span>
         {/* Ontem */}
-        <span className={`font-mono text-[11px] font-bold text-right ${entry.sales_yesterday >= 2 ? 'text-gs-green' : entry.sales_yesterday === 1 ? 'text-gs-text' : 'text-gs-muted/30'}`}>
+        <span
+          className={`font-mono text-[11px] font-bold text-right ${entry.sales_yesterday >= 2 ? 'text-gs-green' : entry.sales_yesterday === 1 ? 'text-gs-text' : 'text-gs-muted/30'}`}
+        >
           {entry.sales_yesterday}
         </span>
 
@@ -341,7 +487,9 @@ function MlbRow({ entry, isExpanded, onToggle }: {
         <VelocityBadge trend={entry.velocity_trend} />
 
         {/* Action badge */}
-        <span className={`text-[8px] font-mono tracking-tight border px-1.5 py-0.5 ${ACTION_COLORS[entry.recommended_action]} truncate`}>
+        <span
+          className={`text-[8px] font-mono tracking-tight border px-1.5 py-0.5 ${ACTION_COLORS[entry.recommended_action]} truncate`}
+        >
           {ACTION_LABELS[entry.recommended_action]}
         </span>
 
@@ -369,23 +517,54 @@ export function AdsRadar() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
 
-  const tabData: Record<TabKey, AdsMLBEntry[]> = {
-    WINNER: winners,
-    MONITOR: monitors,
-    KILL: kills,
-  };
+  const tabData: Record<TabKey, AdsMLBEntry[]> = useMemo(
+    () => ({
+      WINNER: winners,
+      MONITOR: monitors,
+      KILL: kills,
+    }),
+    [winners, monitors, kills]
+  );
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
-    return tabData[activeTab].filter(e =>
-      !q || e.mlb_id.toLowerCase().includes(q) || e.title.toLowerCase().includes(q) || e.sku.toLowerCase().includes(q)
+    return tabData[activeTab].filter(
+      (e) =>
+        !q ||
+        e.mlb_id.toLowerCase().includes(q) ||
+        e.title.toLowerCase().includes(q) ||
+        e.sku.toLowerCase().includes(q)
     );
   }, [tabData, activeTab, search]);
 
-  const tabs: { key: TabKey; label: string; count: number; color: string; icon: React.ReactNode }[] = [
-    { key: 'WINNER', label: 'VENCEDORES', count: summary.winners, color: 'text-gs-green border-gs-green', icon: <Zap size={12} /> },
-    { key: 'MONITOR', label: 'ATENÇÃO', count: summary.monitors, color: 'text-gs-yellow border-gs-yellow', icon: <AlertTriangle size={12} /> },
-    { key: 'KILL', label: 'DESLIGAR', count: summary.kills, color: 'text-gs-red border-gs-red', icon: <XCircle size={12} /> },
+  const tabs: {
+    key: TabKey;
+    label: string;
+    count: number;
+    color: string;
+    icon: React.ReactNode;
+  }[] = [
+    {
+      key: 'WINNER',
+      label: 'VENCEDORES',
+      count: summary.winners,
+      color: 'text-gs-green border-gs-green',
+      icon: <Zap size={12} />,
+    },
+    {
+      key: 'MONITOR',
+      label: 'ATENÇÃO',
+      count: summary.monitors,
+      color: 'text-gs-yellow border-gs-yellow',
+      icon: <AlertTriangle size={12} />,
+    },
+    {
+      key: 'KILL',
+      label: 'DESLIGAR',
+      count: summary.kills,
+      color: 'text-gs-red border-gs-red',
+      icon: <XCircle size={12} />,
+    },
   ];
 
   if (loading) {
@@ -403,15 +582,15 @@ export function AdsRadar() {
 
   return (
     <div className="h-[calc(100vh-140px)] flex flex-col gap-4 animate-fade-in relative z-10">
-
       {/* ── COCKPIT HEADER ── */}
       <div className="flex items-stretch gap-4 shrink-0">
-
         {/* Left: Title */}
         <div className="flex flex-col justify-center min-w-[220px]">
           <h2 className="font-display font-black text-2xl tracking-wide uppercase text-gs-text flex items-center gap-2">
             <span className="text-gs-green">▸</span> ADS_RADAR
-            <span className="text-[9px] font-mono text-gs-muted/40 border border-gs-muted/20 px-1.5 py-0.5">v1.0</span>
+            <span className="text-[9px] font-mono text-gs-muted/40 border border-gs-muted/20 px-1.5 py-0.5">
+              v1.0
+            </span>
           </h2>
           <p className="font-mono text-[10px] text-gs-muted tracking-widest uppercase mt-1">
             INTELIGÊNCIA TÁTICA • PORTFÓLIO DE ANÚNCIOS ML
@@ -432,27 +611,39 @@ export function AdsRadar() {
         {/* Right: KPI Strip */}
         <div className="flex flex-col gap-0 border border-gs-border bg-gs-panel shrink-0">
           <div className="px-5 py-2 border-b border-gs-border/40 flex flex-col">
-            <span className="text-[8px] font-mono text-gs-muted uppercase tracking-widest">Rev. potencial KILL</span>
-            <span className="text-lg font-black font-mono text-gs-red">{fmt(summary.potentialRevenueLost)}</span>
-            <span className="text-[8px] font-mono text-gs-muted/50 mt-0.5">verba em risco (30d)</span>
+            <span className="text-[8px] font-mono text-gs-muted uppercase tracking-widest">
+              Rev. potencial KILL
+            </span>
+            <span className="text-lg font-black font-mono text-gs-text">
+              {fmt(summary.potentialRevenueLost)}
+            </span>
+            <span className="text-[8px] font-mono text-gs-muted/50 mt-0.5">
+              verba em risco (30d)
+            </span>
           </div>
           <div className="px-5 py-2 flex flex-col">
-            <span className="text-[8px] font-mono text-gs-muted uppercase tracking-widest">MLBs analisados</span>
+            <span className="text-[8px] font-mono text-gs-muted uppercase tracking-widest">
+              MLBs analisados
+            </span>
             <span className="text-lg font-black font-mono text-gs-text">{summary.total}</span>
-            <span className="text-[8px] font-mono text-gs-muted/50 mt-0.5">todos os anúncios ativos</span>
+            <span className="text-[8px] font-mono text-gs-muted/50 mt-0.5">
+              todos os anúncios ativos
+            </span>
           </div>
         </div>
       </div>
 
       {/* ── TACTICAL TABLE ── */}
       <div className="flex-1 flex flex-col border border-gs-border bg-gs-panel overflow-hidden">
-
         {/* Tabs + Search */}
         <div className="flex items-stretch border-b border-gs-border shrink-0">
-          {tabs.map(tab => (
+          {tabs.map((tab) => (
             <button
               key={tab.key}
-              onClick={() => { setActiveTab(tab.key); setExpandedId(null); }}
+              onClick={() => {
+                setActiveTab(tab.key);
+                setExpandedId(null);
+              }}
               className={`flex items-center gap-2 px-5 py-3 font-mono text-[10px] tracking-widest uppercase border-r border-gs-border/50 transition-all ${
                 activeTab === tab.key
                   ? `bg-black/30 ${tab.color} border-b-2 -mb-[1px]`
@@ -472,7 +663,7 @@ export function AdsRadar() {
             <input
               type="text"
               value={search}
-              onChange={e => setSearch(e.target.value)}
+              onChange={(e) => setSearch(e.target.value)}
               placeholder="Filtrar por MLB / SKU / título..."
               className="w-full max-w-xs bg-transparent border-0 border-b border-gs-border/30 text-gs-text font-mono text-xs py-1 placeholder-gs-muted/40 focus:outline-none focus:border-gs-green transition-colors"
             />
@@ -490,8 +681,23 @@ export function AdsRadar() {
           className="grid items-center gap-2 px-3 py-1.5 border-b border-gs-border/30 bg-black/20 shrink-0"
           style={{ gridTemplateColumns: '24px 130px 1fr 72px 40px 40px 40px 40px 90px 72px 26px' }}
         >
-          {['', 'MLB ID', 'TÍTULO', 'SKU', '7D', '15D', '30D', 'ONTEM', 'VELOCIDADE', 'AÇÃO', ''].map((h, i) => (
-            <span key={i} className="text-[8px] font-mono uppercase tracking-widest text-gs-muted/50 text-right first:text-left last:text-left">
+          {[
+            '',
+            'MLB ID',
+            'TÍTULO',
+            'SKU',
+            '7D',
+            '15D',
+            '30D',
+            'ONTEM',
+            'VELOCIDADE',
+            'AÇÃO',
+            '',
+          ].map((h, i) => (
+            <span
+              key={i}
+              className="text-[8px] font-mono uppercase tracking-widest text-gs-muted/50 text-right first:text-left last:text-left"
+            >
               {h}
             </span>
           ))}
@@ -507,7 +713,7 @@ export function AdsRadar() {
               </span>
             </div>
           ) : (
-            filtered.map(entry => (
+            filtered.map((entry) => (
               <MlbRow
                 key={entry.mlb_id}
                 entry={entry}

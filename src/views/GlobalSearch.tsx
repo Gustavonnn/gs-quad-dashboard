@@ -1,45 +1,48 @@
-import { useState, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Card, Badge, Button } from '@/components/ui'
-import { Input } from '@/components/ui/input'
-import { Search, BarChart3, AlertTriangle, TrendingUp, Brain } from 'lucide-react'
-import { supabase } from '@/lib/supabase'
-import { Skeleton } from '@/components/Skeleton'
-import { toast } from 'sonner'
+import { useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Card, Badge } from '@/components/ui';
+import { Input } from '@/components/ui/input';
+import { Search, BarChart3, AlertTriangle, TrendingUp, Brain } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import { Skeleton } from '@/components/Skeleton';
+import { toast } from 'sonner';
 
-type ResultType = 'curva_abc' | 'ia_alertas' | 'ml_insights' | 'ia_growth_plans'
+type ResultType = 'curva_abc' | 'ia_alertas' | 'ml_insights' | 'ia_growth_plans';
 
 interface SearchResult {
-  type: ResultType
-  id: string
-  title: string
-  subtitle: string
-  extra?: string
-  path: string
+  type: ResultType;
+  id: string;
+  title: string;
+  subtitle: string;
+  extra?: string;
+  path: string;
 }
 
-const TYPE_CONFIG: Record<ResultType, { icon: typeof BarChart3; color: string; badge: 'success' | 'warning' | 'danger' | 'secondary' }> = {
+const TYPE_CONFIG: Record<
+  ResultType,
+  { icon: typeof BarChart3; color: string; badge: 'success' | 'warning' | 'secondary' | 'default' }
+> = {
   curva_abc: { icon: BarChart3, color: 'text-[var(--color-gs-green)]', badge: 'success' },
-  ia_alertas: { icon: AlertTriangle, color: 'text-[var(--color-gs-red)]', badge: 'danger' },
+  ia_alertas: { icon: AlertTriangle, color: 'text-[var(--color-gs-text)]', badge: 'default' },
   ml_insights: { icon: Brain, color: 'text-[var(--color-gs-blue)]', badge: 'secondary' },
   ia_growth_plans: { icon: TrendingUp, color: 'text-[var(--color-gs-yellow)]', badge: 'warning' },
-}
+};
 
 export function GlobalSearch() {
-  const [query, setQuery] = useState('')
-  const [results, setResults] = useState<SearchResult[]>([])
-  const [isSearching, setIsSearching] = useState(false)
-  const [hasSearched, setHasSearched] = useState(false)
-  const navigate = useNavigate()
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
+  const navigate = useNavigate();
 
   const handleSearch = useCallback(async (q: string) => {
     if (q.trim().length < 2) {
-      setResults([])
-      return
+      setResults([]);
+      return;
     }
 
-    setIsSearching(true)
-    setHasSearched(true)
+    setIsSearching(true);
+    setHasSearched(true);
 
     try {
       const [curvaRes, alertasRes, insightsRes, growthRes] = await Promise.allSettled([
@@ -63,76 +66,80 @@ export function GlobalSearch() {
           .select('id, sku, status_intervencao')
           .ilike('sku', `%${q}%`)
           .limit(5),
-      ])
+      ]);
 
-      const all: SearchResult[] = []
+      const all: SearchResult[] = [];
 
       if (curvaRes.status === 'fulfilled') {
-        curvaRes.value.data?.forEach((item: any) => {
+        curvaRes.value.data?.forEach((item: unknown) => {
+          const d = item as Record<string, unknown>;
           all.push({
             type: 'curva_abc',
-            id: item.id,
-            title: item.titulo || item.id,
-            subtitle: `Curva ${item.curva_abc} · SKU ${item.id}`,
-            path: `/terminal?sku=${item.id}`,
-          })
-        })
+            id: String(d.id || ''),
+            title: String(d.titulo || d.id || ''),
+            subtitle: `Curva ${d.curva_abc || ''} · SKU ${d.id || ''}`,
+            path: `/terminal?sku=${d.id || ''}`,
+          });
+        });
       }
 
       if (alertasRes.status === 'fulfilled') {
-        alertasRes.value.data?.forEach((item: any) => {
+        alertasRes.value.data?.forEach((item: unknown) => {
+          const d = item as Record<string, unknown>;
           all.push({
             type: 'ia_alertas',
-            id: item.id,
-            title: `${item.tipo_alerta} — ${item.sku}`,
-            subtitle: `[${item.severity}] ${item.sku}`,
+            id: String(d.id || ''),
+            title: `${d.tipo_alerta || ''} — ${d.sku || ''}`,
+            subtitle: `[${d.severity || ''}] ${d.sku || ''}`,
             path: `/monitor`,
-          })
-        })
+          });
+        });
       }
 
       if (insightsRes.status === 'fulfilled') {
-        insightsRes.value.data?.forEach((item: any) => {
+        insightsRes.value.data?.forEach((item: unknown) => {
+          const d = item as Record<string, unknown>;
           all.push({
             type: 'ml_insights',
-            id: item.sku,
-            title: item.titulo || item.sku,
-            subtitle: `Rupture risk: ${((item.rupture_risk || 0) * 100).toFixed(0)}%`,
+            id: String(d.sku || ''),
+            title: String(d.titulo || d.sku || ''),
+            subtitle: `Rupture risk: ${((Number(d.rupture_risk) || 0) * 100).toFixed(0)}%`,
             path: `/ml`,
-          })
-        })
+          });
+        });
       }
 
       if (growthRes.status === 'fulfilled') {
-        growthRes.value.data?.forEach((item: any) => {
+        growthRes.value.data?.forEach((item: unknown) => {
+          const d = item as Record<string, unknown>;
           all.push({
             type: 'ia_growth_plans',
-            id: item.id,
-            title: `Growth Plan — ${item.sku}`,
-            subtitle: `Status: ${item.status_intervencao}`,
+            id: String(d.id || ''),
+            title: `Growth Plan — ${d.sku || ''}`,
+            subtitle: `Status: ${d.status_intervencao || ''}`,
             path: `/growth`,
-          })
-        })
+          });
+        });
       }
 
-      setResults(all)
-    } catch (err) {
-      toast.error('Erro na busca')
-      setResults([])
+      setResults(all);
+    } catch {
+      toast.error('Erro na busca');
+      setResults([]);
     } finally {
-      setIsSearching(false)
+      setIsSearching(false);
     }
-  }, [])
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value
-    setQuery(val)
-    handleSearch(val)
-  }
+    const val = e.target.value;
+    setQuery(val);
+    handleSearch(val);
+  };
 
   const handleResultClick = (result: SearchResult) => {
-    navigate(result.path)
-  }
+    navigate(result.path);
+  };
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in max-w-3xl mx-auto w-full">
@@ -178,8 +185,8 @@ export function GlobalSearch() {
       {!isSearching && results.length > 0 && (
         <div className="space-y-2">
           {results.map((result) => {
-            const config = TYPE_CONFIG[result.type]
-            const Icon = config.icon
+            const config = TYPE_CONFIG[result.type];
+            const Icon = config.icon;
 
             return (
               <Card
@@ -202,7 +209,7 @@ export function GlobalSearch() {
                   {result.type.replace('_', ' ')}
                 </Badge>
               </Card>
-            )
+            );
           })}
         </div>
       )}
@@ -216,5 +223,5 @@ export function GlobalSearch() {
         </Card>
       )}
     </div>
-  )
+  );
 }

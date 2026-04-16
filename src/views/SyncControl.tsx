@@ -1,16 +1,24 @@
-import { useState } from 'react'
-import { Card, Badge, Button } from '@/components/ui'
-import { Play, RefreshCw, Database, GitPullRequest, CheckCircle, XCircle, Loader2 } from 'lucide-react'
-import { toast } from 'sonner'
+import { useState } from 'react';
+import { Card, Badge, Button } from '@/components/ui';
+import {
+  Play,
+  RefreshCw,
+  Database,
+  GitPullRequest,
+  CheckCircle,
+  XCircle,
+  Loader2,
+} from 'lucide-react';
+import { toast } from 'sonner';
 
-type SyncStatus = 'idle' | 'running' | 'success' | 'error'
+type SyncStatus = 'idle' | 'running' | 'success' | 'error';
 
 interface SyncResult {
-  mode: string
-  status: SyncStatus
-  message: string
-  duration?: string
-  records?: number
+  mode: string;
+  status: SyncStatus;
+  message: string;
+  duration?: string;
+  records?: number;
 }
 
 const SYNC_MODES = [
@@ -38,32 +46,31 @@ const SYNC_MODES = [
     color: 'text-[var(--color-gs-yellow)]',
     badge: 'warning' as const,
   },
-]
+];
 
 export function SyncControl() {
-  const [activeSync, setActiveSync] = useState<string | null>(null)
-  const [status, setStatus] = useState<SyncStatus>('idle')
-  const [results, setResults] = useState<SyncResult[]>([])
+  const [activeSync, setActiveSync] = useState<string | null>(null);
+  const [results, setResults] = useState<SyncResult[]>([]);
 
   const handleSync = async (mode: string) => {
-    setActiveSync(mode)
-    setStatus('running')
+    setActiveSync(mode);
 
-    toast.info(`Iniciando sync ${mode}...`, { duration: 2000 })
+    toast.info(`Iniciando sync ${mode}...`, { duration: 2000 });
 
     // Simulate API call to backend pipeline
     try {
-      const res = await fetch('https://mxwzvdbzwnavsnvndted.supabase.co/functions/v1/sync-trigger', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mode }),
-      })
+      const res = await fetch(
+        'https://mxwzvdbzwnavsnvndted.supabase.co/functions/v1/sync-trigger',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mode }),
+        }
+      );
 
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-      const data = await res.json().catch(() => ({}))
-
-      setStatus('success')
+      const data = await res.json().catch(() => ({}));
       setResults((prev) => [
         {
           mode,
@@ -73,23 +80,23 @@ export function SyncControl() {
           records: data.records ?? 0,
         },
         ...prev,
-      ])
-      toast.success(`Sync ${mode} concluído!`)
-    } catch (err: any) {
-      setStatus('error')
+      ]);
+      toast.success(`Sync ${mode} concluído!`);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Falha na execução.';
       setResults((prev) => [
         {
           mode,
           status: 'error',
-          message: err.message ?? 'Falha na execução.',
+          message: errorMessage,
         },
         ...prev,
-      ])
-      toast.error(`Sync ${mode} falhou: ${err.message}`)
+      ]);
+      toast.error(`Sync ${mode} falhou: ${errorMessage}`);
     } finally {
-      setActiveSync(null)
+      setActiveSync(null);
     }
-  }
+  };
 
   return (
     <div className="flex flex-col gap-8 animate-fade-in">
@@ -106,14 +113,16 @@ export function SyncControl() {
       {/* Sync Modes */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {SYNC_MODES.map((mode) => {
-          const Icon = mode.icon
-          const isRunning = activeSync === mode.id
+          const Icon = mode.icon;
+          const isRunning = activeSync === mode.id;
 
           return (
             <Card
               key={mode.id}
               className={`p-6 flex flex-col gap-4 transition-all ${
-                isRunning ? 'border-[var(--color-gs-green)]/50 shadow-[0_0_20px_rgba(0,224,128,0.1)]' : ''
+                isRunning
+                  ? 'border-[var(--color-gs-green)]/50 shadow-[0_0_20px_rgba(52,131,250,0.1)]'
+                  : ''
               }`}
             >
               <div className="flex items-center justify-between">
@@ -132,9 +141,7 @@ export function SyncControl() {
               <Button
                 onClick={() => handleSync(mode.id)}
                 disabled={!!activeSync}
-                className={`gap-2 w-full ${
-                  isRunning ? 'opacity-70' : ''
-                }`}
+                className={`gap-2 w-full ${isRunning ? 'opacity-70' : ''}`}
               >
                 {isRunning ? (
                   <>
@@ -149,7 +156,7 @@ export function SyncControl() {
                 )}
               </Button>
             </Card>
-          )
+          );
         })}
       </div>
 
@@ -174,7 +181,7 @@ export function SyncControl() {
                     {result.status === 'success' ? (
                       <CheckCircle className="h-4 w-4 text-[var(--color-gs-green)]" />
                     ) : (
-                      <XCircle className="h-4 w-4 text-[var(--color-gs-red)]" />
+                      <XCircle className="h-4 w-4 text-[var(--color-gs-text)]" />
                     )}
                     <div>
                       <span className="font-mono text-xs font-bold text-[var(--color-gs-text)]">
@@ -202,5 +209,5 @@ export function SyncControl() {
         </div>
       )}
     </div>
-  )
+  );
 }

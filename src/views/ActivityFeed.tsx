@@ -1,15 +1,13 @@
-import { useState, useEffect } from 'react'
-import { Card } from '@/components/ui'
-import { Badge } from '@/components/ui/badge'
-import { Activity, AlertTriangle, CheckCircle, TrendingUp, Zap, Clock } from 'lucide-react'
+import { Card } from '@/components/ui';
+import { Activity, AlertTriangle, CheckCircle, TrendingUp, Zap, Clock } from 'lucide-react';
 
 interface ActivityEvent {
-  id: string
-  type: 'alerta' | 'sync' | 'growth' | 'price' | 'system'
-  title: string
-  description: string
-  timestamp: string
-  severity?: 'info' | 'success' | 'warning' | 'error'
+  id: string;
+  type: 'alerta' | 'sync' | 'growth' | 'price' | 'system';
+  title: string;
+  description: string;
+  timestamp: string;
+  severity?: 'info' | 'success' | 'warning' | 'error';
 }
 
 const MOCK_EVENTS: ActivityEvent[] = [
@@ -69,37 +67,37 @@ const MOCK_EVENTS: ActivityEvent[] = [
     timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
     severity: 'info',
   },
-]
+];
 
 const TYPE_CONFIG: Record<string, { icon: typeof Activity; color: string }> = {
-  alerta: { icon: AlertTriangle, color: 'text-[var(--color-gs-red)]' },
+  alerta: { icon: AlertTriangle, color: 'text-[var(--color-gs-text)]' },
   sync: { icon: Zap, color: 'text-[var(--color-gs-green)]' },
   growth: { icon: TrendingUp, color: 'text-[var(--color-gs-blue)]' },
   price: { icon: CheckCircle, color: 'text-[var(--color-gs-yellow)]' },
   system: { icon: Clock, color: 'text-[var(--color-gs-muted)]' },
-}
+};
 
 const SEVERITY_BORDER: Record<string, string> = {
-  error: 'border-l-[var(--color-gs-red)]',
+  error: 'border-l-[var(--color-gs-text)]',
   warning: 'border-l-[var(--color-gs-yellow)]',
   success: 'border-l-[var(--color-gs-green)]',
   info: 'border-l-[var(--color-gs-blue)]',
-}
+};
 
 function timeAgo(dateStr: string) {
-  const diff = Date.now() - new Date(dateStr).getTime()
-  const minutes = Math.floor(diff / 60000)
-  if (minutes < 60) return `${minutes}m atrás`
-  const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours}h atrás`
-  return `${Math.floor(hours / 24)}d atrás`
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const minutes = Math.floor(diff / 60000);
+  if (minutes < 60) return `${minutes}m atrás`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h atrás`;
+  return `${Math.floor(hours / 24)}d atrás`;
 }
 
 export function ActivityFeed() {
-  const [events] = useState<ActivityEvent[]>(MOCK_EVENTS)
-  const [filter, setFilter] = useState<string>('ALL')
+  const [events] = useState<ActivityEvent[]>(MOCK_EVENTS);
+  const [filter, setFilter] = useState<string>('ALL');
 
-  const filtered = filter === 'ALL' ? events : events.filter((e) => e.type === filter)
+  const filtered = filter === 'ALL' ? events : events.filter((e) => e.type === filter);
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in">
@@ -136,8 +134,8 @@ export function ActivityFeed() {
 
         <div className="space-y-4">
           {filtered.map((event) => {
-            const config = TYPE_CONFIG[event.type]
-            const Icon = config.icon
+            const config = TYPE_CONFIG[event.type];
+            const Icon = config.icon;
 
             return (
               <div key={event.id} className="relative pl-14">
@@ -163,10 +161,10 @@ export function ActivityFeed() {
                   </p>
                 </Card>
               </div>
-            )
+            );
           })}
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -75,7 +75,7 @@ function KpiCard({
 
   return (
     <div
-      className="relative flex flex-col gap-3 p-5 overflow-hidden"
+      className="relative flex flex-col gap-3 p-4 sm:p-5 flex-1 overflow-hidden group"
       style={{
         background: 'var(--color-gs-panel)',
         border: '1px solid var(--color-gs-border)',
@@ -107,8 +107,8 @@ function KpiCard({
         />
       ) : (
         <div
-          className="font-heading font-black tracking-tight leading-none"
-          style={{ fontSize: '28px', color: 'var(--color-gs-text)' }}
+          className="font-heading font-black tracking-tight leading-none text-2xl sm:text-[28px]"
+          style={{ color: 'var(--color-gs-text)' }}
         >
           {value}
         </div>
@@ -537,7 +537,7 @@ export function VisaoGeral() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3" style={{ minHeight: '280px' }}>
         {/* Sparkline — 2 cols */}
         <div
-          className="lg:col-span-2 flex flex-col"
+          className="lg:col-span-2 flex flex-col min-h-[220px]"
           style={{
             background: 'var(--color-gs-panel)',
             border: '1px solid var(--color-gs-border)',
@@ -571,7 +571,7 @@ export function VisaoGeral() {
         </div>
 
         {/* Terminal Feed — 1 col */}
-        <div className="flex flex-col">
+        <div className="flex flex-col min-h-[260px] lg:min-h-0">
           <TerminalFeed lines={logLines} />
         </div>
       </div>

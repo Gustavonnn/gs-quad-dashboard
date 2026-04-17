@@ -103,8 +103,8 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
   );
 
   return (
-    <div className="h-[calc(100vh-140px)] flex flex-col gap-4 animate-fade-in relative z-10">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col gap-4 animate-fade-in relative z-10 h-[calc(100vh-120px)] lg:h-[calc(100vh-140px)] overflow-hidden lg:overflow-visible">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 shrink-0">
         <div className="flex flex-col">
           <h2 className="font-display font-bold text-2xl tracking-wide uppercase text-gs-text flex items-center gap-3">
             <span className="text-gs-green">&gt;_</span> VISUAL_DB TERMINAL
@@ -118,31 +118,31 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
         </div>
 
         {/* Global KPIs */}
-        <div className="flex gap-6 border border-gs-border bg-gs-panel py-2 px-6 rounded-sm shadow-xl">
-          <div className="flex flex-col items-end">
-            <span className="text-[9px] text-gs-muted font-mono tracking-widest uppercase">
+        <div className="grid grid-cols-3 gap-2 lg:flex lg:gap-6 border border-gs-border bg-gs-panel py-2 px-3 lg:px-6 rounded-[2px] shadow-[1px_1px_0_var(--color-gs-border)]">
+          <div className="flex flex-col items-center lg:items-end">
+            <span className="text-[9px] text-gs-muted font-mono tracking-widest uppercase text-center lg:text-right">
               TTL Revenue 30d
             </span>
-            <span className="text-sm font-bold text-gs-green font-mono">
+            <span className="text-xs lg:text-sm font-bold text-gs-green font-mono text-center lg:text-right">
               {formatCurrency(data.reduce((a, b) => a + b.total_revenue_30d, 0))}
             </span>
           </div>
-          <div className="w-[1px] bg-gs-border"></div>
-          <div className="flex flex-col items-end">
-            <span className="text-[9px] text-gs-muted font-mono tracking-widest uppercase">
+          <div className="hidden lg:block w-[1px] bg-gs-border"></div>
+          <div className="flex flex-col items-center lg:items-end">
+            <span className="text-[9px] text-gs-muted font-mono tracking-widest uppercase text-center lg:text-right">
               Sales Yesterday
             </span>
-            <span className="text-sm font-bold text-gs-green font-mono">
+            <span className="text-xs lg:text-sm font-bold text-gs-green font-mono text-center lg:text-right">
               {data.reduce((a, b) => a + b.sales_yesterday, 0)}{' '}
               <span className="text-[9px] opacity-50 font-normal">un</span>
             </span>
           </div>
-          <div className="w-[1px] bg-gs-border"></div>
-          <div className="flex flex-col items-end">
-            <span className="text-[9px] text-gs-muted font-mono tracking-widest uppercase">
+          <div className="hidden lg:block w-[1px] bg-gs-border"></div>
+          <div className="flex flex-col items-center lg:items-end">
+            <span className="text-[9px] text-gs-muted font-mono tracking-widest uppercase text-center lg:text-right">
               Global Stock
             </span>
-            <span className="text-sm font-bold text-gs-text font-mono">
+            <span className="text-xs lg:text-sm font-bold text-gs-text font-mono text-center lg:text-right">
               {data.reduce((a, b) => a + b.global_stock, 0)}{' '}
               <span className="text-[9px] opacity-50 font-normal">un</span>
             </span>
@@ -167,9 +167,9 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
         </div>
       )}
 
-      <div className="flex-1 flex gap-4 overflow-hidden">
+      <div className="flex-1 flex flex-col lg:flex-row gap-4 overflow-y-auto lg:overflow-hidden hide-scrollbar">
         {/* LEFT PANE: SKU BROWSER (The "Database Index") */}
-        <div className="w-[400px] flex flex-col bg-gs-panel border border-gs-border rounded-sm shadow-2xl shrink-0">
+        <div className="w-full lg:w-[340px] xl:w-[400px] flex flex-col bg-gs-panel border border-gs-border rounded-[2px] shadow-[1px_1px_0_var(--color-gs-border)] shrink-0 h-[280px] lg:h-auto z-10">
           <div className="p-4 border-b border-gs-border flex flex-col gap-3 shrink-0 bg-black/20">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gs-muted" />
@@ -255,7 +255,7 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
 
         {/* RIGHT PANE: DETAIL VIEW (The Mapped children and charts) */}
         {selectedSku ? (
-          <div className="flex-1 flex flex-col bg-gs-panel border border-gs-border rounded-sm shadow-2xl overflow-hidden relative">
+          <div className="flex-1 flex flex-col bg-gs-panel border border-gs-border rounded-[2px] shadow-[1px_1px_0_var(--color-gs-border)] lg:overflow-hidden min-h-[600px] lg:min-h-0 relative shrink-0">
             <div className="absolute top-0 right-0 w-64 h-64 bg-gs-green/5 blur-3xl -z-10 rounded-full pointer-events-none" />
 
             {/* Header Detail */}
@@ -291,8 +291,8 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
                 )}
               </div>
 
-              <div className="flex gap-4">
-                <div className="flex flex-col bg-black/30 border border-gs-border/50 rounded-sm px-4 py-2 min-w-[120px]">
+              <div className="flex gap-2 lg:gap-4 flex-wrap lg:flex-nowrap mt-4 lg:mt-0">
+                <div className="flex-1 lg:flex-none flex flex-col bg-black/30 border border-gs-border/50 rounded-sm px-4 py-2 min-w-[120px]">
                   <span className="text-[9px] text-gs-muted font-mono tracking-widest uppercase mb-1 flex items-center gap-1">
                     <Activity className="w-3 h-3" /> Receita 30d
                   </span>
@@ -300,7 +300,7 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
                     {formatCurrency(selectedSku.total_revenue_30d)}
                   </span>
                 </div>
-                <div className="flex flex-col bg-black/30 border border-gs-border/50 rounded-sm px-4 py-2 min-w-[120px]">
+                <div className="flex-1 lg:flex-none flex flex-col bg-black/30 border border-gs-border/50 rounded-sm px-4 py-2 min-w-[120px]">
                   <span className="text-[9px] text-gs-muted font-mono tracking-widest uppercase mb-1 flex items-center gap-1">
                     <Package className="w-3 h-3" /> Estoque Global
                   </span>
@@ -309,7 +309,7 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
                     <span className="text-[10px] text-gs-muted font-normal ml-1">un.</span>
                   </span>
                 </div>
-                <div className="flex gap-1.5 ml-auto border-l border-gs-border/50 pl-4 items-center">
+                <div className="flex w-full lg:w-auto gap-1.5 lg:ml-auto lg:border-l lg:border-gs-border/50 lg:pl-4 items-center justify-between lg:justify-end">
                   <div className="flex flex-col items-center px-3 py-1 bg-white/5 border border-white/5 rounded-sm">
                     <span className="text-[8px] text-gs-muted font-mono uppercase">7D</span>
                     <span className="text-sm font-bold font-mono text-gs-text">

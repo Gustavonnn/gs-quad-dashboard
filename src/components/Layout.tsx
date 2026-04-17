@@ -593,10 +593,8 @@ function Topbar({ onMenuClick }: { onMenuClick: () => void }) {
 
   return (
     <header
-      className="shrink-0 flex items-center justify-between sticky top-0 z-30"
+      className="shrink-0 flex items-center justify-between sticky top-0 z-30 px-4 md:px-6 h-14 md:h-[60px]"
       style={{
-        height: '60px',
-        padding: '0 24px',
         borderBottom: '1px solid var(--color-gs-border)',
         background: 'var(--color-gs-header)',
         backdropFilter: 'blur(20px)',
@@ -715,9 +713,8 @@ export function Layout({ children }: { children: ReactNode }) {
 
         <main className="flex-1 overflow-x-hidden overflow-y-auto">
           <div
-            className="animate-fade-in"
+            className="animate-fade-in px-4 py-6 md:px-6 md:py-8 lg:px-8 lg:py-10"
             style={{
-              padding: '28px 28px 40px',
               maxWidth: '1680px',
               margin: '0 auto',
               width: '100%',

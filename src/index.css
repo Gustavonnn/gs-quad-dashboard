@@ -266,43 +266,40 @@
 
   .glass-panel {
     background: var(--color-gs-surface);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--glass-border);
-    box-shadow:
-      var(--glass-shadow),
-      inset 0 1px 0 var(--glass-highlight);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid var(--color-gs-border);
+    border-radius: 2px;
+    box-shadow: 1px 1px 0 var(--color-gs-border);
   }
 
   .card-premium {
     background: var(--color-gs-surface);
     border: 1px solid var(--color-gs-border);
-    box-shadow:
-      0 1px 3px rgba(0, 0, 0, 0.08),
-      0 1px 2px rgba(0, 0, 0, 0.06);
-    transition: all 0.2s ease;
+    border-radius: 2px;
+    box-shadow: 1px 1px 0 var(--color-gs-border);
+    transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .card-premium:hover {
-    box-shadow:
-      0 4px 12px rgba(0, 0, 0, 0.1),
-      0 0 0 1px rgba(0, 0, 0, 0.05);
-    transform: translateY(-1px);
+    border-color: var(--color-gs-muted);
+    transform: translateY(-2px);
+    box-shadow: 3px 3px 0 var(--color-gs-border);
   }
 
   .glow-green {
-    transition: all 0.2s ease;
+    transition: all 0.1s ease;
   }
 
   .glow-green:hover {
-    box-shadow:
-      0 0 12px rgba(52, 131, 250, 0.2),
-      0 0 24px rgba(52, 131, 250, 0.1);
+    border-color: var(--color-gs-green);
+    box-shadow: 2px 2px 0 var(--color-gs-green);
   }
 
   /* Custom scrollbar — ultra thin */
   .custom-scrollbar::-webkit-scrollbar {
     width: 2px;
+    height: 2px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-track {
@@ -312,6 +309,15 @@
   .custom-scrollbar::-webkit-scrollbar-thumb {
     background: var(--color-gs-border);
     border-radius: 1px;
+  }
+
+  /* Hide scrollbar completely (useful for mobile swipe) */
+  .hide-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
   }
 
   .sidebar-expanded {

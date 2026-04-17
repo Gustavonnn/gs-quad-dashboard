@@ -292,7 +292,7 @@ export function DataExplorer() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-[var(--color-gs-border)] pb-0">
+      <div className="flex gap-2 border-b border-[var(--color-gs-border)] pb-0 overflow-x-auto hide-scrollbar w-full">
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -322,7 +322,7 @@ export function DataExplorer() {
           placeholder="Buscar..."
           value={globalFilter ?? ''}
           onChange={(e) => setGlobalFilter(e.target.value)}
-          className="max-w-xs"
+          className="w-full sm:max-w-xs"
         />
         <span className="font-mono text-[10px] text-[var(--color-gs-muted)]">
           {table.getFilteredRowModel().rows.length} registros
@@ -331,8 +331,12 @@ export function DataExplorer() {
       </div>
 
       {/* Table */}
-      <Card className="overflow-hidden p-0">
-        <div ref={parentRef} className="overflow-auto" style={{ height: '60vh', minHeight: 400 }}>
+      <Card className="overflow-hidden p-0 rounded-[2px] shadow-[1px_1px_0_var(--color-gs-border)] border-[var(--color-gs-border)]">
+        <div
+          ref={parentRef}
+          className="overflow-auto hide-scrollbar"
+          style={{ height: '60vh', minHeight: 400 }}
+        >
           <table className="w-full border-collapse">
             <thead className="sticky top-0 z-10 bg-[var(--color-gs-panel)]">
               {table.getHeaderGroups().map((headerGroup) => (

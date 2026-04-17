@@ -181,15 +181,17 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
                 className="w-full bg-gs-bg/40 border border-gs-border/50 text-gs-text font-mono text-xs pl-10 pr-4 py-2.5 rounded-sm placeholder-gs-muted/50 focus:outline-none focus:border-gs-green focus:ring-1 focus:ring-gs-green transition-all"
               />
             </div>
-            <div className="flex gap-2">
-              {(['ALL', 'A', 'B', 'C'] as const).map((cls) => (
+            <div className="flex border border-gs-border/50 rounded-[2px] overflow-hidden">
+              {(['ALL', 'A', 'B', 'C'] as const).map((cls, idx) => (
                 <button
                   key={cls}
                   onClick={() => setFilterClass(cls)}
-                  className={`flex-1 text-[10px] font-mono tracking-widest uppercase py-1.5 border rounded-sm transition-all ${
+                  className={`flex-1 text-[10px] font-mono tracking-widest uppercase py-2 transition-all ${
+                    idx < 3 ? 'border-r border-gs-border/30' : ''
+                  } ${
                     filterClass === cls
-                      ? 'bg-gs-text text-gs-bg border-gs-text'
-                      : 'border-gs-border/50 text-gs-muted hover:text-gs-text hover:border-gs-muted'
+                      ? 'bg-gs-green text-white font-bold'
+                      : 'bg-white/50 text-gs-muted hover:text-gs-text hover:bg-gs-bg/40'
                   }`}
                 >
                   {cls === 'ALL' ? 'TUDO' : `RANK ${cls}`}

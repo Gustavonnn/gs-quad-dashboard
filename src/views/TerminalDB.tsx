@@ -217,7 +217,7 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
                 <div className="flex items-start justify-between w-full mb-1.5 pl-1">
                   <div className="flex items-center gap-1.5">
                     <span
-                      className={`font-mono font-bold text-xs ${selectedSku?.sku === item.sku ? 'text-gs-green' : 'text-gs-text group-hover:text-white'}`}
+                      className={`font-mono font-bold text-xs ${selectedSku?.sku === item.sku ? 'text-gs-green' : 'text-gs-text group-hover:text-gs-blue'}`}
                     >
                       {item.sku}
                     </span>

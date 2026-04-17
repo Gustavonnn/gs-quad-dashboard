@@ -170,7 +170,7 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
       <div className="flex-1 flex flex-col lg:flex-row gap-4 overflow-y-auto lg:overflow-hidden hide-scrollbar">
         {/* LEFT PANE: SKU BROWSER (The "Database Index") */}
         <div className="w-full lg:w-[340px] xl:w-[400px] flex flex-col bg-gs-panel border border-gs-border rounded-[2px] shadow-[1px_1px_0_var(--color-gs-border)] shrink-0 h-[280px] lg:h-auto z-10">
-          <div className="p-4 border-b border-gs-border flex flex-col gap-3 shrink-0 bg-black/20">
+          <div className="p-4 border-b border-gs-border flex flex-col gap-3 shrink-0 bg-gs-bg/20">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gs-muted" />
               <input
@@ -178,7 +178,7 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="BUSCAR MATRIZ (SKU)..."
-                className="w-full bg-black/40 border border-gs-border/50 text-gs-text font-mono text-xs pl-10 pr-4 py-2.5 rounded-sm placeholder-gs-muted/50 focus:outline-none focus:border-gs-green focus:ring-1 focus:ring-gs-green transition-all"
+                className="w-full bg-gs-bg/40 border border-gs-border/50 text-gs-text font-mono text-xs pl-10 pr-4 py-2.5 rounded-sm placeholder-gs-muted/50 focus:outline-none focus:border-gs-green focus:ring-1 focus:ring-gs-green transition-all"
               />
             </div>
             <div className="flex gap-2">
@@ -205,8 +205,8 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
                 onClick={() => handleSkuSelect(item)}
                 className={`flex flex-col p-3 text-left border rounded-sm transition-all duration-200 group relative overflow-hidden ${
                   selectedSku?.sku === item.sku
-                    ? 'border-gs-green/60 bg-gs-green/5 shadow-[0_0_15px_rgba(52,131,250,0.05)]'
-                    : 'border-transparent hover:border-gs-border hover:bg-gray-100'
+                    ? 'border-gs-green/60 bg-gs-green/5 shadow-[1px_1px_0_var(--color-gs-green)]'
+                    : 'border-transparent hover:border-gs-border hover:bg-gs-bg/30'
                 }`}
               >
                 {selectedSku?.sku === item.sku && (
@@ -259,7 +259,7 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
             <div className="absolute top-0 right-0 w-64 h-64 bg-gs-green/5 blur-3xl -z-10 rounded-full pointer-events-none" />
 
             {/* Header Detail */}
-            <div className="p-6 border-b border-gs-border flex justify-between items-start bg-gradient-to-b from-black/40 to-transparent">
+            <div className="p-6 border-b border-gs-border flex justify-between items-start bg-gradient-to-b from-gs-bg/20 to-transparent">
               <div>
                 <div className="flex items-center gap-3 mb-2">
                   <div
@@ -292,7 +292,7 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
               </div>
 
               <div className="flex gap-2 lg:gap-4 flex-wrap lg:flex-nowrap mt-4 lg:mt-0">
-                <div className="flex-1 lg:flex-none flex flex-col bg-black/30 border border-gs-border/50 rounded-sm px-4 py-2 min-w-[120px]">
+                <div className="flex-1 lg:flex-none flex flex-col bg-gs-bg/30 border border-gs-border/50 rounded-sm px-4 py-2 min-w-[120px]">
                   <span className="text-[9px] text-gs-muted font-mono tracking-widest uppercase mb-1 flex items-center gap-1">
                     <Activity className="w-3 h-3" /> Receita 30d
                   </span>
@@ -300,7 +300,7 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
                     {formatCurrency(selectedSku.total_revenue_30d)}
                   </span>
                 </div>
-                <div className="flex-1 lg:flex-none flex flex-col bg-black/30 border border-gs-border/50 rounded-sm px-4 py-2 min-w-[120px]">
+                <div className="flex-1 lg:flex-none flex flex-col bg-gs-bg/30 border border-gs-border/50 rounded-sm px-4 py-2 min-w-[120px]">
                   <span className="text-[9px] text-gs-muted font-mono tracking-widest uppercase mb-1 flex items-center gap-1">
                     <Package className="w-3 h-3" /> Estoque Global
                   </span>
@@ -341,7 +341,7 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
             {/* Split layout inside detail: Chart top, MLBs bottom */}
             <div className="flex-1 flex flex-col p-6 gap-6 overflow-y-auto custom-scrollbar">
               {/* Terminal Graph */}
-              <div className="h-[240px] flex flex-col border border-gs-border/50 rounded-sm bg-black/20 p-4">
+              <div className="h-[240px] flex flex-col border border-gs-border/50 rounded-sm bg-gs-bg/10 p-4">
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-[10px] text-gs-muted font-mono tracking-widest uppercase flex items-center gap-2">
                     <div className="w-1.5 h-1.5 bg-gs-blue rounded-full animate-pulse"></div>
@@ -455,8 +455,8 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
                       }}
                       className={`group border transition-all duration-300 rounded-sm p-4 flex flex-col gap-3 cursor-pointer relative overflow-hidden ${
                         selectedMlbId === mlb.mlb_id
-                          ? 'border-gs-green bg-gs-green/5 shadow-[0_0_20px_rgba(52,131,250,0.1)]'
-                          : 'border-gs-border/40 bg-gray-50 hover:border-gs-border/80'
+                          ? 'border-gs-green bg-gs-green/5 shadow-[1px_1px_0_var(--color-gs-green)]'
+                          : 'border-gs-border/40 bg-white hover:border-gs-border/80'
                       }`}
                     >
                       {selectedMlbId === mlb.mlb_id && (

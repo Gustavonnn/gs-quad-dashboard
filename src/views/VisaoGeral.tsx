@@ -413,7 +413,7 @@ export function VisaoGeral() {
   return (
     <div className="flex flex-col gap-5 animate-fade-in">
       {/* ── PAGE HEADER ── */}
-      <div className="flex items-end justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <PulseDot />
@@ -478,7 +478,7 @@ export function VisaoGeral() {
       </div>
 
       {/* ── KPI CARDS ROW ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <KpiCard
           label="Receita do Dia"
           value={fmt(metrics?.totalVendas ?? 0)}
@@ -681,7 +681,7 @@ export function VisaoGeral() {
           </div>
 
           <div
-            className="flex-1 grid grid-cols-3 divide-x"
+            className="flex-1 grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x"
             style={{ borderColor: 'var(--color-gs-border)' }}
           >
             {[

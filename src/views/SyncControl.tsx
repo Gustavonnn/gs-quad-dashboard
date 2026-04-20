@@ -176,7 +176,7 @@ export function SyncControl() {
                     : 'border-l-[var(--color-gs-red)]'
                 }`}
               >
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
                   <div className="flex items-center gap-3">
                     {result.status === 'success' ? (
                       <CheckCircle className="h-4 w-4 text-[var(--color-gs-green)]" />

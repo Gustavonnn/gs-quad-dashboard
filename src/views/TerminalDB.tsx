@@ -181,17 +181,15 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
                 className="w-full bg-gs-bg/40 border border-gs-border/50 text-gs-text font-mono text-xs pl-10 pr-4 py-2.5 rounded-sm placeholder-gs-muted/50 focus:outline-none focus:border-gs-green focus:ring-1 focus:ring-gs-green transition-all"
               />
             </div>
-            <div className="flex border border-gs-border/50 rounded-[2px] overflow-hidden">
-              {(['ALL', 'A', 'B', 'C'] as const).map((cls, idx) => (
+            <div className="flex p-1 bg-gs-bg border border-gs-border/40 rounded-[2px]">
+              {(['ALL', 'A', 'B', 'C'] as const).map((cls) => (
                 <button
                   key={cls}
                   onClick={() => setFilterClass(cls)}
-                  className={`flex-1 text-[10px] font-mono tracking-widest uppercase py-2 transition-all ${
-                    idx < 3 ? 'border-r border-gs-border/30' : ''
-                  } ${
+                  className={`flex-1 text-[10px] font-mono tracking-widest uppercase py-1.5 transition-all rounded-[1px] ${
                     filterClass === cls
-                      ? 'bg-gs-green text-white font-bold'
-                      : 'bg-white/50 text-gs-muted hover:text-gs-text hover:bg-gs-bg/40'
+                      ? 'bg-white text-gs-green font-bold shadow-sm border border-gs-border/20'
+                      : 'text-gs-muted hover:text-gs-text'
                   }`}
                 >
                   {cls === 'ALL' ? 'TUDO' : `RANK ${cls}`}
@@ -261,7 +259,7 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
             <div className="absolute top-0 right-0 w-64 h-64 bg-gs-green/5 blur-3xl -z-10 rounded-full pointer-events-none" />
 
             {/* Header Detail */}
-            <div className="p-6 border-b border-gs-border flex justify-between items-start bg-gradient-to-b from-gs-bg/20 to-transparent">
+            <div className="p-4 sm:p-6 border-b border-gs-border flex flex-col lg:flex-row justify-between items-start gap-4 lg:gap-0 bg-gradient-to-b from-gs-bg/20 to-transparent">
               <div>
                 <div className="flex items-center gap-3 mb-2">
                   <div

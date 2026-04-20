@@ -337,7 +337,7 @@ export function DataExplorer() {
           className="overflow-auto hide-scrollbar"
           style={{ height: '60vh', minHeight: 400 }}
         >
-          <table className="w-full border-collapse">
+          <table className="w-full min-w-[800px] border-collapse">
             <thead className="sticky top-0 z-10 bg-[var(--color-gs-panel)]">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>

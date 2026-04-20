@@ -583,7 +583,7 @@ export function AdsRadar() {
   return (
     <div className="h-[calc(100vh-140px)] flex flex-col gap-4 animate-fade-in relative z-10">
       {/* ── COCKPIT HEADER ── */}
-      <div className="flex items-stretch gap-4 shrink-0">
+      <div className="flex flex-col xl:flex-row items-stretch gap-4 shrink-0">
         {/* Left: Title */}
         <div className="flex flex-col justify-center min-w-[220px]">
           <h2 className="font-display font-black text-2xl tracking-wide uppercase text-gs-text flex items-center gap-2">
@@ -636,92 +636,103 @@ export function AdsRadar() {
       {/* ── TACTICAL TABLE ── */}
       <div className="flex-1 flex flex-col border border-gs-border bg-gs-panel overflow-hidden">
         {/* Tabs + Search */}
-        <div className="flex items-stretch border-b border-gs-border shrink-0">
-          {tabs.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => {
-                setActiveTab(tab.key);
-                setExpandedId(null);
-              }}
-              className={`flex items-center gap-2 px-5 py-3 font-mono text-[10px] tracking-widest uppercase border-r border-gs-border/50 transition-all ${
-                activeTab === tab.key
-                  ? `bg-black/30 ${tab.color} border-b-2 -mb-[1px]`
-                  : 'text-gs-muted hover:text-gs-text hover:bg-white/[0.02]'
-              }`}
-            >
-              {tab.icon}
-              {tab.label}
-              <span className={`font-black text-xs ${activeTab === tab.key ? '' : 'opacity-50'}`}>
-                ({tab.count})
-              </span>
-            </button>
-          ))}
+        <div className="flex flex-col sm:flex-row items-stretch border-b border-gs-border shrink-0">
+          <div className="flex overflow-x-auto custom-scrollbar border-b sm:border-b-0 border-gs-border/30">
+            {tabs.map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => {
+                  setActiveTab(tab.key);
+                  setExpandedId(null);
+                }}
+                className={`flex items-center whitespace-nowrap gap-2 px-5 py-3 font-mono text-[10px] tracking-widest uppercase border-r border-gs-border/50 transition-all ${
+                  activeTab === tab.key
+                    ? `bg-black/30 ${tab.color} border-b-2 -mb-[1px]`
+                    : 'text-gs-muted hover:text-gs-text hover:bg-white/[0.02]'
+                }`}
+              >
+                {tab.icon}
+                {tab.label}
+                <span className={`font-black text-xs ${activeTab === tab.key ? '' : 'opacity-50'}`}>
+                  ({tab.count})
+                </span>
+              </button>
+            ))}
+          </div>
 
           {/* Search */}
-          <div className="flex-1 flex items-center px-4">
+          <div className="flex-1 flex items-center px-4 py-2 sm:py-0">
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Filtrar por MLB / SKU / título..."
-              className="w-full max-w-xs bg-transparent border-0 border-b border-gs-border/30 text-gs-text font-mono text-xs py-1 placeholder-gs-muted/40 focus:outline-none focus:border-gs-green transition-colors"
+              className="w-full sm:max-w-xs bg-transparent border-0 border-b border-gs-border/30 text-gs-text font-mono text-xs py-1 placeholder-gs-muted/40 focus:outline-none focus:border-gs-green transition-colors"
             />
           </div>
 
           {/* Entry count */}
-          <div className="flex items-center px-4 gap-1 text-gs-muted font-mono text-[9px]">
+          <div className="hidden sm:flex items-center px-4 gap-1 text-gs-muted font-mono text-[9px]">
             <BarChart2 size={10} />
             {filtered.length} de {tabData[activeTab].length}
           </div>
         </div>
 
-        {/* Table header */}
-        <div
-          className="grid items-center gap-2 px-3 py-1.5 border-b border-gs-border/30 bg-black/20 shrink-0"
-          style={{ gridTemplateColumns: '24px 130px 1fr 72px 40px 40px 40px 40px 90px 72px 26px' }}
-        >
-          {[
-            '',
-            'MLB ID',
-            'TÍTULO',
-            'SKU',
-            '7D',
-            '15D',
-            '30D',
-            'ONTEM',
-            'VELOCIDADE',
-            'AÇÃO',
-            '',
-          ].map((h, i) => (
-            <span
-              key={i}
-              className="text-[8px] font-mono uppercase tracking-widest text-gs-muted/50 text-right first:text-left last:text-left"
+        {/* Horizontal scroll container for table */}
+        <div className="flex-1 flex flex-col overflow-x-auto custom-scrollbar">
+          <div className="min-w-[900px] flex-1 flex flex-col">
+            {/* Table header */}
+            <div
+              className="grid items-center gap-2 px-3 py-1.5 border-b border-gs-border/30 bg-black/20 shrink-0"
+              style={{
+                gridTemplateColumns: '24px 130px 1fr 72px 40px 40px 40px 40px 90px 72px 26px',
+              }}
             >
-              {h}
-            </span>
-          ))}
-        </div>
-
-        {/* Rows */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar">
-          {filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 gap-3">
-              <Activity size={28} className="text-gs-muted/30" />
-              <span className="font-mono text-xs text-gs-muted/40 uppercase tracking-widest">
-                {search ? 'Nenhum resultado para a busca' : 'Nenhum MLB nesta categoria'}
-              </span>
+              {[
+                '',
+                'MLB ID',
+                'TÍTULO',
+                'SKU',
+                '7D',
+                '15D',
+                '30D',
+                'ONTEM',
+                'VELOCIDADE',
+                'AÇÃO',
+                '',
+              ].map((h, i) => (
+                <span
+                  key={i}
+                  className="text-[8px] font-mono uppercase tracking-widest text-gs-muted/50 text-right first:text-left last:text-left"
+                >
+                  {h}
+                </span>
+              ))}
             </div>
-          ) : (
-            filtered.map((entry) => (
-              <MlbRow
-                key={entry.mlb_id}
-                entry={entry}
-                isExpanded={expandedId === entry.mlb_id}
-                onToggle={() => setExpandedId(expandedId === entry.mlb_id ? null : entry.mlb_id)}
-              />
-            ))
-          )}
+
+            {/* Rows */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar">
+              {filtered.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 gap-3">
+                  <Activity size={28} className="text-gs-muted/30" />
+                  <span className="font-mono text-xs text-gs-muted/40 uppercase tracking-widest">
+                    {search ? 'Nenhum resultado para a busca' : 'Nenhum MLB nesta categoria'}
+                  </span>
+                </div>
+              ) : (
+                filtered.map((entry) => (
+                  <MlbRow
+                    key={entry.mlb_id}
+                    entry={entry}
+                    isExpanded={expandedId === entry.mlb_id}
+                    onToggle={() =>
+                      setExpandedId(expandedId === entry.mlb_id ? null : entry.mlb_id)
+                    }
+                  />
+                ))
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

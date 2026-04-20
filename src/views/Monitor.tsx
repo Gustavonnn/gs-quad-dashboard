@@ -145,7 +145,7 @@ export function Monitor({ onSelectSku }: MonitorProps) {
                   onClick={() => onSelectSku?.(alerta.sku)}
                   className={`border-l-4 ${SEV_BORDER[alerta.severity] ?? 'border-l-gs-muted'} p-5 flex flex-col border-y border-r border-gs-border shadow-lg hover:border-r-gs-muted/50 transition-colors cursor-pointer group`}
                 >
-                  <div className="flex items-start justify-between mb-3">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-3">
                     <span
                       className={`font-mono text-sm font-bold tracking-wider uppercase ${SEV_TEXT[alerta.severity] ?? 'text-gs-muted'}`}
                     >

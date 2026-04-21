@@ -347,7 +347,7 @@ function DesktopSidebar() {
 
       {/* ── Navigation ── */}
       <nav
-        className="flex-1 overflow-y-auto overflow-x-hidden py-3 flex flex-col gap-4"
+        className="flex-1 overflow-y-auto overflow-x-hidden py-3 flex flex-col gap-4 no-scrollbar"
         style={{ padding: '12px 6px' }}
       >
         <NavGroup items={MODULE_ITEMS} label="Intel" expanded={expanded} />
@@ -485,7 +485,7 @@ function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void })
 
         {/* Nav */}
         <nav
-          className="flex-1 overflow-y-auto py-3 flex flex-col gap-4"
+          className="flex-1 overflow-y-auto py-3 flex flex-col gap-4 no-scrollbar"
           style={{ padding: '12px 8px' }}
         >
           {[

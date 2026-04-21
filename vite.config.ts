@@ -20,6 +20,15 @@ export default defineConfig({
     tsconfigPaths(),
   ],
   ...(process.env.VITEST ? testConfig : {}),
+  server: {
+    proxy: {
+      '/api/minimax': {
+        target: 'https://api.minimax.io/anthropic',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/minimax/, ''),
+      },
+    },
+  },
   build: {
     rollupOptions: {
       output: {

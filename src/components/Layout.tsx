@@ -21,7 +21,7 @@ import {
 import { useUIStore } from '@/stores/uiStore';
 import { getRouteMeta } from '@/app/routes';
 import { ThemeToggle } from '@/components/ThemeToggle';
-import { VoiceCore } from '@/components/VoiceCore';
+import { FridayOrb } from '@/components/FridayOrb';
 
 interface NavItem {
   id: string;
@@ -725,7 +725,7 @@ export function Layout({ children }: { children: ReactNode }) {
           </div>
         </main>
       </div>
-      <VoiceCore />
+      <FridayOrb />
     </div>
   );
 }

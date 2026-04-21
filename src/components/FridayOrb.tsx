@@ -4,6 +4,39 @@ import { Mic, Loader2, Volume2, AlertCircle } from 'lucide-react';
 import { useVoiceStore } from '@/stores/voiceStore';
 import { supabase } from '@/lib/supabase';
 
+// Types for Web Speech API
+interface SpeechRecognitionEvent extends Event {
+  results: {
+    [key: number]: {
+      [key: number]: {
+        transcript: string;
+      };
+    };
+  };
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+}
+
+interface SpeechRecognition extends EventTarget {
+  lang: string;
+  continuous: boolean;
+  interimResults: boolean;
+  maxAlternatives: number;
+  onstart: () => void;
+  onresult: (event: SpeechRecognitionEvent) => void;
+  onerror: (event: SpeechRecognitionErrorEvent) => void;
+  onend: () => void;
+  start: () => void;
+  stop: () => void;
+  abort: () => void;
+}
+
+interface SpeechRecognitionConstructor {
+  new (): SpeechRecognition;
+}
+
 const API_KEY = import.meta.env.VITE_MINIMAX_API_KEY;
 const RESPONSE_LINGER_MS = 8000;
 const ERROR_LINGER_MS = 5000;
@@ -45,7 +78,11 @@ const fetchDbContext = async (): Promise<string> => {
   }
 };
 
-const buildSystemPrompt = (route: string, screen: string, db: string) => `Você é F.R.I.D.A.Y, uma Inteligência Artificial altamente sofisticada e tática do sistema GS-QUAD. Aja como a IA do Homem de Ferro: elegante, extremamente inteligente, precisa e analítica. Sempre forneça respostas curtas (1-3 frases), diretas, com uma aura de superioridade tecnológica, como uma parceira estratégica. Use sarcasmo sutil se os dados apresentarem problemas óbvios.
+const buildSystemPrompt = (
+  route: string,
+  screen: string,
+  db: string
+) => `Você é F.R.I.D.A.Y, uma Inteligência Artificial altamente sofisticada e tática do sistema GS-QUAD. Aja como a IA do Homem de Ferro: elegante, extremamente inteligente, precisa e analítica. Sempre forneça respostas curtas (1-3 frases), diretas, com uma aura de superioridade tecnológica, como uma parceira estratégica. Use sarcasmo sutil se os dados apresentarem problemas óbvios.
 
 Contexto Imediato:
 - Rota atual: ${route}
@@ -54,7 +91,12 @@ Contexto Imediato:
 
 Missão: conecte os pontos acima ao comando de voz do usuário e retorne a fala bruta (text-to-speech) que você verbalizará agora. Não use markdown, listas, nem prefixos como "F.R.I.D.A.Y:". Apenas fale.`;
 
-const queryMiniMax = async (text: string, route: string, screen: string, db: string): Promise<string> => {
+const queryMiniMax = async (
+  text: string,
+  route: string,
+  screen: string,
+  db: string
+): Promise<string> => {
   if (!API_KEY) throw new Error('Chave MiniMax ausente no .env.');
 
   const res = await fetch('/api/minimax/v1/messages', {
@@ -81,10 +123,11 @@ const queryMiniMax = async (text: string, route: string, screen: string, db: str
 const pickVoice = (voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | null => {
   if (!voices.length) return null;
   const ptVoices = voices.filter((v) => v.lang?.toLowerCase().startsWith('pt'));
-  const pool = ptVoices.length ? ptVoices : voices;
+  if (!ptVoices.length) return null;
   const priority = [
     /francisca/i,
     /thalita/i,
+    /antonio/i,
     /maria.*neural/i,
     /microsoft.*neural/i,
     /google.*portug/i,
@@ -93,24 +136,30 @@ const pickVoice = (voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | null 
     /maria/i,
   ];
   for (const re of priority) {
-    const hit = pool.find((v) => re.test(v.name));
+    const hit = ptVoices.find((v) => re.test(v.name));
     if (hit) return hit;
   }
-  return pool.find((v) => v.lang === 'pt-BR') || pool[0] || null;
+  return ptVoices.find((v) => v.lang === 'pt-BR') || ptVoices[0];
 };
 
 export function FridayOrb() {
   const location = useLocation();
   const routeRef = useRef(location.pathname);
-  routeRef.current = location.pathname;
-
   const store = useVoiceStore();
   const { status, assistantResponse, errorMsg } = store;
   const storeRef = useRef(store);
-  storeRef.current = store;
+
+  useEffect(() => {
+    routeRef.current = location.pathname;
+  }, [location.pathname]);
+
+  useEffect(() => {
+    storeRef.current = store;
+  }, [store]);
 
   const [isHovered, setIsHovered] = useState(false);
-  const recognitionRef = useRef<any>(null);
+  const [hasPtVoice, setHasPtVoice] = useState(true);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
   const voicesRef = useRef<SpeechSynthesisVoice[]>([]);
   const idleTimerRef = useRef<number | null>(null);
   const isRecordingRef = useRef(false);
@@ -118,7 +167,9 @@ export function FridayOrb() {
   useEffect(() => {
     if (typeof window === 'undefined' || !window.speechSynthesis) return;
     const load = () => {
-      voicesRef.current = window.speechSynthesis.getVoices();
+      const list = window.speechSynthesis.getVoices();
+      voicesRef.current = list;
+      setHasPtVoice(list.some((v) => v.lang?.toLowerCase().startsWith('pt')));
     };
     load();
     window.speechSynthesis.addEventListener('voiceschanged', load);
@@ -133,8 +184,17 @@ export function FridayOrb() {
     window.speechSynthesis.cancel();
     const utter = new SpeechSynthesisUtterance(text);
     const voice = pickVoice(voicesRef.current);
-    if (voice) utter.voice = voice;
-    utter.lang = voice?.lang || 'pt-BR';
+    if (voice) {
+      utter.voice = voice;
+      utter.lang = voice.lang;
+    } else {
+      utter.lang = 'pt-BR';
+      if (import.meta.env.DEV) {
+        console.warn(
+          '[FRIDAY] Nenhuma voz pt-BR instalada no SO. Instale em: Configurações → Hora e idioma → Idioma → Português (Brasil) → Opções → Instalar voz.'
+        );
+      }
+    }
     utter.pitch = 1.15;
     utter.rate = 1.12;
     utter.onstart = () => storeRef.current.setStatus('speaking');
@@ -143,32 +203,40 @@ export function FridayOrb() {
     window.speechSynthesis.speak(utter);
   }, []);
 
-  const handleTranscript = useCallback(async (text: string) => {
-    const s = storeRef.current;
-    s.setTranscript(text);
-    s.setStatus('processing');
-    try {
-      const [screen, db] = await Promise.all([
-        Promise.resolve(getScreenContext()),
-        fetchDbContext(),
-      ]);
-      const answer = await queryMiniMax(text, describeRoute(routeRef.current), screen, db);
-      s.setAssistantResponse(answer);
-      speak(answer);
-    } catch (err: any) {
-      s.setError(err?.message || 'Falha na comunicação com o núcleo.');
-      s.setStatus('error');
-      if (idleTimerRef.current) window.clearTimeout(idleTimerRef.current);
-      idleTimerRef.current = window.setTimeout(() => {
-        storeRef.current.setStatus('idle');
-        storeRef.current.setError(null);
-      }, ERROR_LINGER_MS);
-    }
-  }, [speak]);
+  const handleTranscript = useCallback(
+    async (text: string) => {
+      const s = storeRef.current;
+      s.setTranscript(text);
+      s.setStatus('processing');
+      try {
+        const [screen, db] = await Promise.all([
+          Promise.resolve(getScreenContext()),
+          fetchDbContext(),
+        ]);
+        const answer = await queryMiniMax(text, describeRoute(routeRef.current), screen, db);
+        s.setAssistantResponse(answer);
+        speak(answer);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Falha na comunicação com o núcleo.';
+        s.setError(message);
+        s.setStatus('error');
+        if (idleTimerRef.current) window.clearTimeout(idleTimerRef.current);
+        idleTimerRef.current = window.setTimeout(() => {
+          storeRef.current.setStatus('idle');
+          storeRef.current.setError(null);
+        }, ERROR_LINGER_MS);
+      }
+    },
+    [speak]
+  );
 
   const ensureRecognition = useCallback(() => {
     if (recognitionRef.current) return recognitionRef.current;
-    const SR: any = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const win = window as unknown as {
+      SpeechRecognition: SpeechRecognitionConstructor;
+      webkitSpeechRecognition: SpeechRecognitionConstructor;
+    };
+    const SR = win.SpeechRecognition || win.webkitSpeechRecognition;
     if (!SR) return null;
     const rec = new SR();
     rec.lang = 'pt-BR';
@@ -176,12 +244,12 @@ export function FridayOrb() {
     rec.interimResults = false;
     rec.maxAlternatives = 1;
     rec.onstart = () => storeRef.current.setStatus('listening');
-    rec.onresult = (e: any) => {
+    rec.onresult = (e: SpeechRecognitionEvent) => {
       const text = e.results?.[0]?.[0]?.transcript?.trim();
       if (text) handleTranscript(text);
       else storeRef.current.setStatus('idle');
     };
-    rec.onerror = (e: any) => {
+    rec.onerror = (e: SpeechRecognitionErrorEvent) => {
       isRecordingRef.current = false;
       if (e.error === 'aborted' || e.error === 'no-speech') {
         storeRef.current.setStatus('idle');
@@ -222,7 +290,11 @@ export function FridayOrb() {
 
   const stopRecording = useCallback(() => {
     if (recognitionRef.current && isRecordingRef.current) {
-      try { recognitionRef.current.stop(); } catch { /* noop */ }
+      try {
+        recognitionRef.current.stop();
+      } catch {
+        /* noop */
+      }
     }
   }, []);
 
@@ -255,7 +327,11 @@ export function FridayOrb() {
       window.removeEventListener('keydown', down);
       window.removeEventListener('keyup', up);
       if (recognitionRef.current) {
-        try { recognitionRef.current.abort(); } catch { /* noop */ }
+        try {
+          recognitionRef.current.abort();
+        } catch {
+          /* noop */
+        }
       }
       if (idleTimerRef.current) window.clearTimeout(idleTimerRef.current);
       if (typeof window !== 'undefined' && window.speechSynthesis) {
@@ -318,12 +394,20 @@ export function FridayOrb() {
           style={{ color: statusColor }}
         >
           F.R.I.D.A.Y
-          {status === 'speaking' && <div className="h-0.5 flex-1 bg-[var(--color-gs-green)]/30 animate-pulse" />}
+          {status === 'speaking' && (
+            <div className="h-0.5 flex-1 bg-[var(--color-gs-green)]/30 animate-pulse" />
+          )}
         </div>
 
         {status === 'idle' && !assistantResponse && (
           <div className="text-[11px] text-[var(--color-gs-muted)] font-mono">
             Segure <kbd className="px-1 border rounded text-[9px]">ESPAÇO</kbd> ou clique no orbe.
+            {!hasPtVoice && (
+              <div className="mt-2 text-[10px] text-[var(--color-gs-yellow,#eab308)] leading-snug">
+                ⚠ Nenhuma voz pt-BR no SO. Instale em Configurações → Idioma → Português (Brasil) →
+                Voz. Usando TTS online se disponível.
+              </div>
+            )}
           </div>
         )}
         {status === 'listening' && (
@@ -357,16 +441,12 @@ export function FridayOrb() {
       <button
         onClick={handleOrbClick}
         aria-label="Ativar F.R.I.D.A.Y"
-        className="w-16 h-16 rounded-full flex items-center justify-center transition-all relative border-2 cursor-pointer hover:scale-105"
+        className="w-14 h-14 rounded-full flex items-center justify-center transition-all relative border-2 cursor-pointer hover:scale-105"
         style={{
-          background: 'var(--color-gs-panel)',
-          borderColor: 'var(--color-gs-green)',
-          color: 'var(--color-gs-green)',
-          boxShadow: `0 0 20px var(--color-gs-green)`,
-          zIndex: 9999999,
-          position: 'fixed',
-          bottom: '24px',
-          right: '24px'
+          background: 'var(--color-gs-deep, var(--color-gs-panel))',
+          borderColor: statusColor,
+          color: statusColor,
+          boxShadow: `0 0 12px ${statusColor}66`,
         }}
       >
         {['listening', 'processing', 'speaking'].includes(status) && (
@@ -380,5 +460,3 @@ export function FridayOrb() {
     </div>
   );
 }
-
-console.log('FridayOrb loaded');

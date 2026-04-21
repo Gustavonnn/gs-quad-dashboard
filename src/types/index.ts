@@ -56,18 +56,6 @@ export interface LiveMetrics {
   sparkData: number[]
 }
 
-export interface MLPriceTimeline {
-  sku: string
-  evento_data: string
-  preco_anterior: number
-  preco_novo: number
-  delta_preco_pct: number
-  volume_7d_antes: number
-  volume_7d_depois: number
-  delta_volume_pct: number
-  absorcao_status: 'ABSORVIDO' | 'REJEITADO' | 'INEFICAZ'
-}
-
 export interface MLInsight {
   sku: string
   titulo: string

@@ -6,8 +6,8 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
-import { iaAlertaSchema, curvaABCSchema, iaGrowthPlanSchema, mlPriceTimelineSchema, mlInsightSchema, liveProdutosSchema, ALERTA_RANK, GROWTH_RANK } from '@/lib/schemas'
-import type { IAAlerta, IAGrowthPlan, MLPriceTimeline, MLInsight, CurvaABC, LiveProduto } from '@/lib/schemas'
+import { iaAlertaSchema, curvaABCSchema, iaGrowthPlanSchema, mlPriceTimelineSchema, mlInsightSchema } from '@/lib/schemas'
+import type { IAAlerta, IAGrowthPlan, MLPriceTimeline, MLInsight, CurvaABC } from '@/lib/schemas'
 import { useRealtimeTable } from './useRealtimeTable'
 
 // ─── Live Metrics ─────────────────────────────────────────────
@@ -86,7 +86,6 @@ export function useCurvaABC(limit = 500) {
 // ─── IA Alertas (with Realtime) ────────────────────────────────
 
 export function useIAAlertas(limit = 50) {
-  const queryClient = useQueryClient()
 
   // Realtime disabled — data updated once per day via Excel
   useRealtimeTable({
@@ -296,7 +295,7 @@ export function usePaginatedAlertas({ page, pageSize, severity, status, search }
 
       query = query.order('data_registro', { ascending: false })
 
-      const { data, error, count } = await query
+      const { data, error } = await query
       if (error) throw error
 
       return (data || []).map((row) => iaAlertaSchema.parse(row))

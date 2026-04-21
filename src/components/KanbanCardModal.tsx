@@ -8,7 +8,7 @@ import {
 import { Badge } from '@/components/ui'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import { Zap, Brain, Edit3, Tag, DollarSign, Image, X } from 'lucide-react'
+import { Zap, Brain, Edit3, Tag, X } from 'lucide-react'
 
 interface KanbanCardModalProps {
   card: KanbanCard | null
@@ -24,8 +24,8 @@ export function KanbanCardModal({
   open,
   onClose,
   onTrigger,
-  onSaveBriefing,
-  onSaveManual,
+  onSaveBriefing: _onSaveBriefing,
+  onSaveManual: _onSaveManual,
 }: KanbanCardModalProps) {
   const [activeTab, setActiveTab] = useState<'briefing' | 'manual'>('briefing')
 
@@ -153,11 +153,11 @@ export function KanbanCardModal({
                       </div>
                     )}
 
-                    {wf?.tags_usadas?.length > 0 && (
+                    {wf?.tags_usadas && wf.tags_usadas.length > 0 && (
                       <div>
                         <div className="font-mono text-[9px] text-[var(--color-gs-muted)] uppercase tracking-widest mb-1">Tags</div>
                         <div className="flex flex-wrap gap-1">
-                          {wf.tags_usadas.map((tag) => (
+                          {wf.tags_usadas.map((tag: string) => (
                             <span key={tag} className="font-mono text-[9px] px-1.5 py-0.5 rounded-sm bg-[var(--color-gs-border)] text-[var(--color-gs-muted)]">
                               {tag}
                             </span>
@@ -252,7 +252,7 @@ export function KanbanCardModal({
                   <div>
                     <div className="font-mono text-[9px] text-[var(--color-gs-muted)] uppercase tracking-widest mb-1">Tags</div>
                     <div className="flex flex-wrap gap-1">
-                      {card.manual_data.tags.map((tag) => (
+                      {card.manual_data.tags.map((tag: string) => (
                         <span key={tag} className="font-mono text-[9px] px-1.5 py-0.5 rounded-sm bg-[var(--color-gs-border)] text-[var(--color-gs-muted)]">{tag}</span>
                       ))}
                     </div>

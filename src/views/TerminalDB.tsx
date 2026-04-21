@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { useTerminalData } from '../hooks/useTerminalData';
+import { useTerminalData } from '@/hooks';
 import type { TerminalSkuItem } from '../types/terminal';
 import {
   AreaChart,
@@ -27,7 +27,7 @@ interface TerminalDBProps {
 }
 
 export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
-  const { data, loading, error } = useTerminalData();
+  const { data, isLoading: loading, error } = useTerminalData();
   const [selectedSku, setSelectedSku] = useState<TerminalSkuItem | null>(null);
   const [selectedMlbId, setSelectedMlbId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
@@ -124,7 +124,7 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
               TTL Revenue 30d
             </span>
             <span className="text-xs lg:text-sm font-bold text-gs-green font-mono text-center lg:text-right">
-              {formatCurrency(data.reduce((a, b) => a + b.total_revenue_30d, 0))}
+              {formatCurrency((data ?? []).reduce((a, b) => a + b.total_revenue_30d, 0))}
             </span>
           </div>
           <div className="hidden lg:block w-[1px] bg-gs-border"></div>
@@ -133,7 +133,7 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
               Sales Yesterday
             </span>
             <span className="text-xs lg:text-sm font-bold text-gs-green font-mono text-center lg:text-right">
-              {data.reduce((a, b) => a + b.sales_yesterday, 0)}{' '}
+              {(data ?? []).reduce((a, b) => a + b.sales_yesterday, 0)}{' '}
               <span className="text-[9px] opacity-50 font-normal">un</span>
             </span>
           </div>
@@ -143,7 +143,7 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
               Global Stock
             </span>
             <span className="text-xs lg:text-sm font-bold text-gs-text font-mono text-center lg:text-right">
-              {data.reduce((a, b) => a + b.global_stock, 0)}{' '}
+              {(data ?? []).reduce((a, b) => a + b.global_stock, 0)}{' '}
               <span className="text-[9px] opacity-50 font-normal">un</span>
             </span>
           </div>
@@ -153,7 +153,7 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
       {/* Debug/Error Info */}
       {error && (
         <div className="bg-gray-500/10 border border-gray-500/30 p-3 rounded-sm">
-          <p className="text-gray-500 font-mono text-xs">⚠ Erro: {error}</p>
+          <p className="text-gray-500 font-mono text-xs">⚠ Erro: {error instanceof Error ? error.message : String(error)}</p>
         </div>
       )}
       {(!data || data.length === 0) && !loading && (

@@ -22,7 +22,7 @@ import {
   Target,
   BarChart2,
 } from 'lucide-react';
-import { useAdsRadar } from '../hooks/useAdsRadar';
+import { useAdsRadar } from '@/hooks';
 import type { AdsMLBEntry, RadarStatus, RadarAction } from '../types/terminal';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

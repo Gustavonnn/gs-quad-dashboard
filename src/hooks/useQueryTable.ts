@@ -1,6 +1,5 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import type { SupabaseClient } from '@supabase/supabase-js'
 import { z } from 'zod'
 
 export interface UseQueryTableOptions<T> {
@@ -33,8 +32,6 @@ export function useQueryTable<T>({
   count = 'exact',
   enabled = true,
 }: UseQueryTableOptions<T>): UseQueryTableResult<T> {
-  const queryClient = useQueryClient()
-
   const query = useQuery({
     queryKey: ['table', table, select, filters, orderBy, range],
     queryFn: async () => {
@@ -103,7 +100,7 @@ export function useLiveMetrics() {
 
       const lastDate = lastDateRow?.[0]?.data_venda?.split('T')[0]
 
-      const [{ data: vendas, count: vendasCount }, { count: alertasAtivos }, { count: totalProdutos }] = await Promise.all([
+      const [{ data: vendas }, { count: alertasAtivos }, { count: totalProdutos }] = await Promise.all([
         lastDate
           ? supabase.from('live_vendas').select('receita_total').gte('data_venda', lastDate)
           : Promise.resolve({ data: [], count: 0 }),

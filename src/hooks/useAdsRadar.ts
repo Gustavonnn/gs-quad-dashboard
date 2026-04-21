@@ -211,7 +211,7 @@ export interface AdsRadarSummary {
 }
 
 export function useAdsRadar() {
-  const { data, loading, error } = useTerminalData();
+  const { data, isLoading, error } = useTerminalData();
 
   const entries = useMemo<AdsMLBEntry[]>(() => {
     if (!data || data.length === 0) return [];
@@ -248,5 +248,5 @@ export function useAdsRadar() {
     };
   }, [entries, winners, monitors, kills]);
 
-  return { entries, winners, monitors, kills, summary, loading, error };
+  return { entries, winners, monitors, kills, summary, loading: isLoading, error };
 }

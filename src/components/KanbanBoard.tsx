@@ -10,12 +10,10 @@ import {
   closestCorners,
   DragOverlay,
 } from '@dnd-kit/core'
-import { arrayMove } from '@dnd-kit/sortable'
 import { type KanbanCard, type KanbanStatus, KANBAN_COLUMNS, useKanbanCards, useUpdateKanbanCardStatus, useDeleteKanbanCard, useTriggerKanbanAnalysis } from '@/hooks'
 import { KanbanColumn } from './KanbanColumn'
 import { KanbanCardModal } from './KanbanCardModal'
 import { useCreateKanbanCard } from '@/hooks/useKanbanBoard'
-import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 

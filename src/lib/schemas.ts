@@ -179,7 +179,7 @@ export const kanbanCardSchema = z.object({
   type: kanbanCardTypeSchema,
   categoria: z.string().nullable(),
   briefing_data: briefingDataSchema.nullable(),
-  manual_data: z.record(z.any()).nullable(),
+  manual_data: z.record(z.string(), z.any()).nullable(),
   created_at: z.string(),
   updated_at: z.string(),
   created_by: z.string().nullable(),
@@ -189,3 +189,4 @@ export const kanbanCardSchema = z.object({
 })
 
 export type KanbanCard = z.infer<typeof kanbanCardSchema>
+export type KanbanStatus = z.infer<typeof kanbanStatusSchema>

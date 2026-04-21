@@ -1,12 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import type { SupabaseClient } from '@supabase/supabase-js'
 import { toast } from 'sonner'
 
 export interface UseMutationOptions<TInput, TOutput> {
   table: string
   mutationFn?: (
-    supabase: SupabaseClient,
+    supabase: any,
     input: TInput
   ) => Promise<{ data: TOutput | null; error: any }>
   invalidates?: string[]
@@ -30,7 +29,7 @@ export function useSupabaseMutation<TInput, TOutput = any>({
   const queryClient = useQueryClient()
 
   const defaultMutationFn = async (
-    supabase: SupabaseClient,
+    supabase: any,
     input: TInput
   ) => {
     // Default: INSERT if input has no id, UPDATE if it has id
@@ -72,7 +71,7 @@ export function useSupabaseMutation<TInput, TOutput = any>({
       return { previousData }
     },
 
-    onError: (err, input, context) => {
+    onError: (err, _input, context) => {
       if (optimisticUpdate && context?.previousData !== undefined) {
         queryClient.setQueryData(optimisticUpdate.queryKey, context.previousData)
       }
@@ -81,7 +80,7 @@ export function useSupabaseMutation<TInput, TOutput = any>({
       toast.error(message)
     },
 
-    onSuccess: (data, input) => {
+    onSuccess: (_data, _input) => {
       if (onSuccessMessage) {
         toast.success(onSuccessMessage)
       }
@@ -106,7 +105,7 @@ export function useSupabaseMutation<TInput, TOutput = any>({
 export function useResolveAlerta() {
   return useSupabaseMutation({
     table: 'ia_alertas',
-    mutationFn: async (supabase, alertId: string) => {
+    mutationFn: async (supabase: any, alertId: string) => {
       return supabase
         .from('ia_alertas')
         .update({
@@ -116,7 +115,7 @@ export function useResolveAlerta() {
         })
         .eq('id', alertId)
     },
-    invalidates: [['table', 'ia_alertas']],
+    invalidates: ['ia_alertas'],
     onSuccessMessage: 'Alerta resolvido',
     onErrorMessage: 'Erro ao resolver alerta',
   })
@@ -126,7 +125,7 @@ export function useUpdateAlertaStatus() {
   return useSupabaseMutation({
     table: 'ia_alertas',
     mutationFn: async (
-      supabase,
+      supabase: any,
       { id, status }: { id: string; status: string }
     ) => {
       const updates: Record<string, any> = { status }
@@ -136,7 +135,7 @@ export function useUpdateAlertaStatus() {
       }
       return supabase.from('ia_alertas').update(updates).eq('id', id)
     },
-    invalidates: [['table', 'ia_alertas']],
+    invalidates: ['ia_alertas'],
     onSuccessMessage: 'Status atualizado',
     onErrorMessage: 'Erro ao atualizar status',
   })
@@ -146,7 +145,7 @@ export function useUpdateGrowthPlanStatus() {
   return useSupabaseMutation({
     table: 'ia_growth_plans',
     mutationFn: async (
-      supabase,
+      supabase: any,
       { id, status_intervencao }: { id: string; status_intervencao: string }
     ) => {
       return supabase
@@ -154,7 +153,7 @@ export function useUpdateGrowthPlanStatus() {
         .update({ status_intervencao })
         .eq('id', id)
     },
-    invalidates: [['table', 'ia_growth_plans']],
+    invalidates: ['ia_growth_plans'],
     onSuccessMessage: 'Plano atualizado',
     onErrorMessage: 'Erro ao atualizar plano',
   })

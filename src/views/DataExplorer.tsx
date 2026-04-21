@@ -46,7 +46,7 @@ export function DataExplorer() {
   ];
 
   // Columns
-  const curvaColumns = useMemo<ColumnDef<unknown>[]>(
+  const curvaColumns = useMemo<ColumnDef<any>[]>(
     () => [
       {
         accessorKey: 'id',
@@ -54,7 +54,7 @@ export function DataExplorer() {
         size: 140,
         cell: ({ row }) => (
           <span className="font-mono text-xs text-[var(--color-gs-green)]">
-            {(row.original as Record<string, unknown>).id}
+            {(row.original as any).id}
           </span>
         ),
       },
@@ -65,9 +65,9 @@ export function DataExplorer() {
         cell: ({ row }) => (
           <span
             className="text-sm truncate max-w-[280px] block"
-            title={(row.original as Record<string, unknown>).titulo}
+            title={(row.original as any).titulo as string}
           >
-            {(row.original as Record<string, unknown>).titulo}
+            {(row.original as any).titulo}
           </span>
         ),
       },
@@ -75,10 +75,11 @@ export function DataExplorer() {
         accessorKey: 'curva_abc',
         header: 'Curva',
         size: 80,
-        cell: ({ row }) => {
-          const c = (row.original as Record<string, unknown>).curva_abc;
+        cell: ({ row }: any) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const c = (row.original as any).curva_abc;
           return (
-            <Badge variant={c === 'A' ? 'success' : c === 'B' ? 'warning' : 'secondary'}>{c}</Badge>
+            <Badge variant={c === 'A' ? 'success' : c === 'B' ? 'warning' : 'secondary'}>{c as string}</Badge>
           );
         },
       },
@@ -89,7 +90,7 @@ export function DataExplorer() {
         cell: ({ row }) => (
           <span className="font-mono text-xs">
             {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
-              (row.original as Record<string, unknown>).receita_30d
+              (row.original as any).receita_30d as number
             )}
           </span>
         ),
@@ -98,8 +99,9 @@ export function DataExplorer() {
         accessorKey: 'tendencia',
         header: 'Tendência',
         size: 110,
-        cell: ({ row }) => {
-          const t = (row.original as Record<string, unknown>).tendencia;
+        cell: ({ row }: any) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const t = (row.original as any).tendencia as string;
           const colors: Record<string, string> = {
             crescendo: 'text-[var(--color-gs-green)]',
             caindo: 'text-[var(--color-gs-text)]',
@@ -113,7 +115,7 @@ export function DataExplorer() {
     []
   );
 
-  const alertaColumns = useMemo<ColumnDef<unknown>[]>(
+  const alertaColumns = useMemo<ColumnDef<any>[]>(
     () => [
       {
         accessorKey: 'sku',
@@ -121,7 +123,7 @@ export function DataExplorer() {
         size: 140,
         cell: ({ row }) => (
           <span className="font-mono text-xs text-[var(--color-gs-green)]">
-            {(row.original as Record<string, unknown>).sku}
+            {(row.original as any).sku}
           </span>
         ),
       },
@@ -130,7 +132,7 @@ export function DataExplorer() {
         header: 'Severidade',
         size: 100,
         cell: ({ row }) => {
-          const s = (row.original as Record<string, unknown>).severity;
+          const s = (row.original as any).severity as string;
           return (
             <Badge
               variant={
@@ -153,7 +155,7 @@ export function DataExplorer() {
         header: 'Tipo',
         size: 150,
         cell: ({ row }) => (
-          <span className="text-xs">{(row.original as Record<string, unknown>).tipo_alerta}</span>
+          <span className="text-xs">{(row.original as any).tipo_alerta}</span>
         ),
       },
       {
@@ -162,7 +164,7 @@ export function DataExplorer() {
         size: 300,
         cell: ({ row }) => (
           <span className="text-xs text-[var(--color-gs-muted)] truncate max-w-[280px] block">
-            {(row.original as Record<string, unknown>).descricao}
+            {(row.original as any).descricao}
           </span>
         ),
       },
@@ -172,7 +174,7 @@ export function DataExplorer() {
         size: 100,
         cell: ({ row }) => (
           <span className="font-mono text-[10px] text-[var(--color-gs-muted)]">
-            {new Date((row.original as Record<string, unknown>).data_registro).toLocaleDateString(
+            {new Date((row.original as any).data_registro).toLocaleDateString(
               'pt-BR'
             )}
           </span>
@@ -182,7 +184,7 @@ export function DataExplorer() {
     []
   );
 
-  const insightColumns = useMemo<ColumnDef<unknown>[]>(
+  const insightColumns = useMemo<ColumnDef<any>[]>(
     () => [
       {
         accessorKey: 'sku',
@@ -190,7 +192,7 @@ export function DataExplorer() {
         size: 140,
         cell: ({ row }) => (
           <span className="font-mono text-xs text-[var(--color-gs-green)]">
-            {(row.original as Record<string, unknown>).sku}
+            {(row.original as any).sku}
           </span>
         ),
       },
@@ -198,8 +200,9 @@ export function DataExplorer() {
         accessorKey: 'rupture_risk',
         header: 'Rupture Risk',
         size: 100,
-        cell: ({ row }) => {
-          const v = (row.original as Record<string, unknown>).rupture_risk;
+        cell: ({ row }: any) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const v = (row.original as any).rupture_risk as number;
           return (
             <span
               className={`font-mono text-xs font-bold ${
@@ -221,7 +224,7 @@ export function DataExplorer() {
         size: 90,
         cell: ({ row }) => (
           <span className="font-mono text-xs text-gs-muted">
-            {(row.original as Record<string, unknown>).anomaly_score?.toFixed(3)}
+            {((row.original as any).anomaly_score as number)?.toFixed(3)}
           </span>
         ),
       },
@@ -230,7 +233,7 @@ export function DataExplorer() {
         header: 'Cluster',
         size: 90,
         cell: ({ row }) => (
-          <Badge variant="secondary">{(row.original as Record<string, unknown>).ml_cluster}</Badge>
+          <Badge variant="secondary">{(row.original as any).ml_cluster}</Badge>
         ),
       },
       {
@@ -239,7 +242,7 @@ export function DataExplorer() {
         size: 100,
         cell: ({ row }) => (
           <span className="font-mono text-xs">
-            ε = {(row.original as Record<string, unknown>).elasticity?.toFixed(2) ?? '—'}
+            ε = {((row.original as any).elasticity as number)?.toFixed(2) ?? '—'}
           </span>
         ),
       },

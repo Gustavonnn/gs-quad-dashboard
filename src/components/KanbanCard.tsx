@@ -1,7 +1,6 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { type KanbanCard } from '@/hooks'
-import { Badge } from '@/components/ui'
 import { GripVertical, Zap, Brain, Trash2 } from 'lucide-react'
 
 interface KanbanCardProps {

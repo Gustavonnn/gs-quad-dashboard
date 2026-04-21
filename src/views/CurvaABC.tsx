@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { useCurvaABC } from '../hooks/useSupabaseData'
-import { Card, Badge, MetricDisplay } from '../components/ui'
+import { useCurvaABC } from '@/hooks'
+import { Card, Badge } from '@/components/ui'
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
@@ -12,7 +12,7 @@ const CURVA_COLOR: Record<string, string> = { A: 'text-gs-green', B: 'text-gs-bl
 const TENDENCIA_ICON: Record<string, string> = { crescendo: '↑', caindo: '↓', estavel: '→', declínio: '↓↓' }
 
 export function CurvaABC() {
-  const { data, loading } = useCurvaABC()
+  const { data, isLoading: loading } = useCurvaABC()
   const [filter, setFilter] = useState<CurvaFilter>('all')
   const [search, setSearch] = useState('')
 
@@ -40,24 +40,30 @@ export function CurvaABC() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <MetricDisplay
-          label="CURVA A"
-          value={grupos.A.length}
-          badge={<Badge variant="ok">TOP 80%</Badge>}
-          trend={<span className="text-gs-green">{formatCurrency(receitaA)}</span>}
-        />
-        <MetricDisplay
-          label="CURVA B"
-          value={grupos.B.length}
-          badge={<Badge variant="ok">80–95%</Badge>}
-          trend={<span className="text-gs-blue">{formatCurrency(receitaB)}</span>}
-        />
-        <MetricDisplay
-          label="CURVA C"
-          value={grupos.C.length}
-          badge={<Badge variant="warn">INTERVENÇÃO</Badge>}
-          trend={<span className="text-gs-red">{formatCurrency(receitaC)}</span>}
-        />
+        <Card className="p-5 flex flex-col gap-2">
+          <span className="font-mono text-[10px] text-gs-muted tracking-widest uppercase">CURVA A</span>
+          <span className="font-display font-bold text-2xl text-gs-text">{grupos.A.length}</span>
+          <div className="flex items-center justify-between">
+            <Badge variant="success">TOP 80%</Badge>
+            <span className="text-gs-green font-mono text-xs">{formatCurrency(receitaA)}</span>
+          </div>
+        </Card>
+        <Card className="p-5 flex flex-col gap-2">
+          <span className="font-mono text-[10px] text-gs-muted tracking-widest uppercase">CURVA B</span>
+          <span className="font-display font-bold text-2xl text-gs-text">{grupos.B.length}</span>
+          <div className="flex items-center justify-between">
+            <Badge variant="success">80–95%</Badge>
+            <span className="text-gs-blue font-mono text-xs">{formatCurrency(receitaB)}</span>
+          </div>
+        </Card>
+        <Card className="p-5 flex flex-col gap-2">
+          <span className="font-mono text-[10px] text-gs-muted tracking-widest uppercase">CURVA C</span>
+          <span className="font-display font-bold text-2xl text-gs-text">{grupos.C.length}</span>
+          <div className="flex items-center justify-between">
+            <Badge variant="warning">INTERVENÇÃO</Badge>
+            <span className="text-gs-red font-mono text-xs">{formatCurrency(receitaC)}</span>
+          </div>
+        </Card>
       </div>
 
       {/* Filters & Search */}
@@ -149,9 +155,9 @@ export function CurvaABC() {
                   </td>
                   <td className="px-5 py-3">
                     {item.alerta ? (
-                       <Badge variant="critical">ALERTA NOVO</Badge>
+                       <Badge variant="danger">ALERTA NOVO</Badge>
                     ) : (
-                       <Badge variant="ok">CONFORME</Badge>
+                       <Badge variant="success">CONFORME</Badge>
                     )}
                   </td>
                 </tr>

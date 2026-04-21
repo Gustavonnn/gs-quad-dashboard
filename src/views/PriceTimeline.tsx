@@ -189,7 +189,7 @@ export function PriceTimeline() {
 
         <div className="flex items-center gap-4">
           <button
-            onClick={refetch}
+            onClick={() => refetch()}
             className="group flex items-center gap-2 font-mono text-[10px] tracking-widest uppercase px-4 py-2 rounded-sm transition-all bg-gs-surface border border-gs-border hover:border-gs-text hover:text-gs-text"
           >
             <span className="group-hover:rotate-180 transition-transform duration-500">↻</span>

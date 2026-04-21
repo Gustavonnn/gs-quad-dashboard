@@ -9,7 +9,7 @@ const formatPct = (val: number | null) => {
 };
 
 interface MLIntelProps {
-  onSelectSku: (sku: string) => void;
+  onSelectSku?: (sku: string) => void;
 }
 
 export function MLIntel({ onSelectSku }: MLIntelProps) {
@@ -85,7 +85,7 @@ export function MLIntel({ onSelectSku }: MLIntelProps) {
               ruptures.map((item: MLInsight) => (
                 <div
                   key={item.sku}
-                  onClick={() => onSelectSku(item.sku)}
+                  onClick={() => onSelectSku?.(item.sku)}
                   className="group relative border border-gs-border bg-gs-bg p-3 rounded-sm hover:-translate-y-0.5 transition-all duration-200 cursor-pointer hover:border-gs-yellow/50"
                 >
                   <div className="absolute top-0 left-0 w-1 h-full bg-gs-yellow rounded-l-sm" />
@@ -147,7 +147,7 @@ export function MLIntel({ onSelectSku }: MLIntelProps) {
               anomalies.map((item: MLInsight) => (
                 <div
                   key={item.sku}
-                  onClick={() => onSelectSku(item.sku)}
+                  onClick={() => onSelectSku?.(item.sku)}
                   className="group relative border border-gs-border bg-gs-panel p-3 rounded-sm cursor-pointer hover:border-gs-text/60 transition-all"
                 >
                   <div className="flex justify-between items-start">
@@ -199,7 +199,7 @@ export function MLIntel({ onSelectSku }: MLIntelProps) {
                 .map((item: MLInsight) => (
                   <div
                     key={item.sku}
-                    onClick={() => onSelectSku(item.sku)}
+                    onClick={() => onSelectSku?.(item.sku)}
                     className="border border-gs-border bg-gs-bg p-3 rounded-sm flex items-center justify-between cursor-pointer hover:border-gs-green/50 transition-all"
                   >
                     <div>
@@ -235,7 +235,7 @@ export function MLIntel({ onSelectSku }: MLIntelProps) {
               .map((item: MLInsight) => (
                 <div
                   key={item.sku}
-                  onClick={() => onSelectSku(item.sku)}
+                  onClick={() => onSelectSku?.(item.sku)}
                   className="border border-gs-border bg-gs-bg p-3 rounded-sm cursor-pointer hover:border-gs-yellow/50 transition-all"
                 >
                   <div className="flex justify-between items-center mb-2">

@@ -1,10 +1,10 @@
 import { expect, afterEach, vi } from 'vitest'
 import { cleanup } from '@testing-library/react'
-import * as matchers from '@testing-library/react'
+import * as matchers from '@testing-library/jest-dom/matchers'
 import '@testing-library/jest-dom'
 
 // Extend expect with testing-library matchers
-expect.extend(matchers)
+expect.extend(matchers as any)
 
 // Cleanup after each test
 afterEach(() => {
@@ -32,7 +32,7 @@ class ResizeObserverMock {
   unobserve = vi.fn()
   disconnect = vi.fn()
 }
-window.ResizeObserver = ResizeObserverMock
+(window as any).ResizeObserver = ResizeObserverMock
 
 // Mock IntersectionObserver
 class IntersectionObserverMock {
@@ -41,4 +41,4 @@ class IntersectionObserverMock {
   disconnect = vi.fn()
   takeRecords = vi.fn()
 }
-window.IntersectionObserver = IntersectionObserverMock
+(window as any).IntersectionObserver = IntersectionObserverMock

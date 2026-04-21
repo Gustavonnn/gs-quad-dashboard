@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Card } from '@/components/ui';
 import { Activity, AlertTriangle, CheckCircle, TrendingUp, Zap, Clock } from 'lucide-react';
 

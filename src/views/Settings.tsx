@@ -1,7 +1,7 @@
 import { useUIStore } from '@/stores/uiStore'
-import { Card, Button, Badge } from '@/components/ui'
+import { Card, Badge } from '@/components/ui'
 import { Separator } from '@/components/ui/separator'
-import { Moon, Sun, Monitor, Keyboard } from 'lucide-react'
+import { Moon, Sun, Keyboard } from 'lucide-react'
 
 export function Settings() {
   const { theme, setTheme } = useUIStore()

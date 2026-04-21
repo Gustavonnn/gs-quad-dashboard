@@ -39,6 +39,35 @@
   --glass-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
   --glass-highlight: rgba(255, 255, 255, 0.03);
 
+  /* ── Design System v2.1 aliases ── */
+  --gs-deep: var(--color-gs-deep);
+  --gs-bg: var(--color-gs-bg);
+  --gs-surface: var(--color-gs-surface);
+  --gs-panel: var(--color-gs-panel);
+  --gs-header: var(--color-gs-header);
+  --gs-border: var(--color-gs-border);
+  --gs-subtle: var(--color-gs-subtle);
+  --gs-text: var(--color-gs-text);
+  --gs-muted: var(--color-gs-muted);
+  --gs-green: var(--color-gs-green);
+  --gs-green-dim: var(--color-gs-green-dim);
+  --gs-blue: var(--color-gs-blue);
+  --gs-blue-dim: var(--color-gs-blue-dim);
+  --gs-cyan: var(--color-gs-cyan);
+  --gs-cyan-dim: var(--color-gs-cyan-dim);
+  --gs-red: var(--color-gs-red);
+  --gs-red-dim: var(--color-gs-red-dim);
+  --gs-yellow: var(--color-gs-yellow);
+  --gs-yellow-dim: var(--color-gs-yellow-dim);
+  --gs-orange: var(--color-gs-orange);
+  --gs-orange-dim: var(--color-gs-orange-dim);
+  --gs-chart-grid: var(--color-gs-chart-grid);
+  --gs-chart-label: var(--color-gs-chart-label);
+
+  --shadow-card: 1px 1px 0 var(--color-gs-border);
+  --shadow-hover: 3px 3px 0 var(--color-gs-border);
+  --shadow-glow: 0 0 8px var(--color-gs-green);
+
   color-scheme: dark;
 }
 
@@ -47,19 +76,19 @@
   --color-gs-deep: #f5f5f5;
   --color-gs-bg: #f5f5f5;
   --color-gs-surface: #ffffff;
-  --color-gs-panel: #ffffff; /* Sidebar/Panels Brancos */
-  --color-gs-header: #fff159; /* Header Amarelo ML */
+  --color-gs-panel: #ffffff;
+  --color-gs-header: #fff159;
   --color-gs-border: #e6e6e6;
   --color-gs-text: #333333;
   --color-gs-muted: #666666;
 
-  --color-gs-green: #3483fa; /* Azul ML para links importantes */
+  --color-gs-green: #3483fa;
   --color-gs-green-dim: rgba(52, 131, 250, 0.12);
   --color-gs-blue: #3483fa;
   --color-gs-blue-dim: rgba(52, 131, 250, 0.12);
   --color-gs-cyan: #00adef;
   --color-gs-cyan-dim: rgba(0, 173, 239, 0.12);
-  --color-gs-red: #555555; /* Cinza médio neutro */
+  --color-gs-red: #555555;
   --color-gs-red-dim: rgba(85, 85, 85, 0.08);
   --color-gs-yellow: #fff159;
   --color-gs-yellow-dim: rgba(255, 241, 89, 0.15);
@@ -73,7 +102,60 @@
   --glass-shadow: 1px 1px 0 rgba(0, 0, 0, 0.05);
   --glass-highlight: rgba(255, 255, 255, 1);
 
+  /* ── Design System v2.1 aliases ── */
+  --gs-deep: var(--color-gs-deep);
+  --gs-bg: var(--color-gs-bg);
+  --gs-surface: var(--color-gs-surface);
+  --gs-panel: var(--color-gs-panel);
+  --gs-header: var(--color-gs-header);
+  --gs-border: var(--color-gs-border);
+  --gs-subtle: var(--color-gs-subtle);
+  --gs-text: var(--color-gs-text);
+  --gs-muted: var(--color-gs-muted);
+  --gs-green: var(--color-gs-green);
+  --gs-green-dim: var(--color-gs-green-dim);
+  --gs-blue: var(--color-gs-blue);
+  --gs-blue-dim: var(--color-gs-blue-dim);
+  --gs-cyan: var(--color-gs-cyan);
+  --gs-cyan-dim: var(--color-gs-cyan-dim);
+  --gs-red: var(--color-gs-red);
+  --gs-red-dim: var(--color-gs-red-dim);
+  --gs-yellow: var(--color-gs-yellow);
+  --gs-yellow-dim: var(--color-gs-yellow-dim);
+  --gs-orange: var(--color-gs-orange);
+  --gs-orange-dim: var(--color-gs-orange-dim);
+  --gs-chart-grid: var(--color-gs-chart-grid);
+  --gs-chart-label: var(--color-gs-chart-label);
+
+  --shadow-card: 1px 1px 0 var(--color-gs-border);
+  --shadow-hover: 3px 3px 0 var(--color-gs-border);
+
   color-scheme: light;
+}
+
+/* ── SEMANTIC ALIASES (Design System v2.1) ─────────────── */
+:root,
+[data-theme='dark'],
+[data-theme='light'] {
+  --fg1: var(--color-gs-text);
+  --fg2: var(--color-gs-muted);
+  --fg3: var(--color-gs-subtle);
+
+  --bg-page: var(--color-gs-deep);
+  --bg-surface: var(--color-gs-surface);
+  --bg-panel: var(--color-gs-panel);
+  --bg-header: var(--color-gs-header);
+
+  --color-primary: var(--color-gs-green);
+  --color-interactive: var(--color-gs-blue);
+  --color-live: var(--color-gs-green);
+  --color-warning: var(--color-gs-yellow);
+  --color-danger: var(--color-gs-red);
+  --color-info: var(--color-gs-cyan);
+
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-full: 9999px;
 }
 
 /* ── KEYFRAMES ─────────────────────────────────────────── */
@@ -326,6 +408,105 @@
 
   .sidebar-collapsed {
     width: 52px;
+  }
+
+  /* ── TYPE SCALE (Design System v2.1) ── */
+  .t-display {
+    font-family: var(--font-heading);
+    font-weight: 900;
+    font-size: 28px;
+    letter-spacing: -0.01em;
+    line-height: 1;
+    color: var(--fg1);
+  }
+
+  .t-title {
+    font-family: var(--font-heading);
+    font-weight: 900;
+    font-size: 22px;
+    letter-spacing: 0.02em;
+    line-height: 1;
+    text-transform: uppercase;
+    color: var(--fg1);
+  }
+
+  .t-section {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+    color: var(--fg1);
+  }
+
+  .t-kpi {
+    font-family: var(--font-heading);
+    font-weight: 900;
+    font-size: 28px;
+    letter-spacing: -0.01em;
+    line-height: 1;
+    color: var(--fg1);
+  }
+
+  .t-body {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--fg1);
+  }
+
+  .t-label {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    line-height: 1;
+    color: var(--fg2);
+  }
+
+  .t-mono {
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 11px;
+    line-height: 1.6;
+    color: var(--fg1);
+  }
+
+  .t-micro {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 8px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    line-height: 1;
+    color: var(--fg2);
+    opacity: 0.5;
+  }
+
+  .t-nav {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+
+  /* ── CARD BASE (Design System v2.1) ── */
+  .card {
+    background: var(--bg-panel);
+    border: 1px solid var(--gs-border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-card);
+  }
+
+  .card:hover {
+    border-color: var(--gs-muted);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+    transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 

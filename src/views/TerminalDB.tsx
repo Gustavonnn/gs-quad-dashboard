@@ -466,17 +466,29 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
                       )}
                       <div className="flex justify-between items-start">
                         <div className="flex flex-col">
-                          <a
-                            href={`https://www.mercadolivre.com.br/anuncios/lista?filters=OMNI_ACTIVE|OMNI_INACTIVE|CHANNEL_NO_PROXIMITY_AND_NO_MP_MERCHANTS&page=1&search=${mlb.mlb_id.replace(/\D/g, '')}&sort=DEFAULT`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="font-mono font-bold text-sm text-gs-blue hover:text-gs-cyan hover:underline transition-colors cursor-pointer flex items-center gap-1 z-20"
-                          >
-                            {mlb.mlb_id}
-                            <Activity size={10} className="opacity-40" />
-                          </a>
-                          <span className="text-[10px] text-gs-muted uppercase font-mono max-w-[200px] truncate">
+                          <div className="flex items-center gap-2">
+                            <a
+                              href={`https://www.mercadolivre.com.br/anuncios/lista?filters=OMNI_ACTIVE|OMNI_INACTIVE|CHANNEL_NO_PROXIMITY_AND_NO_MP_MERCHANTS&page=1&search=${mlb.mlb_id.replace(/\\D/g, '')}&sort=DEFAULT`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="font-mono font-bold text-sm text-gs-blue hover:text-gs-cyan hover:underline transition-colors cursor-pointer flex items-center gap-1 z-20"
+                            >
+                              {mlb.mlb_id}
+                              <Activity size={10} className="opacity-40" />
+                            </a>
+                            <a
+                              href={`https://app.marketfacil.com.br/analise-anuncio?url=https://produto.mercadolivre.com.br/${mlb.mlb_id}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="px-1.5 py-0.5 text-[8px] font-mono tracking-widest uppercase rounded-sm border border-gs-blue/30 text-gs-blue bg-gs-blue/10 hover:bg-gs-blue/20 hover:border-gs-blue/50 transition-colors z-20"
+                              title="Analisar anúncio no Marketfacil"
+                            >
+                              MARKETFACIL
+                            </a>
+                          </div>
+                          <span className="text-[10px] text-gs-muted uppercase font-mono max-w-[200px] truncate mt-0.5">
                             {mlb.title}
                           </span>
                         </div>

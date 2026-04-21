@@ -203,7 +203,7 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
               <button
                 key={item.sku}
                 onClick={() => handleSkuSelect(item)}
-                className={`flex flex-col p-3 text-left border rounded-sm transition-all duration-200 group relative overflow-hidden ${
+                className={`flex flex-col p-3 text-left border rounded-md transition-all duration-200 group relative overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-gs-blue/50 ${
                   selectedSku?.sku === item.sku
                     ? 'border-gs-green/60 bg-gs-green/5 shadow-[1px_1px_0_var(--color-gs-green)]'
                     : 'border-transparent hover:border-gs-border hover:bg-gs-bg/30'

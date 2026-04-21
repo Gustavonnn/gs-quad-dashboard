@@ -1,4 +1,56 @@
-﻿@import 'tailwindcss';
+@import 'tailwindcss';
+
+@theme {
+  --color-gs-deep: var(--gs-deep);
+  --color-gs-bg: var(--gs-bg);
+  --color-gs-surface: var(--gs-surface);
+  --color-gs-panel: var(--gs-panel);
+  --color-gs-header: var(--gs-header);
+
+  --color-gs-border: var(--gs-border);
+  --color-gs-subtle: var(--gs-subtle);
+
+  --color-gs-text: var(--gs-text);
+  --color-gs-muted: var(--gs-muted);
+
+  --color-gs-green: var(--gs-green);
+  --color-gs-green-dim: var(--gs-green-dim);
+  --color-gs-blue: var(--gs-blue);
+  --color-gs-blue-dim: var(--gs-blue-dim);
+  --color-gs-cyan: var(--gs-cyan);
+  --color-gs-cyan-dim: var(--gs-cyan-dim);
+  --color-gs-red: var(--gs-red);
+  --color-gs-red-dim: var(--gs-red-dim);
+  --color-gs-yellow: var(--gs-yellow);
+  --color-gs-yellow-dim: var(--gs-yellow-dim);
+  --color-gs-orange: var(--gs-orange);
+  --color-gs-orange-dim: var(--gs-orange-dim);
+
+  --color-primary: var(--gs-green);
+  --color-interactive: var(--gs-blue);
+  --color-live: var(--gs-green);
+  --color-warning: var(--gs-yellow);
+  --color-danger: var(--gs-red);
+  --color-info: var(--gs-cyan);
+
+  --color-bg-page: var(--bg-page);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-panel: var(--bg-panel);
+  --color-bg-header: var(--bg-header);
+
+  --color-fg1: var(--fg1);
+  --color-fg2: var(--fg2);
+  --color-fg3: var(--fg3);
+
+  --color-gs-chart-grid: var(--gs-chart-grid);
+  --color-gs-chart-label: var(--gs-chart-label);
+
+  --font-display: var(--font-display);
+  --font-heading: var(--font-heading);
+  --font-mono: var(--font-mono);
+
+  /* Additional shadow aliases used by components like "shadow-soft" or "shadow-card" if needed */
+}
 
 /*
  * GS-QUAD Design System â€” Colors & Typography

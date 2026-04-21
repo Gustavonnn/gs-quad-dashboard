@@ -45,7 +45,7 @@ export const useUIStore = create<UIState>()(
       }),
       merge: (persistedState: unknown, currentState: unknown) => {
         const merged = { ...(currentState as object), ...(persistedState as object) } as UIState;
-        merged.theme = 'light';
+        // Allows both light and dark theme by reading from persisted memory correctly
         return merged;
       },
     }

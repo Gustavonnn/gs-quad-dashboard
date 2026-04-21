@@ -11,8 +11,7 @@ import { routes } from './app/routes';
 import { env } from './lib/env';
 import { RouteFallback } from '@/components/RouteFallback';
 
-// Força tema claro ANTES de tudo
-document.documentElement.setAttribute('data-theme', 'light');
+// Theme is handled by ThemeProvider
 
 // Initialize Sentry for error tracking in production
 if (env.VITE_APP_ENV === 'production' && env.VITE_SENTRY_DSN) {

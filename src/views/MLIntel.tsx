@@ -13,9 +13,9 @@ interface MLIntelProps {
 }
 
 export function MLIntel({ onSelectSku }: MLIntelProps) {
-  const { data, isLoading } = useMLInsights();
+  const { data, isLoading, isError, error, refetch } = useMLInsights();
 
-  if (isLoading || !data) {
+  if (isLoading) {
     return (
       <div className="flex h-[80vh] items-center justify-center">
         <div className="flex flex-col items-center gap-4">
@@ -28,13 +28,37 @@ export function MLIntel({ onSelectSku }: MLIntelProps) {
     );
   }
 
+  if (isError || !data) {
+    return (
+      <div className="flex h-[80vh] items-center justify-center">
+        <div className="flex flex-col items-center gap-6 max-w-md text-center">
+          <AlertTriangle className="text-gs-yellow" size={48} />
+          <div className="space-y-2">
+            <h3 className="font-display font-bold text-lg text-gs-text uppercase">
+              Data Retrieval Failed
+            </h3>
+            <p className="font-mono text-xs text-gs-muted">
+              {error instanceof Error ? error.message : 'Ocorreu um erro de sincronização neural.'}
+            </p>
+          </div>
+          <button
+            onClick={() => refetch()}
+            className="px-6 py-2 bg-gs-yellow/10 border border-gs-yellow text-gs-yellow font-mono text-[10px] tracking-widest uppercase hover:bg-gs-yellow hover:text-black transition-all"
+          >
+            RETRY SYNC
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   // Separar dados
   const ruptures = data
-    .filter((d) => (d.rupture_risk || 0) > 0.6)
-    .sort((a, b) => b.rupture_risk - a.rupture_risk);
+    .filter((d) => (d.rupture_risk ?? 0) > 0.6)
+    .sort((a, b) => (b.rupture_risk ?? 0) - (a.rupture_risk ?? 0));
   const anomalies = data
-    .filter((d) => (d.anomaly_score || 0) < 0)
-    .sort((a, b) => a.anomaly_score - b.anomaly_score);
+    .filter((d) => (d.anomaly_score ?? 0) < 0)
+    .sort((a, b) => (a.anomaly_score ?? 0) - (b.anomaly_score ?? 0));
   const clusters = data.filter((d) => d.abc_divergence && d.abc_divergence !== 'CONCORDANTE');
 
   return (
@@ -97,7 +121,7 @@ export function MLIntel({ onSelectSku }: MLIntelProps) {
                         </span>
                         <span
                           className="font-mono text-[10px] text-gs-muted block truncate max-w-[150px]"
-                          title={item.titulo}
+                          title={item.titulo ?? undefined}
                         >
                           {item.titulo}
                         </span>

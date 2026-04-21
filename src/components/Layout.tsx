@@ -301,6 +301,7 @@ function DesktopSidebar() {
           borderBottom: '1px solid var(--color-gs-border)',
           padding: '0 6px',
           background: 'var(--color-gs-header)',
+          color: 'var(--fg-header)',
         }}
       >
         {/* Logo mark — always visible */}
@@ -332,7 +333,7 @@ function DesktopSidebar() {
         >
           <div
             className="font-heading font-black text-sm tracking-wide leading-none whitespace-nowrap"
-            style={{ color: 'var(--color-gs-text)' }}
+            style={{ color: 'var(--fg-header)' }}
           >
             GS-QUAD
           </div>
@@ -598,6 +599,7 @@ function Topbar({ onMenuClick }: { onMenuClick: () => void }) {
       style={{
         borderBottom: '1px solid var(--color-gs-border)',
         background: 'var(--color-gs-header)',
+        color: 'var(--fg-header)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
       }}
@@ -616,7 +618,7 @@ function Topbar({ onMenuClick }: { onMenuClick: () => void }) {
         <div className="flex flex-col" style={{ gap: '2px' }}>
           <h1
             className="font-heading font-black tracking-wide leading-none"
-            style={{ fontSize: '15px', color: 'var(--color-gs-text)' }}
+            style={{ fontSize: '15px', color: 'var(--fg-header)' }}
           >
             {routeMeta?.title || 'GS-QUAD'}
             <span style={{ color: 'var(--color-gs-green)', marginLeft: '2px' }}>.</span>
@@ -624,7 +626,7 @@ function Topbar({ onMenuClick }: { onMenuClick: () => void }) {
           {routeMeta?.subtitle && (
             <p
               className="font-mono uppercase tracking-[0.18em] hidden sm:block"
-              style={{ fontSize: '9px', color: 'var(--color-gs-muted)', opacity: 0.7 }}
+              style={{ fontSize: '9px', color: 'var(--fg-header)', opacity: 0.7 }}
             >
               {routeMeta.subtitle}
             </p>

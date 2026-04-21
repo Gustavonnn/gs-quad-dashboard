@@ -136,30 +136,32 @@ export function Monitor({ onSelectSku }: MonitorProps) {
           </div>
           <div className="flex flex-col gap-4">
             {(alertas ?? []).map((alerta) => {
-              const rank = ALERTA_RANK[alerta.status] ?? 0;
+              const rank = ALERTA_RANK[alerta.status ?? 'PENDENTE'] ?? 0;
               const isResolved = rank >= 2;
 
               return (
                 <Card
                   key={alerta.id}
                   onClick={() => onSelectSku?.(alerta.sku)}
-                  className={`border-l-4 ${SEV_BORDER[alerta.severity] ?? 'border-l-gs-muted'} p-5 flex flex-col border-y border-r border-gs-border shadow-lg hover:border-r-gs-muted/50 transition-colors cursor-pointer group`}
+                  className={`border-l-4 ${SEV_BORDER[alerta.severity ?? 'BAIXO'] ?? 'border-l-gs-muted'} p-5 flex flex-col border-y border-r border-gs-border shadow-lg hover:border-r-gs-muted/50 transition-colors cursor-pointer group`}
                 >
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-3">
                     <span
-                      className={`font-mono text-sm font-bold tracking-wider uppercase ${SEV_TEXT[alerta.severity] ?? 'text-gs-muted'}`}
+                      className={`font-mono text-sm font-bold tracking-wider uppercase ${SEV_TEXT[alerta.severity ?? 'BAIXO'] ?? 'text-gs-muted'}`}
                     >
-                      [{alerta.severity}] {alerta.sku}
+                      [{alerta.severity ?? 'BAIXO'}] {alerta.sku}
                     </span>
                     <div className="flex items-center gap-4">
                       <span className="text-[10px] text-gs-muted font-mono tracking-widest">
-                        {new Date(alerta.data_registro).toLocaleDateString('pt-BR')}
+                        {alerta.data_registro
+                          ? new Date(alerta.data_registro).toLocaleDateString('pt-BR')
+                          : '—'}
                       </span>
                       {!isResolved && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleAdvanceStatus(alerta.id, alerta.status);
+                            handleAdvanceStatus(alerta.id, alerta.status ?? 'PENDENTE');
                           }}
                           disabled={updateStatus.isPending}
                           className="group relative px-3 py-1 bg-transparent border border-gs-green text-gs-green rounded-sm overflow-hidden transition-all hover:shadow-[0_0_15px_rgba(52,131,250,0.2)] disabled:opacity-40 disabled:cursor-not-allowed"

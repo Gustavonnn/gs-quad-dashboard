@@ -31,7 +31,7 @@ function fmtK(v: number) {
 
 // ─── Pulse dot ───────────────────────────────────────────────────────────────
 
-function PulseDot({ color = 'var(--color-gs-blue)' }: { color?: string }) {
+function PulseDot({ color = '#3483fa' }: { color?: string }) {
   return (
     <div className="relative flex items-center justify-center" style={{ width: 8, height: 8 }}>
       <span
@@ -640,7 +640,12 @@ export function VisaoGeral() {
               alertas
                 .slice(0, 8)
                 .map((a) => (
-                  <AlertRow key={a.id} sku={a.sku} tipo={a.tipo_alerta} severity={a.severity} />
+                  <AlertRow
+                    key={a.id}
+                    sku={a.sku ?? ''}
+                    tipo={a.tipo_alerta ?? ''}
+                    severity={a.severity ?? 'BAIXO'}
+                  />
                 ))
             )}
           </div>

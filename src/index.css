@@ -76,7 +76,7 @@
   --gs-bg: #030303;
   --gs-surface: #0a0a0a;
   --gs-panel: #0a0a0a;
-  --gs-header: #050505;
+  --gs-header: #3483fa; /* Blue Header in Dark mode as requested */
 
   /* Borders */
   --gs-border: #1f1f1f;
@@ -85,6 +85,7 @@
   /* Text */
   --gs-text: #ededed;
   --gs-muted: #888888;
+  --gs-header-text: #ffffff; /* White on Blue */
 
   /* Accents */
   --gs-green: #00ff66;
@@ -117,13 +118,14 @@
   color-scheme: dark;
 }
 
-/* â”€â”€â”€ LIGHT THEME (Mercado Livre) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── LIGHT THEME (Mercado Livre inspired) ────────────────────────── */
 [data-theme='light'] {
   --gs-deep: #f5f5f5;
   --gs-bg: #f5f5f5;
   --gs-surface: #ffffff;
   --gs-panel: #ffffff;
-  --gs-header: #fff159; /* ML Yellow */
+  --gs-header: #fff159; /* Back to Yellow */
+  --gs-header-text: #333333; /* Back to Dark */
 
   --gs-border: #e6e6e6;
   --gs-subtle: #f5f5f5;
@@ -171,6 +173,7 @@
   --bg-surface: var(--gs-surface);
   --bg-panel: var(--gs-panel);
   --bg-header: var(--gs-header);
+  --fg-header: var(--gs-header-text);
 
   /* Interactive */
   --color-primary: var(--gs-green);

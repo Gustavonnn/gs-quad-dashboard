@@ -2,20 +2,22 @@ import { useState, useMemo } from 'react';
 import { usePriceTimeline } from '@/hooks';
 import type { MLPriceTimeline } from '@/lib/schemas';
 
-function fmt(n: number) {
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(n);
+function fmt(n: number | null | undefined) {
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(n ?? 0);
 }
 
-function fmtVol(n: number) {
-  return new Intl.NumberFormat('pt-BR').format(n);
+function fmtVol(n: number | null | undefined) {
+  return new Intl.NumberFormat('pt-BR').format(n ?? 0);
 }
 
-function fmtPct(n: number) {
+function fmtPct(n: number | null | undefined) {
+  if (n === null || n === undefined) return '0%';
   const sign = n > 0 ? '+' : '';
   return `${sign}${n.toFixed(1)}%`;
 }
 
-function fmtDate(s: string) {
+function fmtDate(s: string | null | undefined) {
+  if (!s) return '—';
   return new Date(s).toLocaleDateString('pt-BR', {
     day: '2-digit',
     month: 'short',
@@ -45,7 +47,8 @@ const STATUS_CONFIG = {
 };
 
 function StatusBadge({ status }: { status: MLPriceTimeline['absorcao_status'] }) {
-  const cfg = STATUS_CONFIG[status];
+  const cfg =
+    STATUS_CONFIG[(status as keyof typeof STATUS_CONFIG) ?? 'INEFICAZ'] ?? STATUS_CONFIG.INEFICAZ;
   return (
     <span
       className="font-mono text-[10px] font-bold tracking-widest px-2 py-0.5 rounded-sm uppercase"
@@ -73,7 +76,9 @@ function DeltaTag({ value, isPrice = false }: { value: number; isPrice?: boolean
 }
 
 function TimelineCard({ event }: { event: MLPriceTimeline }) {
-  const cfg = STATUS_CONFIG[event.absorcao_status];
+  const cfg =
+    STATUS_CONFIG[(event.absorcao_status as keyof typeof STATUS_CONFIG) ?? 'INEFICAZ'] ??
+    STATUS_CONFIG.INEFICAZ;
 
   return (
     <div className="flex gap-4">
@@ -118,7 +123,7 @@ function TimelineCard({ event }: { event: MLPriceTimeline }) {
               <span className="text-gs-text font-bold">{fmt(event.preco_novo)}</span>
             </div>
             <div className="mt-1">
-              <DeltaTag value={event.delta_preco_pct} isPrice />
+              <DeltaTag value={event.delta_preco_pct ?? 0} isPrice />
             </div>
           </div>
 
@@ -138,7 +143,7 @@ function TimelineCard({ event }: { event: MLPriceTimeline }) {
               <span className="text-gs-text font-bold">{fmtVol(event.volume_7d_depois)}</span>
             </div>
             <div className="mt-1">
-              <DeltaTag value={event.delta_volume_pct} />
+              <DeltaTag value={event.delta_volume_pct ?? 0} />
             </div>
           </div>
         </div>

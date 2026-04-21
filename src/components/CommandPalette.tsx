@@ -1,9 +1,9 @@
-import { useEffect, useState, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Command } from 'cmdk'
-import { useUIStore } from '@/stores/uiStore'
-import { useCurvaABC } from '@/hooks'
-import { Badge } from '@/components/ui'
+import { useEffect, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Command } from 'cmdk';
+import { useUIStore } from '@/stores/uiStore';
+import { useCurvaABC } from '@/hooks';
+import { Badge } from '@/components/ui';
 import {
   Search,
   LayoutDashboard,
@@ -17,7 +17,7 @@ import {
   Zap,
   RefreshCw,
   Megaphone,
-} from 'lucide-react'
+} from 'lucide-react';
 
 const NAV_ITEMS = [
   { label: 'Visão Geral', icon: LayoutDashboard, path: '/', group: 'Navegação' },
@@ -32,46 +32,46 @@ const NAV_ITEMS = [
   { label: 'Global Search', icon: Search, path: '/search', group: 'Ferramentas' },
   { label: 'Ad Factory', icon: Megaphone, path: '/adfactory', group: 'Ferramentas' },
   { label: 'Settings', icon: Settings, path: '/settings', group: 'Sistema' },
-]
+];
 
 export function CommandPalette() {
-  const open = useUIStore((s) => s.commandPaletteOpen)
-  const close = useUIStore((s) => s.closeCommandPalette)
-  const navigate = useNavigate()
-  const { data: curvaData } = useCurvaABC(50)
-  const [search, setSearch] = useState('')
+  const open = useUIStore((s) => s.commandPaletteOpen);
+  const close = useUIStore((s) => s.closeCommandPalette);
+  const navigate = useNavigate();
+  const { data: curvaData } = useCurvaABC(50);
+  const [search, setSearch] = useState('');
 
   // Listen for ⌘K / Ctrl+K
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault()
-        useUIStore.getState().toggleCommandPalette()
+        e.preventDefault();
+        useUIStore.getState().toggleCommandPalette();
       }
-    }
-    document.addEventListener('keydown', down)
-    return () => document.removeEventListener('keydown', down)
-  }, [])
+    };
+    document.addEventListener('keydown', down);
+    return () => document.removeEventListener('keydown', down);
+  }, []);
 
   // Close palette on Escape key
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && open) close()
-    }
-    document.addEventListener('keydown', handleEsc)
-    return () => document.removeEventListener('keydown', handleEsc)
-  }, [open, close])
+      if (e.key === 'Escape' && open) close();
+    };
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [open, close]);
 
   const handleSelect = useCallback(
     (path: string) => {
-      navigate(path)
-      close()
-      setSearch('')
+      navigate(path);
+      close();
+      setSearch('');
     },
     [navigate, close]
-  )
+  );
 
-  if (!open) return null
+  if (!open) return null;
 
   return (
     <div
@@ -144,16 +144,16 @@ export function CommandPalette() {
               ?.filter(
                 (item) =>
                   search === '' ||
-                  item.id.toLowerCase().includes(search.toLowerCase()) ||
-                  item.titulo.toLowerCase().includes(search.toLowerCase())
+                  (item.id ?? '').toLowerCase().includes(search.toLowerCase()) ||
+                  (item.titulo ?? '').toLowerCase().includes(search.toLowerCase())
               )
               .slice(0, 10)
               .map((item) => (
                 <Command.Item
                   key={item.id}
-                  value={`${item.id} ${item.titulo}`}
+                  value={`${item.id ?? ''} ${item.titulo ?? ''}`}
                   onSelect={() => {
-                    handleSelect(`/terminal?sku=${item.id}`)
+                    handleSelect(`/terminal?sku=${item.id}`);
                   }}
                   className="flex items-center gap-3 px-3 py-2.5 rounded-md cursor-pointer data-[selected=true]:bg-[var(--color-gs-border)]/50 transition-colors group"
                 >
@@ -166,14 +166,14 @@ export function CommandPalette() {
                           : 'secondary'
                     }
                   >
-                    {item.curva_abc}
+                    {item.curva_abc ?? 'C'}
                   </Badge>
                   <div className="flex flex-col min-w-0">
                     <span className="text-xs font-mono text-[var(--color-gs-text)] truncate">
                       {item.id}
                     </span>
                     <span className="text-[10px] font-mono text-[var(--color-gs-muted)] truncate">
-                      {item.titulo}
+                      {item.titulo ?? '—'}
                     </span>
                   </div>
                 </Command.Item>
@@ -194,5 +194,5 @@ export function CommandPalette() {
         </div>
       </Command>
     </div>
-  )
+  );
 }

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0a0a0a; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    height: 36px; padding: 0 16px; border-radius: 3px; border: 1px solid transparent;
+    font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all 0.15s; white-space: nowrap;
+  }
+  .btn-sm { height: 28px; padding: 0 12px; font-size: 11px; }
+  .btn-icon { width: 36px; height: 36px; padding: 0; }
+  .sep { font-family: 'JetBrains Mono', monospace; font-size: 8px; color: #555; letter-spacing: 0.2em; text-transform: uppercase; }
+</style>
+</head>
+<body>
+  <div class="sep">Variants</div>
+  <div class="row">
+    <button class="btn" style="background:#00ff66;color:#030303;border-color:#00ff66">Default</button>
+    <button class="btn" style="background:#ff3333;color:#fff;border-color:#ff3333">Destructive</button>
+    <button class="btn" style="background:transparent;color:#ededed;border-color:#1f1f1f">Outline</button>
+    <button class="btn" style="background:#1f1f1f;color:#ededed;border-color:#1f1f1f">Secondary</button>
+    <button class="btn" style="background:transparent;color:#888;border-color:transparent">Ghost</button>
+    <button class="btn" style="background:transparent;color:#00ff66;border-color:transparent;text-decoration:underline">Link</button>
+  </div>
+
+  <div class="sep">Sizes</div>
+  <div class="row">
+    <button class="btn" style="height:44px;padding:0 24px;font-size:15px;background:#00ff66;color:#030303;border-color:#00ff66">Large</button>
+    <button class="btn" style="background:#00ff66;color:#030303;border-color:#00ff66">Default</button>
+    <button class="btn btn-sm" style="background:#00ff66;color:#030303;border-color:#00ff66">Small</button>
+    <button class="btn btn-icon" style="border-color:#1f1f1f;background:transparent;color:#888;font-size:16px">⌘</button>
+  </div>
+
+  <div class="sep">Interactive Action Buttons (dark)</div>
+  <div class="row">
+    <button class="btn" style="background:#007aff;color:#fff;border-color:#007aff;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase">EXPORTAR</button>
+    <button class="btn btn-sm" style="border-color:#1f1f1f;background:transparent;color:#888;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.12em;text-transform:uppercase">FILTRAR</button>
+    <button class="btn btn-sm" style="border-color:#1f1f1f;background:transparent;color:#888;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.12em;text-transform:uppercase">⌘K  BUSCAR</button>
+    <button class="btn btn-sm" style="background:transparent;color:#ff3333;border-color:rgba(255,51,51,0.3);font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.12em;text-transform:uppercase">PAUSAR</button>
+  </div>
+</body>
+</html>

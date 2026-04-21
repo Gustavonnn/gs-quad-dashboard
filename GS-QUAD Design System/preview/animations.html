@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0a0a0a; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+  .row { display: flex; align-items: center; gap: 16px; }
+  .lbl { font-family: 'JetBrains Mono', monospace; font-size: 8px; color: #555; letter-spacing: 0.2em; text-transform: uppercase; width: 110px; flex-shrink: 0; }
+  .demo { display: flex; align-items: center; gap: 10px; }
+
+  .box { width: 36px; height: 20px; background: #1f1f1f; border: 1px solid #1f1f1f; border-radius: 2px; }
+
+  /* fade-in */
+  @keyframes fadein { from{opacity:0} to{opacity:1} }
+  .anim-fade { animation: fadein 1.2s ease-out infinite alternate; background:#007aff; }
+
+  /* slide-up */
+  @keyframes slideup { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+  .anim-slide { animation: slideup 1s cubic-bezier(0.16,1,0.3,1) infinite alternate; background:#00ff66; }
+
+  /* glow-pulse */
+  @keyframes glow { 0%,100%{box-shadow:0 0 4px rgba(0,255,102,0.3)} 50%{box-shadow:0 0 12px rgba(0,255,102,0.7)} }
+  .anim-glow { animation: glow 2.5s ease-in-out infinite; background:#00ff66; }
+
+  /* blink cursor */
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+  .cursor { display: inline-block; width: 6px; height: 14px; background: #00ff66; animation: blink 1s step-end infinite; }
+
+  /* scan line */
+  .scan-wrap { position: relative; width: 80px; height: 20px; overflow: hidden; background: #030303; border: 1px solid #1f1f1f; border-radius: 2px; }
+  @keyframes scan { 0%{top:0;opacity:0} 5%{opacity:0.7} 95%{opacity:0.4} 100%{top:100%;opacity:0} }
+  .scan-line { position: absolute; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(0,255,102,0.6), transparent); animation: scan 2.5s linear infinite; }
+
+  /* ping dot */
+  .ping-wrap { position: relative; width: 12px; height: 12px; }
+  .ping-ring { position: absolute; inset: 0; border-radius: 50%; background: #00ff66; opacity: 0.5; animation: ping 1.5s ease-out infinite; }
+  .ping-dot { position: relative; width: 8px; height: 8px; border-radius: 50%; background: #00ff66; top: 2px; left: 2px; }
+  @keyframes ping { 0%{transform:scale(1);opacity:0.5} 100%{transform:scale(2.2);opacity:0} }
+
+  /* hover card */
+  .hover-card { background: #0a0a0a; border: 1px solid #1f1f1f; border-radius: 2px; padding: 8px 12px; box-shadow: 1px 1px 0 #1f1f1f; transition: all 0.1s cubic-bezier(0.4,0,0.2,1); cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 9px; color: #555; }
+  .hover-card:hover { border-color: #555; transform: translateY(-2px); box-shadow: 3px 3px 0 #1f1f1f; color: #ededed; }
+</style>
+</head>
+<body>
+  <div class="row"><span class="lbl">FADE IN</span><div class="demo"><div class="box anim-fade"></div><span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#555">0.35s ease-out</span></div></div>
+  <div class="row"><span class="lbl">SLIDE UP</span><div class="demo"><div class="box anim-slide"></div><span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#555">0.4s cubic(0.16,1,0.3,1)</span></div></div>
+  <div class="row"><span class="lbl">GLOW PULSE</span><div class="demo"><div class="box anim-glow"></div><span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#555">2.5s ease-in-out infinite</span></div></div>
+  <div class="row"><span class="lbl">BLINK CURSOR</span><div class="demo"><span class="cursor"></span><span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#555;margin-left:6px">1s step-end infinite</span></div></div>
+  <div class="row"><span class="lbl">SCAN LINE</span><div class="demo"><div class="scan-wrap"><div class="scan-line"></div></div><span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#555">3.5s linear infinite</span></div></div>
+  <div class="row"><span class="lbl">PING DOT</span><div class="demo"><div class="ping-wrap"><div class="ping-ring"></div><div class="ping-dot"></div></div><span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#555;margin-left:8px">1.5s ease-out infinite</span></div></div>
+  <div class="row"><span class="lbl">HOVER CARD</span><div class="demo"><div class="hover-card">translateY(-2px) · 3px offset</div></div></div>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #050505; padding: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .card { background: #0a0a0a; border: 1px solid #1f1f1f; border-radius: 2px; box-shadow: 1px 1px 0 #1f1f1f; overflow: hidden; }
+  .card-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid #1f1f1f; }
+  .card-title { font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: #555; display: flex; align-items: center; gap: 6px; }
+  .card-body { padding: 12px; }
+  .lbl { font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: 0.15em; text-transform: uppercase; color: #555; }
+  .val { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 20px; color: #ededed; line-height: 1; margin: 4px 0; }
+  .tag { display: inline-flex; align-items: center; font-family: 'JetBrains Mono', monospace; font-size: 8px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 2px 6px; border-radius: 2px; }
+  .row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid #1f1f1f; }
+  .row:last-child { border-bottom: none; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+</style>
+</head>
+<body>
+  <!-- Data card with accent line -->
+  <div class="card">
+    <div style="height:2px;background:linear-gradient(90deg,#00ff66,transparent)"></div>
+    <div class="card-header">
+      <span class="card-title">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#00ff66" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
+        RECEITA 7 DIAS
+      </span>
+      <div style="display:flex;align-items:center;gap:4px">
+        <div style="width:6px;height:6px;border-radius:50%;background:#00ff66"></div>
+        <span class="lbl" style="color:#00ff66">LIVE</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="lbl">Total acumulado</div>
+      <div class="val">R$ 284.930</div>
+      <span class="tag" style="background:rgba(0,255,102,0.1);color:#00ff66">↑ tendência de alta</span>
+    </div>
+  </div>
+
+  <!-- Alert card -->
+  <div class="card">
+    <div style="height:2px;background:linear-gradient(90deg,#ffd700,transparent)"></div>
+    <div class="card-header">
+      <span class="card-title">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#ffd700" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        ALERTAS RECENTES
+      </span>
+      <span style="border:1px solid #1f1f1f;border-radius:1px;padding:1px 6px;font-family:'JetBrains Mono',monospace;font-size:8px;color:#555">7 total</span>
+    </div>
+    <div class="card-body" style="padding:8px 12px">
+      <div class="row"><div class="dot" style="background:#ff3333"></div><span class="lbl" style="color:#ff3333;min-width:26px">CRI</span><span style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:#ededed;min-width:70px">SKU-00291</span><span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#555">Preço abaixo do custo</span></div>
+      <div class="row"><div class="dot" style="background:#ff9500"></div><span class="lbl" style="color:#ff9500;min-width:26px">ALT</span><span style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:#ededed;min-width:70px">SKU-00447</span><span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#555">Estoque crítico</span></div>
+      <div class="row"><div class="dot" style="background:#ffd700"></div><span class="lbl" style="color:#ffd700;min-width:26px">MED</span><span style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:#ededed;min-width:70px">SKU-00183</span><span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#555">CTR abaixo do target</span></div>
+    </div>
+  </div>
+</body>
+</html>

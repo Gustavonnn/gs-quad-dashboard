@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0a0a0a; padding: 16px; font-family: 'JetBrains Mono', monospace; }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+  .token { display: flex; flex-direction: column; gap: 6px; }
+  .bar-wrap { background: #1f1f1f; border-radius: 1px; height: 8px; }
+  .bar { height: 8px; background: #007aff; border-radius: 1px; }
+  .lbl { font-size: 8px; letter-spacing: 0.15em; text-transform: uppercase; color: #555; }
+  .val { font-size: 9px; color: #ededed; }
+  .divider { height: 1px; background: #1f1f1f; margin: 12px 0; }
+  .rad-row { display: flex; gap: 10px; align-items: center; }
+  .rad-box { background: #1f1f1f; width: 36px; height: 24px; display: flex; align-items: center; justify-content: center; }
+  .rad-label { font-size: 8px; color: #555; }
+</style>
+</head>
+<body>
+  <div class="lbl" style="margin-bottom:10px">Spacing Scale (px)</div>
+  <div class="grid">
+    <div class="token"><div class="bar-wrap"><div class="bar" style="width:12.5%"></div></div><div class="val">2px</div><div class="lbl">xs / border</div></div>
+    <div class="token"><div class="bar-wrap"><div class="bar" style="width:25%"></div></div><div class="val">4px</div><div class="lbl">sm</div></div>
+    <div class="token"><div class="bar-wrap"><div class="bar" style="width:37.5%"></div></div><div class="val">6px</div><div class="lbl">sidebar-pad</div></div>
+    <div class="token"><div class="bar-wrap"><div class="bar" style="width:50%"></div></div><div class="val">8px</div><div class="lbl">gap-sm</div></div>
+    <div class="token"><div class="bar-wrap"><div class="bar" style="width:62.5%"></div></div><div class="val">12px</div><div class="lbl">gap (gap-3)</div></div>
+    <div class="token"><div class="bar-wrap"><div class="bar" style="width:75%"></div></div><div class="val">16px</div><div class="lbl">px-4</div></div>
+    <div class="token"><div class="bar-wrap"><div class="bar" style="width:87.5%"></div></div><div class="val">20px</div><div class="lbl">gap-5</div></div>
+    <div class="token"><div class="bar-wrap"><div class="bar" style="width:100%"></div></div><div class="val">24px</div><div class="lbl">px-6</div></div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="lbl" style="margin-bottom:10px">Border Radius</div>
+  <div class="rad-row">
+    <div><div class="rad-box" style="border-radius:2px;border:1px solid #1f1f1f"></div><div class="rad-label" style="margin-top:4px">2px — card</div></div>
+    <div><div class="rad-box" style="border-radius:3px;border:1px solid #1f1f1f"></div><div class="rad-label" style="margin-top:4px">3px — nav</div></div>
+    <div><div class="rad-box" style="border-radius:9999px;border:1px solid #1f1f1f;width:48px"></div><div class="rad-label" style="margin-top:4px">pill — dot</div></div>
+    <div style="margin-left:auto;text-align:right">
+      <div class="lbl">Shadows</div>
+      <div style="font-size:8px;color:#ededed;margin-top:4px">1px 1px 0 #1f1f1f · card</div>
+      <div style="font-size:8px;color:#ededed;margin-top:2px">3px 3px 0 #1f1f1f · hover</div>
+      <div style="font-size:8px;color:#00ff66;margin-top:2px">0 0 8px #00ff66 · glow</div>
+    </div>
+  </div>
+</body>
+</html>

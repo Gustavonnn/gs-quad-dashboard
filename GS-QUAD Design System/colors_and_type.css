@@ -1,0 +1,345 @@
+/*
+ * GS-QUAD Design System — Colors & Typography
+ * Source: Gustavonnn/gs-quad-dashboard (src/index.css)
+ * Theme: Dark (default) + Light (Mercado Livre inspired)
+ */
+
+/* ─── GOOGLE FONTS ───────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+/* ─── FONT VARS ──────────────────────────────────────────── */
+:root {
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-heading: 'Outfit', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+/* ─── DARK THEME (default) ───────────────────────────────── */
+:root,
+[data-theme='dark'] {
+  /* Backgrounds */
+  --gs-deep: #050505;
+  --gs-bg: #030303;
+  --gs-surface: #0a0a0a;
+  --gs-panel: #0a0a0a;
+  --gs-header: #050505;
+
+  /* Borders */
+  --gs-border: #1f1f1f;
+  --gs-subtle: #555555;
+
+  /* Text */
+  --gs-text: #ededed;
+  --gs-muted: #888888;
+
+  /* Accents */
+  --gs-green: #00ff66;
+  --gs-green-dim: rgba(0, 224, 128, 0.15);
+  --gs-blue: #007aff;
+  --gs-blue-dim: rgba(0, 122, 255, 0.15);
+  --gs-cyan: #00d4ff;
+  --gs-cyan-dim: rgba(0, 212, 255, 0.15);
+  --gs-red: #ff3333;
+  --gs-red-dim: rgba(255, 51, 51, 0.15);
+  --gs-yellow: #ffd700;
+  --gs-yellow-dim: rgba(255, 215, 0, 0.15);
+  --gs-orange: #ff6b00;
+  --gs-orange-dim: rgba(255, 107, 0, 0.15);
+
+  /* Chart */
+  --gs-chart-grid: #2a2a2a;
+  --gs-chart-label: #a0a0a0;
+
+  /* Glass / Elevation */
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --glass-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  --glass-highlight: rgba(255, 255, 255, 0.03);
+
+  /* Shadow */
+  --shadow-card: 1px 1px 0 var(--gs-border);
+  --shadow-hover: 3px 3px 0 var(--gs-border);
+  --shadow-glow: 0 0 8px var(--gs-green);
+
+  color-scheme: dark;
+}
+
+/* ─── LIGHT THEME (Mercado Livre) ────────────────────────── */
+[data-theme='light'] {
+  --gs-deep: #f5f5f5;
+  --gs-bg: #f5f5f5;
+  --gs-surface: #ffffff;
+  --gs-panel: #ffffff;
+  --gs-header: #fff159; /* ML Yellow */
+
+  --gs-border: #e6e6e6;
+  --gs-subtle: #f5f5f5;
+
+  --gs-text: #333333;
+  --gs-muted: #666666;
+
+  --gs-green: #3483fa; /* ML Blue (primary interactive) */
+  --gs-green-dim: rgba(52, 131, 250, 0.12);
+  --gs-blue: #3483fa;
+  --gs-blue-dim: rgba(52, 131, 250, 0.12);
+  --gs-cyan: #00adef;
+  --gs-cyan-dim: rgba(0, 173, 239, 0.12);
+  --gs-red: #555555;
+  --gs-red-dim: rgba(85, 85, 85, 0.08);
+  --gs-yellow: #fff159;
+  --gs-yellow-dim: rgba(255, 241, 89, 0.15);
+  --gs-orange: #ff7733;
+  --gs-orange-dim: rgba(255, 119, 51, 0.1);
+
+  --gs-chart-grid: #e6e6e6;
+  --gs-chart-label: #999999;
+
+  --glass-border: rgba(0, 0, 0, 0.06);
+  --glass-shadow: 1px 1px 0 rgba(0, 0, 0, 0.05);
+  --glass-highlight: rgba(255, 255, 255, 1);
+
+  --shadow-card: 1px 1px 0 var(--gs-border);
+  --shadow-hover: 3px 3px 0 var(--gs-border);
+
+  color-scheme: light;
+}
+
+/* ─── SEMANTIC ALIASES ───────────────────────────────────── */
+:root,
+[data-theme='dark'],
+[data-theme='light'] {
+  /* Foregrounds */
+  --fg1: var(--gs-text);
+  --fg2: var(--gs-muted);
+  --fg3: var(--gs-subtle);
+
+  /* Backgrounds */
+  --bg-page: var(--gs-deep);
+  --bg-surface: var(--gs-surface);
+  --bg-panel: var(--gs-panel);
+  --bg-header: var(--gs-header);
+
+  /* Interactive */
+  --color-primary: var(--gs-green);
+  --color-interactive: var(--gs-blue);
+  --color-live: var(--gs-green);
+  --color-warning: var(--gs-yellow);
+  --color-danger: var(--gs-red);
+  --color-info: var(--gs-cyan);
+
+  /* Radius */
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-full: 9999px;
+}
+
+/* ─── BASE TYPOGRAPHY ────────────────────────────────────── */
+body {
+  font-family: var(--font-display);
+  background-color: var(--bg-page);
+  color: var(--fg1);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+}
+
+code,
+pre,
+.mono {
+  font-family: var(--font-mono);
+}
+
+/* ─── TYPE SCALE ─────────────────────────────────────────── */
+
+/* Display — Outfit Black */
+.t-display {
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 28px;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  color: var(--fg1);
+}
+
+/* Page title — Outfit Black */
+.t-title {
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 22px;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--fg1);
+}
+
+/* Section header — Outfit Bold */
+.t-section {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  color: var(--fg1);
+}
+
+/* KPI Value — Outfit Black */
+.t-kpi {
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 28px;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  color: var(--fg1);
+}
+
+/* Body — Space Grotesk */
+.t-body {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--fg1);
+}
+
+/* Mono label — JetBrains Mono (ALLCAPS, tracked) */
+.t-label {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  line-height: 1;
+  color: var(--fg2);
+}
+
+/* Mono value — JetBrains Mono */
+.t-mono {
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--fg1);
+}
+
+/* Micro label — smallest readable size */
+.t-micro {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 8px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  line-height: 1;
+  color: var(--fg2);
+  opacity: 0.5;
+}
+
+/* Nav label — JetBrains Mono Bold ALLCAPS */
+.t-nav {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+/* ─── CARD UTILITIES ─────────────────────────────────────── */
+.card {
+  background: var(--bg-panel);
+  border: 1px solid var(--gs-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-card);
+}
+
+.card:hover {
+  border-color: var(--gs-muted);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+  transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-panel {
+  background: var(--bg-surface);
+  backdrop-filter: blur(4px);
+  border: 1px solid var(--gs-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-card);
+}
+
+/* ─── KEYFRAMES ──────────────────────────────────────────── */
+@keyframes gs-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes gs-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes gs-glow-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 6px rgba(0, 255, 102, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 14px rgba(0, 255, 102, 0.55);
+  }
+}
+
+@keyframes gs-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes gs-scan-line {
+  0% {
+    top: 0%;
+    opacity: 0;
+  }
+  5% {
+    opacity: 0.7;
+  }
+  95% {
+    opacity: 0.4;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+.animate-fade-in {
+  animation: gs-fade-in 0.35s ease-out forwards;
+}
+.animate-slide-up {
+  animation: gs-slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.animate-glow {
+  animation: gs-glow-pulse 2.5s ease-in-out infinite;
+}
+.animate-blink {
+  animation: gs-blink 1s step-end infinite;
+}

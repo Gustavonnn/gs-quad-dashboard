@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #030303; padding: 16px; font-family: 'JetBrains Mono', monospace; }
+  .terminal { background: #030303; border: 1px solid #1f1f1f; border-radius: 2px; padding: 12px; }
+  .line { display: flex; gap: 8px; font-size: 10px; line-height: 1.7; }
+  .tag { font-weight: 700; min-width: 42px; }
+  .msg { color: rgba(237,237,237,0.6); }
+  .cursor { display: inline-block; width: 6px; height: 11px; background: #00ff66; animation: blink 1s step-end infinite; margin-left: 2px; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+  .chrome { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-bottom: 1px solid #1f1f1f; margin: -12px -12px 10px; background: #0a0a0a; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .chrome-label { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: #555; margin-left: 4px; }
+</style>
+</head>
+<body>
+  <div class="terminal">
+    <div class="chrome">
+      <div class="dot" style="background:#555;opacity:0.6"></div>
+      <div class="dot" style="background:#ffd700;opacity:0.6"></div>
+      <div class="dot" style="background:#00ff66;opacity:0.6"></div>
+      <span class="chrome-label">TERMINAL_LIVE_FEED</span>
+      <div style="width:8px;height:8px;border-radius:50%;background:#00ff66;margin-left:auto"></div>
+    </div>
+    <div class="line"><span class="tag" style="color:#555">SYS:</span><span class="msg">Conectado ao Supabase Realtime.</span></div>
+    <div class="line"><span class="tag" style="color:#007aff">INTEL:</span><span class="msg">Carregando inferências de ML...</span></div>
+    <div class="line"><span class="tag" style="color:#007aff">OK:</span><span class="msg">Pipeline DuckDB → Supabase: sincronizado.</span></div>
+    <div class="line"><span class="tag" style="color:#ff9500">WARN:</span><span class="msg">3 alertas ativos detectados.</span></div>
+    <div class="line"><span class="tag" style="color:#00adef">ADS:</span><span class="msg">ADS_RADAR: 2 anúncios para desligar.</span></div>
+    <div class="line" style="color:#00ff66"><span>▸</span><span class="cursor"></span></div>
+  </div>
+</body>
+</html>

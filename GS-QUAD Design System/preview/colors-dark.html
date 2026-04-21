@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0a0a0a; padding: 16px; font-family: 'JetBrains Mono', monospace; }
+  .grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; }
+  .swatch { height: 52px; border-radius: 2px; position: relative; }
+  .label { font-size: 8px; letter-spacing: 0.18em; text-transform: uppercase; color: #888; margin-top: 5px; }
+  .val   { font-size: 8px; color: #555; margin-top: 2px; }
+  .row { display: flex; flex-direction: column; }
+  .section { font-size: 8px; letter-spacing: 0.25em; text-transform: uppercase; color: #555; margin-bottom: 10px; margin-top: 14px; }
+</style>
+</head>
+<body>
+<div class="section">Background Scale</div>
+<div class="grid">
+  <div class="row"><div class="swatch" style="background:#030303;border:1px solid #1f1f1f"></div><div class="label">BG</div><div class="val">#030303</div></div>
+  <div class="row"><div class="swatch" style="background:#050505;border:1px solid #1f1f1f"></div><div class="label">DEEP</div><div class="val">#050505</div></div>
+  <div class="row"><div class="swatch" style="background:#0a0a0a;border:1px solid #1f1f1f"></div><div class="label">SURFACE</div><div class="val">#0a0a0a</div></div>
+  <div class="row"><div class="swatch" style="background:#1f1f1f"></div><div class="label">BORDER</div><div class="val">#1f1f1f</div></div>
+  <div class="row"><div class="swatch" style="background:#555555"></div><div class="label">SUBTLE</div><div class="val">#555555</div></div>
+  <div class="row"><div class="swatch" style="background:#888888"></div><div class="label">MUTED</div><div class="val">#888888</div></div>
+  <div class="row"><div class="swatch" style="background:#ededed"></div><div class="label">TEXT</div><div class="val">#ededed</div></div>
+  <div class="row"><div class="swatch" style="background:#ffffff"></div><div class="label">WHITE</div><div class="val">#ffffff</div></div>
+</div>
+
+<div class="section">Accent Palette</div>
+<div class="grid">
+  <div class="row"><div class="swatch" style="background:#00ff66"></div><div class="label">GREEN</div><div class="val">#00ff66</div></div>
+  <div class="row"><div class="swatch" style="background:rgba(0,224,128,0.15);border:1px solid #1f1f1f"></div><div class="label">GREEN DIM</div><div class="val">rgba 15%</div></div>
+  <div class="row"><div class="swatch" style="background:#007aff"></div><div class="label">BLUE</div><div class="val">#007aff</div></div>
+  <div class="row"><div class="swatch" style="background:rgba(0,122,255,0.15);border:1px solid #1f1f1f"></div><div class="label">BLUE DIM</div><div class="val">rgba 15%</div></div>
+  <div class="row"><div class="swatch" style="background:#00d4ff"></div><div class="label">CYAN</div><div class="val">#00d4ff</div></div>
+  <div class="row"><div class="swatch" style="background:#ffd700"></div><div class="label">YELLOW</div><div class="val">#ffd700</div></div>
+  <div class="row"><div class="swatch" style="background:#ff3333"></div><div class="label">RED</div><div class="val">#ff3333</div></div>
+  <div class="row"><div class="swatch" style="background:#ff6b00"></div><div class="label">ORANGE</div><div class="val">#ff6b00</div></div>
+</div>
+</body>
+</html>

@@ -189,7 +189,7 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
       <div className="flex-1 flex flex-col lg:flex-row gap-4 overflow-y-auto lg:overflow-hidden hide-scrollbar">
         {/* LEFT PANE: SKU BROWSER (The "Database Index") */}
         <div className="w-full lg:w-[340px] xl:w-[400px] flex flex-col bg-gs-panel border border-gs-border rounded-[2px] shadow-[1px_1px_0_var(--color-gs-border)] shrink-0 h-[280px] lg:h-auto z-10">
-          <div className="p-4 border-b border-gs-border flex flex-col gap-4 shrink-0 bg-gs-bg/20">
+          <div className="p-4 pt-5 border-b border-gs-border flex flex-col gap-6 shrink-0 bg-gs-bg/20">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gs-muted" />
               <input
@@ -200,7 +200,7 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
                 className="w-full bg-gs-bg/40 border border-gs-border/50 text-gs-text font-mono text-xs pl-10 pr-4 py-2.5 rounded-sm placeholder-gs-muted/50 focus:outline-none focus:border-gs-green focus:ring-1 focus:ring-gs-green transition-all"
               />
             </div>
-            <div className="flex p-1 bg-gs-bg border border-gs-border/40 rounded-[2px]">
+            <div className="flex p-1 mt-1 bg-gs-bg border border-gs-border/40 rounded-[2px]">
               {(['ALL', 'A', 'B', 'C'] as const).map((cls) => (
                 <button
                   key={cls}
@@ -229,7 +229,7 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
                 }`}
               >
                 {selectedSku?.sku === item.sku && (
-                  <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-gs-green shadow-[0_0_8px_var(--color-gs-green)]" />
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 bg-gs-green rounded-r-full shadow-[0_0_12px_var(--color-gs-green)] z-10" />
                 )}
                 <div className="flex items-center justify-between w-full mb-1.5 pl-1">
                   <div className="flex items-center gap-1.5">

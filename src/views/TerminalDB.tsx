@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useTerminalData } from '@/hooks';
 import type { TerminalSkuItem } from '../types/terminal';
 import {
@@ -27,10 +28,14 @@ interface TerminalDBProps {
 }
 
 export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
+  const [searchParams] = useSearchParams();
+  const urlSku = searchParams.get('sku');
+  const urlMlb = searchParams.get('mlb');
+
   const { data, isLoading: loading, error } = useTerminalData();
   const [selectedSku, setSelectedSku] = useState<TerminalSkuItem | null>(null);
   const [selectedMlbId, setSelectedMlbId] = useState<string | null>(null);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(urlSku || '');
   const [filterClass, setFilterClass] = useState<'ALL' | 'A' | 'B' | 'C'>('ALL');
 
   const filteredData = useMemo(() => {
@@ -43,24 +48,36 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
     });
   }, [data, search, filterClass]);
 
-  // Set initial selected item when data loads or preSelectedSkuId changes
+  // Set initial selected item when data loads or URL params change
   useEffect(() => {
-    if (preSelectedSkuId && data && data.length > 0) {
-      const target = data.find((item) => item.sku === preSelectedSkuId);
+    if (!data || data.length === 0) return;
+
+    const targetSkuId = urlSku || preSelectedSkuId;
+
+    if (targetSkuId) {
+      const target = data.find((item) => item.sku === targetSkuId);
       if (target) {
         Promise.resolve().then(() => {
           setSelectedSku(target);
-          setSelectedMlbId(null);
+          if (urlMlb) {
+            setSelectedMlbId(urlMlb);
+          } else {
+            setSelectedMlbId(null);
+          }
           setSearch(target.sku);
         });
+        return;
       }
-    } else if (!selectedSku && filteredData.length > 0) {
+    }
+
+    // Default selection if no deep link
+    if (!selectedSku && filteredData.length > 0) {
       Promise.resolve().then(() => {
         setSelectedSku(filteredData[0]);
         setSelectedMlbId(null);
       });
     }
-  }, [data, preSelectedSkuId, filteredData, selectedSku]);
+  }, [data, urlSku, urlMlb, preSelectedSkuId, filteredData, selectedSku]);
 
   // Handle SKU switch from manual list click
   const handleSkuSelect = (item: TerminalSkuItem) => {
@@ -153,7 +170,9 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
       {/* Debug/Error Info */}
       {error && (
         <div className="bg-gray-500/10 border border-gray-500/30 p-3 rounded-sm">
-          <p className="text-gray-500 font-mono text-xs">⚠ Erro: {error instanceof Error ? error.message : String(error)}</p>
+          <p className="text-gray-500 font-mono text-xs">
+            ⚠ Erro: {error instanceof Error ? error.message : String(error)}
+          </p>
         </div>
       )}
       {(!data || data.length === 0) && !loading && (
@@ -468,7 +487,7 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
                         <div className="flex flex-col">
                           <div className="flex items-center gap-2">
                             <a
-                              href={`https://www.mercadolivre.com.br/anuncios/lista?filters=OMNI_ACTIVE|OMNI_INACTIVE|CHANNEL_NO_PROXIMITY_AND_NO_MP_MERCHANTS&page=1&search=${mlb.mlb_id.replace(/\\D/g, '')}&sort=DEFAULT`}
+                              href={`https://www.mercadolivre.com.br/anuncios/lista?filters=OMNI_ACTIVE|OMNI_INACTIVE|CHANNEL_NO_PROXIMITY_AND_NO_MP_MERCHANTS&page=1&search=${mlb.mlb_id.replace(/\D/g, '')}&sort=DEFAULT`}
                               target="_blank"
                               rel="noopener noreferrer"
                               onClick={(e) => e.stopPropagation()}

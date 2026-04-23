@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import {
   AreaChart,
   Area,
@@ -449,16 +450,25 @@ function MlbRow({
         </div>
 
         {/* MLB ID */}
-        <a
-          href={`https://www.mercadolivre.com.br/anuncios/${entry.mlb_id.replace(/\D/g, '')}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
-          className="font-mono text-xs text-gs-blue hover:text-blue-300 hover:underline flex items-center gap-1 transition-colors"
-        >
-          {entry.mlb_id}
-          <ExternalLink size={9} className="opacity-40" />
-        </a>
+        <div className="flex items-center gap-1.5">
+          <Link
+            to={`/terminal?sku=${entry.sku}&mlb=${entry.mlb_id}`}
+            onClick={(e) => e.stopPropagation()}
+            className="font-mono text-xs text-gs-blue hover:text-blue-300 hover:underline transition-colors"
+          >
+            {entry.mlb_id}
+          </Link>
+          <a
+            href={`https://www.mercadolivre.com.br/anuncios/${entry.mlb_id.replace(/\D/g, '')}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="text-gs-muted/40 hover:text-gs-blue transition-colors"
+            title="Ver no Mercado Livre"
+          >
+            <ExternalLink size={10} />
+          </a>
+        </div>
 
         {/* Title */}
         <span className="font-mono text-[10px] text-gs-muted truncate">{entry.title}</span>

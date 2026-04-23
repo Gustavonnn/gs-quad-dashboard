@@ -222,7 +222,7 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
               <button
                 key={item.sku}
                 onClick={() => handleSkuSelect(item)}
-                className={`flex flex-col p-3 text-left border rounded-md transition-all duration-200 group relative overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-gs-blue/50 ${
+                className={`flex flex-col p-4 text-left border rounded-md transition-all duration-200 group relative overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-gs-blue/50 ${
                   selectedSku?.sku === item.sku
                     ? 'border-gs-green/60 bg-gs-green/5 shadow-[1px_1px_0_var(--color-gs-green)]'
                     : 'border-transparent hover:border-gs-border hover:bg-gs-bg/30'
@@ -231,7 +231,7 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
                 {selectedSku?.sku === item.sku && (
                   <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-gs-green shadow-[0_0_8px_var(--color-gs-green)]" />
                 )}
-                <div className="flex items-start justify-between w-full mb-1.5 pl-1">
+                <div className="flex items-center justify-between w-full mb-1.5 pl-1">
                   <div className="flex items-center gap-1.5">
                     <span
                       className={`font-mono font-bold text-xs ${selectedSku?.sku === item.sku ? 'text-gs-green' : 'text-gs-text group-hover:text-gs-blue'}`}

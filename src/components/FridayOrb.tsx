@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Mic, Loader2, Volume2, AlertCircle } from 'lucide-react';
+import { Loader2, Volume2, AlertCircle } from 'lucide-react';
 import { useVoiceStore } from '@/stores/voiceStore';
 import { supabase } from '@/lib/supabase';
 
@@ -372,7 +372,7 @@ export function FridayOrb() {
     if (status === 'processing') return <Loader2 className="animate-spin" />;
     if (status === 'speaking') return <Volume2 className="animate-pulse" />;
     if (status === 'error') return <AlertCircle />;
-    return <Mic />;
+    return null;
   })();
 
   return (

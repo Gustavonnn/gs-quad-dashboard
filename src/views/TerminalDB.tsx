@@ -120,7 +120,7 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
   );
 
   return (
-    <div className="flex flex-col gap-4 animate-fade-in relative z-10 h-[calc(100vh-120px)] lg:h-[calc(100vh-140px)] overflow-hidden lg:overflow-visible">
+    <div className="flex flex-col gap-6 animate-fade-in relative z-10 h-[calc(100vh-120px)] lg:h-[calc(100vh-140px)] overflow-hidden lg:overflow-visible">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 shrink-0">
         <div className="flex flex-col">
           <h2 className="font-display font-bold text-2xl tracking-wide uppercase text-gs-text flex items-center gap-3">
@@ -189,7 +189,7 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
       <div className="flex-1 flex flex-col lg:flex-row gap-4 overflow-y-auto lg:overflow-hidden hide-scrollbar">
         {/* LEFT PANE: SKU BROWSER (The "Database Index") */}
         <div className="w-full lg:w-[340px] xl:w-[400px] flex flex-col bg-gs-panel border border-gs-border rounded-[2px] shadow-[1px_1px_0_var(--color-gs-border)] shrink-0 h-[280px] lg:h-auto z-10">
-          <div className="p-4 border-b border-gs-border flex flex-col gap-3 shrink-0 bg-gs-bg/20">
+          <div className="p-4 border-b border-gs-border flex flex-col gap-4 shrink-0 bg-gs-bg/20">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gs-muted" />
               <input

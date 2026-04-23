@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Zap, Brain, Edit3, Tag, X } from 'lucide-react';
+import { Zap, Brain, Edit3, Tag } from 'lucide-react';
 
 interface KanbanCardModalProps {
   card: KanbanCard | null;
@@ -50,12 +50,6 @@ export function KanbanCardModal({
               )}
             </Badge>
           </div>
-          <button
-            onClick={onClose}
-            className="p-1 rounded hover:bg-[var(--color-gs-border)] transition-colors"
-          >
-            <X size={16} className="text-[var(--color-gs-muted)]" />
-          </button>
         </div>
         {card.categoria && (
           <div className="flex items-center gap-1 mb-3">

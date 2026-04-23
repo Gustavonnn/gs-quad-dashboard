@@ -140,7 +140,7 @@ export const kanbanCardSchema = z.object({
   status: kanbanStatusSchema.default('backlog'),
   type: z.string().default('hybrid'),
   categoria: z.string().nullable().optional(),
-  trigger_analysis: z.string().nullable().optional(),
+  trigger_analysis: z.coerce.boolean().nullable().optional(),
   briefing_data: z
     .object({
       metadata: z

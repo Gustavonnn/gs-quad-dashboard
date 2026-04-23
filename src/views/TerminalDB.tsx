@@ -207,7 +207,7 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
                   onClick={() => setFilterClass(cls)}
                   className={`flex-1 text-[10px] font-mono tracking-widest uppercase py-1.5 transition-all rounded-[1px] ${
                     filterClass === cls
-                      ? 'bg-white text-gs-green font-bold shadow-sm border border-gs-border/20'
+                      ? 'bg-[var(--color-gs-surface)] text-gs-green font-bold shadow-sm border border-gs-border/20'
                       : 'text-gs-muted hover:text-gs-text'
                   }`}
                 >
@@ -329,13 +329,13 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
                   </span>
                 </div>
                 <div className="flex w-full lg:w-auto gap-1.5 lg:ml-auto lg:border-l lg:border-gs-border/50 lg:pl-4 items-center justify-between lg:justify-end">
-                  <div className="flex flex-col items-center px-3 py-1 bg-white/5 border border-white/5 rounded-sm">
+                  <div className="flex flex-col items-center px-3 py-1 bg-[var(--color-gs-hover-overlay)] border border-[var(--color-gs-border)] rounded-sm">
                     <span className="text-[8px] text-gs-muted font-mono uppercase">7D</span>
                     <span className="text-sm font-bold font-mono text-gs-text">
                       {selectedSku.sales_7d}
                     </span>
                   </div>
-                  <div className="flex flex-col items-center px-3 py-1 bg-white/5 border border-white/5 rounded-sm">
+                  <div className="flex flex-col items-center px-3 py-1 bg-[var(--color-gs-hover-overlay)] border border-[var(--color-gs-border)] rounded-sm">
                     <span className="text-[8px] text-gs-muted font-mono uppercase">15D</span>
                     <span className="text-sm font-bold font-mono text-gs-text">
                       {selectedSku.sales_15d}
@@ -475,7 +475,7 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
                       className={`group border transition-all duration-300 rounded-sm p-4 flex flex-col gap-3 cursor-pointer relative overflow-hidden ${
                         selectedMlbId === mlb.mlb_id
                           ? 'border-gs-green bg-gs-green/5 shadow-[1px_1px_0_var(--color-gs-green)]'
-                          : 'border-gs-border/40 bg-white hover:border-gs-border/80'
+                          : 'border-gs-border/40 bg-[var(--color-gs-surface)] hover:border-gs-border/80'
                       }`}
                     >
                       {selectedMlbId === mlb.mlb_id && (

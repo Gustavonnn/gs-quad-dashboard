@@ -434,7 +434,7 @@ function MlbRow({
 
   return (
     <div
-      className={`border-b border-gs-border/20 transition-colors ${isExpanded ? cfg.bg + ' ' + cfg.glow : 'hover:bg-white/[0.02]'}`}
+      className={`border-b border-gs-border/20 transition-colors ${isExpanded ? cfg.bg + ' ' + cfg.glow : 'hover:bg-[var(--color-gs-hover-overlay)]'}`}
     >
       {/* Main row */}
       <div
@@ -658,7 +658,7 @@ export function AdsRadar() {
                 className={`flex items-center whitespace-nowrap gap-2 px-5 py-3 font-mono text-[10px] tracking-widest uppercase border-r border-gs-border/50 transition-all ${
                   activeTab === tab.key
                     ? `bg-black/30 ${tab.color} border-b-2 -mb-[1px]`
-                    : 'text-gs-muted hover:text-gs-text hover:bg-white/[0.02]'
+                    : 'text-gs-muted hover:text-gs-text hover:bg-[var(--color-gs-hover-overlay)]'
                 }`}
               >
                 {tab.icon}

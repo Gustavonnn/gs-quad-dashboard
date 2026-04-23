@@ -45,49 +45,89 @@
   --color-gs-chart-grid: var(--gs-chart-grid);
   --color-gs-chart-label: var(--gs-chart-label);
 
+  --color-gs-hover-overlay: var(--gs-hover-overlay);
+
   --font-display: var(--font-display);
   --font-heading: var(--font-heading);
   --font-mono: var(--font-mono);
-
-  /* Additional shadow aliases used by components like "shadow-soft" or "shadow-card" if needed */
 }
 
 /*
- * GS-QUAD Design System â€” Colors & Typography
- * Source: Gustavonnn/gs-quad-dashboard (src/index.css)
- * Theme: Dark (default) + Light (Mercado Livre inspired)
+ * GS-QUAD Design System — Colors & Typography
+ * Theme: Light (default / Mercado Livre) + Dark
  */
 
-/* â”€â”€â”€ GOOGLE FONTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── GOOGLE FONTS ────────────────────────────────────────────────── */
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
-/* â”€â”€â”€ FONT VARS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── FONT VARS ────────────────────────────────────────────────────── */
 :root {
   --font-display: 'Space Grotesk', sans-serif;
   --font-heading: 'Outfit', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 }
 
-/* â”€â”€â”€ DARK THEME (default) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── LIGHT THEME (default — Mercado Livre) ───────────────────────── */
 :root,
+[data-theme='light'] {
+  --gs-deep: #f5f5f5;
+  --gs-bg: #f5f5f5;
+  --gs-surface: #ffffff;
+  --gs-panel: #ffffff;
+  --gs-header: #fff159;
+  --gs-header-text: #333333;
+
+  --gs-border: #e0e0e0;
+  --gs-subtle: #ebebeb;
+
+  --gs-text: #1a1a1a;
+  --gs-muted: #777777;
+
+  --gs-green: #3483fa;
+  --gs-green-dim: rgba(52, 131, 250, 0.12);
+  --gs-blue: #3483fa;
+  --gs-blue-dim: rgba(52, 131, 250, 0.12);
+  --gs-cyan: #00adef;
+  --gs-cyan-dim: rgba(0, 173, 239, 0.12);
+  --gs-red: #e03131;
+  --gs-red-dim: rgba(224, 49, 49, 0.1);
+  --gs-yellow: #f5a623;
+  --gs-yellow-dim: rgba(245, 166, 35, 0.15);
+  --gs-orange: #ff7733;
+  --gs-orange-dim: rgba(255, 119, 51, 0.1);
+
+  --gs-chart-grid: #e6e6e6;
+  --gs-chart-label: #999999;
+
+  --glass-border: rgba(0, 0, 0, 0.06);
+  --glass-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  --glass-highlight: rgba(255, 255, 255, 1);
+
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08), 0 0 0 1px var(--gs-border);
+  --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.1), 0 0 0 1px var(--gs-border);
+
+  /* Hover overlay — use this instead of bg-white/5 */
+  --gs-hover-overlay: rgba(0, 0, 0, 0.04);
+  --gs-active-overlay: rgba(52, 131, 250, 0.08);
+
+  color-scheme: light;
+}
+
+/* ─── DARK THEME ──────────────────────────────────────────────────── */
 [data-theme='dark'] {
-  /* Backgrounds */
   --gs-deep: #050505;
   --gs-bg: #030303;
   --gs-surface: #0a0a0a;
   --gs-panel: #0a0a0a;
-  --gs-header: #3483fa; /* Blue Header in Dark mode as requested */
+  --gs-header: #3483fa;
+  --gs-header-text: #ffffff;
 
-  /* Borders */
   --gs-border: #1f1f1f;
   --gs-subtle: #555555;
 
-  /* Text */
   --gs-text: #ededed;
   --gs-muted: #888888;
-  --gs-header-text: #ffffff; /* White on Blue */
 
-  /* Accents */
   --gs-green: #00ff66;
   --gs-green-dim: rgba(0, 224, 128, 0.15);
   --gs-blue: #007aff;
@@ -101,81 +141,38 @@
   --gs-orange: #ff6b00;
   --gs-orange-dim: rgba(255, 107, 0, 0.15);
 
-  /* Chart */
   --gs-chart-grid: #2a2a2a;
   --gs-chart-label: #a0a0a0;
 
-  /* Glass / Elevation */
   --glass-border: rgba(255, 255, 255, 0.06);
   --glass-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
   --glass-highlight: rgba(255, 255, 255, 0.03);
 
-  /* Shadow */
   --shadow-card: 1px 1px 0 var(--gs-border);
   --shadow-hover: 3px 3px 0 var(--gs-border);
   --shadow-glow: 0 0 8px var(--gs-green);
 
+  /* Hover overlay — use this instead of bg-white/5 */
+  --gs-hover-overlay: rgba(255, 255, 255, 0.05);
+  --gs-active-overlay: rgba(255, 255, 255, 0.08);
+
   color-scheme: dark;
 }
 
-/* ─── LIGHT THEME (Mercado Livre inspired) ────────────────────────── */
-[data-theme='light'] {
-  --gs-deep: #f5f5f5;
-  --gs-bg: #f5f5f5;
-  --gs-surface: #ffffff;
-  --gs-panel: #ffffff;
-  --gs-header: #fff159; /* Back to Yellow */
-  --gs-header-text: #333333; /* Back to Dark */
-
-  --gs-border: #e6e6e6;
-  --gs-subtle: #f5f5f5;
-
-  --gs-text: #333333;
-  --gs-muted: #666666;
-
-  --gs-green: #3483fa; /* ML Blue (primary interactive) */
-  --gs-green-dim: rgba(52, 131, 250, 0.12);
-  --gs-blue: #3483fa;
-  --gs-blue-dim: rgba(52, 131, 250, 0.12);
-  --gs-cyan: #00adef;
-  --gs-cyan-dim: rgba(0, 173, 239, 0.12);
-  --gs-red: #555555;
-  --gs-red-dim: rgba(85, 85, 85, 0.08);
-  --gs-yellow: #fff159;
-  --gs-yellow-dim: rgba(255, 241, 89, 0.15);
-  --gs-orange: #ff7733;
-  --gs-orange-dim: rgba(255, 119, 51, 0.1);
-
-  --gs-chart-grid: #e6e6e6;
-  --gs-chart-label: #999999;
-
-  --glass-border: rgba(0, 0, 0, 0.06);
-  --glass-shadow: 1px 1px 0 rgba(0, 0, 0, 0.05);
-  --glass-highlight: rgba(255, 255, 255, 1);
-
-  --shadow-card: 1px 1px 0 var(--gs-border);
-  --shadow-hover: 3px 3px 0 var(--gs-border);
-
-  color-scheme: light;
-}
-
-/* â”€â”€â”€ SEMANTIC ALIASES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── SEMANTIC ALIASES ───────────────────────────────────────────── */
 :root,
 [data-theme='dark'],
 [data-theme='light'] {
-  /* Foregrounds */
   --fg1: var(--gs-text);
   --fg2: var(--gs-muted);
   --fg3: var(--gs-subtle);
 
-  /* Backgrounds */
   --bg-page: var(--gs-deep);
   --bg-surface: var(--gs-surface);
   --bg-panel: var(--gs-panel);
   --bg-header: var(--gs-header);
   --fg-header: var(--gs-header-text);
 
-  /* Interactive */
   --color-primary: var(--gs-green);
   --color-interactive: var(--gs-blue);
   --color-live: var(--gs-green);
@@ -183,13 +180,12 @@
   --color-danger: var(--gs-red);
   --color-info: var(--gs-cyan);
 
-  /* Radius */
   --radius-sm: 2px;
   --radius-md: 3px;
   --radius-full: 9999px;
 }
 
-/* â”€â”€â”€ BASE TYPOGRAPHY â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── BASE TYPOGRAPHY ─────────────────────────────────────────────── */
 body {
   font-family: var(--font-display);
   background-color: var(--bg-page);
@@ -213,9 +209,8 @@ pre,
   font-family: var(--font-mono);
 }
 
-/* â”€â”€â”€ TYPE SCALE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── TYPE SCALE ─────────────────────────────────────────────────── */
 
-/* Display â€” Outfit Black */
 .t-display {
   font-family: var(--font-heading);
   font-weight: 900;
@@ -225,7 +220,6 @@ pre,
   color: var(--fg1);
 }
 
-/* Page title â€” Outfit Black */
 .t-title {
   font-family: var(--font-heading);
   font-weight: 900;
@@ -236,7 +230,6 @@ pre,
   color: var(--fg1);
 }
 
-/* Section header â€” Outfit Bold */
 .t-section {
   font-family: var(--font-heading);
   font-weight: 700;
@@ -246,7 +239,6 @@ pre,
   color: var(--fg1);
 }
 
-/* KPI Value â€” Outfit Black */
 .t-kpi {
   font-family: var(--font-heading);
   font-weight: 900;
@@ -256,7 +248,6 @@ pre,
   color: var(--fg1);
 }
 
-/* Body â€” Space Grotesk */
 .t-body {
   font-family: var(--font-display);
   font-weight: 400;
@@ -265,7 +256,6 @@ pre,
   color: var(--fg1);
 }
 
-/* Mono label â€” JetBrains Mono (ALLCAPS, tracked) */
 .t-label {
   font-family: var(--font-mono);
   font-weight: 700;
@@ -276,7 +266,6 @@ pre,
   color: var(--fg2);
 }
 
-/* Mono value â€” JetBrains Mono */
 .t-mono {
   font-family: var(--font-mono);
   font-weight: 400;
@@ -285,7 +274,6 @@ pre,
   color: var(--fg1);
 }
 
-/* Micro label â€” smallest readable size */
 .t-micro {
   font-family: var(--font-mono);
   font-weight: 700;
@@ -297,7 +285,6 @@ pre,
   opacity: 0.5;
 }
 
-/* Nav label â€” JetBrains Mono Bold ALLCAPS */
 .t-nav {
   font-family: var(--font-mono);
   font-weight: 700;
@@ -307,7 +294,7 @@ pre,
   line-height: 1;
 }
 
-/* â”€â”€â”€ CARD UTILITIES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── CARD UTILITIES ──────────────────────────────────────────────── */
 .card {
   background: var(--bg-panel);
   border: 1px solid var(--gs-border);
@@ -330,7 +317,7 @@ pre,
   box-shadow: var(--shadow-card);
 }
 
-/* â”€â”€â”€ KEYFRAMES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── KEYFRAMES ───────────────────────────────────────────────────── */
 @keyframes gs-fade-in {
   from {
     opacity: 0;
@@ -405,6 +392,6 @@ pre,
   display: none;
 }
 .no-scrollbar {
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

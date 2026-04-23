@@ -157,7 +157,7 @@ function NavButton({ item, expanded }: { item: NavItem; expanded: boolean }) {
         `group relative flex items-center w-full rounded-[3px] transition-all duration-200 ease-out overflow-hidden select-none ${
           isActive
             ? 'bg-[var(--color-gs-blue)] text-white'
-            : 'text-[var(--color-gs-muted)] hover:text-[var(--color-gs-text)] hover:bg-white/[0.05]'
+            : 'text-[var(--color-gs-muted)] hover:text-[var(--color-gs-text)] hover:bg-[var(--color-gs-hover-overlay)]'
         }`
       }
       style={{ textDecoration: 'none', height: '36px' }}
@@ -475,7 +475,7 @@ function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void })
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded transition-colors hover:bg-white/5"
+            className="p-2 rounded transition-colors hover:bg-[var(--color-gs-hover-overlay)]"
             style={{ color: 'var(--color-gs-muted)' }}
             aria-label="Fechar menu"
           >
@@ -510,7 +510,7 @@ function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void })
                       `relative flex items-center gap-3 px-3 py-2.5 rounded-[3px] font-mono text-[10px] font-bold uppercase tracking-widest transition-all duration-150 ${
                         isActive
                           ? 'bg-[var(--color-gs-blue)] text-white'
-                          : 'text-[var(--color-gs-muted)] hover:text-[var(--color-gs-text)] hover:bg-white/5'
+                          : 'text-[var(--color-gs-muted)] hover:text-[var(--color-gs-text)] hover:bg-[var(--color-gs-hover-overlay)]'
                       }`
                     }
                     style={{ textDecoration: 'none' }}
@@ -607,7 +607,7 @@ function Topbar({ onMenuClick }: { onMenuClick: () => void }) {
       <div className="flex items-center gap-4">
         <button
           onClick={onMenuClick}
-          className="lg:hidden p-2 rounded transition-colors hover:bg-white/5"
+          className="lg:hidden p-2 rounded transition-colors hover:bg-[var(--color-gs-hover-overlay)]"
           style={{ color: 'var(--color-gs-muted)' }}
           aria-label="Abrir menu"
         >

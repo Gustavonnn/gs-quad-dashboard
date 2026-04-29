@@ -1,24 +1,52 @@
-import { lazy } from 'react'
-import type { RouteObject } from 'react-router-dom'
+import { lazy } from 'react';
+import type { RouteObject } from 'react-router-dom';
 
-const VisaoGeral = lazy(() => import('@/views/VisaoGeral').then(m => ({ default: m.VisaoGeral })))
-const TerminalDB = lazy(() => import('@/views/TerminalDB').then(m => ({ default: m.TerminalDB })))
-const Monitor = lazy(() => import('@/views/Monitor').then(m => ({ default: m.Monitor })))
-const GrowthPlan = lazy(() => import('@/views/GrowthPlan').then(m => ({ default: m.GrowthPlan })))
-const MLIntel = lazy(() => import('@/views/MLIntel').then(m => ({ default: m.MLIntel })))
-const PriceTimeline = lazy(() => import('@/views/PriceTimeline').then(m => ({ default: m.PriceTimeline })))
-const DataExplorer = lazy(() => import('@/views/DataExplorer').then(m => ({ default: m.DataExplorer })))
-const ActivityFeed = lazy(() => import('@/views/ActivityFeed').then(m => ({ default: m.ActivityFeed })))
-const SyncControl = lazy(() => import('@/views/SyncControl').then(m => ({ default: m.SyncControl })))
-const GlobalSearch = lazy(() => import('@/views/GlobalSearch').then(m => ({ default: m.GlobalSearch })))
-const Settings = lazy(() => import('@/views/Settings').then(m => ({ default: m.Settings })))
-const AdFactory = lazy(() => import('@/views/AdFactory').then(m => ({ default: m.AdFactory })))
-const AdsRadar = lazy(() => import('@/views/AdsRadar').then(m => ({ default: m.AdsRadar })))
+const VisaoGeral = lazy(() =>
+  import('@/views/VisaoGeral').then((m) => ({ default: m.VisaoGeral }))
+);
+const TerminalDB = lazy(() =>
+  import('@/views/TerminalDB').then((m) => ({ default: m.TerminalDB }))
+);
+const Monitor = lazy(() => import('@/views/Monitor').then((m) => ({ default: m.Monitor })));
+const GrowthPlan = lazy(() =>
+  import('@/views/GrowthPlan').then((m) => ({ default: m.GrowthPlan }))
+);
+const MLIntel = lazy(() => import('@/views/MLIntel').then((m) => ({ default: m.MLIntel })));
+const PriceTimeline = lazy(() =>
+  import('@/views/PriceTimeline').then((m) => ({ default: m.PriceTimeline }))
+);
+const DataExplorer = lazy(() =>
+  import('@/views/DataExplorer').then((m) => ({ default: m.DataExplorer }))
+);
+const ActivityFeed = lazy(() =>
+  import('@/views/ActivityFeed').then((m) => ({ default: m.ActivityFeed }))
+);
+const SyncControl = lazy(() =>
+  import('@/views/SyncControl').then((m) => ({ default: m.SyncControl }))
+);
+const GlobalSearch = lazy(() =>
+  import('@/views/GlobalSearch').then((m) => ({ default: m.GlobalSearch }))
+);
+const Settings = lazy(() => import('@/views/Settings').then((m) => ({ default: m.Settings })));
+const AdFactory = lazy(() => import('@/views/AdFactory').then((m) => ({ default: m.AdFactory })));
+const AdsRadar = lazy(() => import('@/views/AdsRadar').then((m) => ({ default: m.AdsRadar })));
+const OperationHub = lazy(() =>
+  import('@/views/OperationHub').then((m) => ({ default: m.OperationHub }))
+);
+const ConversionRadar = lazy(() =>
+  import('@/views/ConversionRadar').then((m) => ({ default: m.ConversionRadar }))
+);
+const StockAdsMatrix = lazy(() =>
+  import('@/views/StockAdsMatrix').then((m) => ({ default: m.StockAdsMatrix }))
+);
+const HiddenPotential = lazy(() =>
+  import('@/views/HiddenPotential').then((m) => ({ default: m.HiddenPotential }))
+);
 
 export interface RouteMeta {
-  title: string
-  subtitle: string
-  path: string
+  title: string;
+  subtitle: string;
+  path: string;
 }
 
 export const routesMeta: RouteMeta[] = [
@@ -87,7 +115,27 @@ export const routesMeta: RouteMeta[] = [
     subtitle: 'PREFERÊNCIAS DO DASHBOARD',
     path: '/settings',
   },
-]
+  {
+    title: 'OP_HUB',
+    subtitle: 'CENTRAL DE COMANDO · TERMÔMETRO OPERACIONAL',
+    path: '/hub',
+  },
+  {
+    title: 'CONV_RADAR',
+    subtitle: 'TERMÔMETRO DE CONVERSÃO · DIAGNÓSTICO AUTOMÁTICO',
+    path: '/conversion',
+  },
+  {
+    title: 'STOCK_ADS',
+    subtitle: 'CORRELAÇÃO ESTOQUE × INVESTIMENTO ADS',
+    path: '/stock-ads',
+  },
+  {
+    title: 'POTENCIAL',
+    subtitle: 'ESTOQUE PARADO · OPORTUNIDADES RÁPIDAS',
+    path: '/hidden-potential',
+  },
+];
 
 export const routes: RouteObject[] = [
   { path: '/', element: <VisaoGeral /> },
@@ -103,7 +151,11 @@ export const routes: RouteObject[] = [
   { path: '/adfactory', element: <AdFactory /> },
   { path: '/ads-radar', element: <AdsRadar /> },
   { path: '/settings', element: <Settings /> },
-]
+  { path: '/hub', element: <OperationHub /> },
+  { path: '/conversion', element: <ConversionRadar /> },
+  { path: '/stock-ads', element: <StockAdsMatrix /> },
+  { path: '/hidden-potential', element: <HiddenPotential /> },
+];
 
 export const getRouteMeta = (path: string): RouteMeta | undefined =>
-  routesMeta.find((meta) => meta.path === path)
+  routesMeta.find((meta) => meta.path === path);

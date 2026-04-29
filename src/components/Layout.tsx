@@ -17,7 +17,11 @@ import {
   Command,
   Target,
   Radar,
+  Gauge,
+  GitMerge,
+  Gem,
 } from 'lucide-react';
+import { SalesTicker } from '@/components/SalesTicker';
 import { useUIStore } from '@/stores/uiStore';
 import { getRouteMeta } from '@/app/routes';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -33,6 +37,15 @@ interface NavItem {
 }
 
 const MODULE_ITEMS: NavItem[] = [
+  {
+    id: 'hub',
+    label: 'OP_HUB',
+    sublabel: 'Central de comando',
+    icon: <Command size={15} strokeWidth={2} />,
+    path: '/hub',
+    group: 'INTEL',
+    accent: 'green',
+  },
   {
     id: 'visao',
     label: 'WAR_ROOM',
@@ -89,6 +102,30 @@ const MODULE_ITEMS: NavItem[] = [
     path: '/ads-radar',
     group: 'INTEL',
     accent: 'green',
+  },
+  {
+    id: 'conversion',
+    label: 'CONV_RADAR',
+    sublabel: 'Termômetro conversão',
+    icon: <Gauge size={15} strokeWidth={2} />,
+    path: '/conversion',
+    group: 'INTEL',
+  },
+  {
+    id: 'stock-ads',
+    label: 'STOCK_ADS',
+    sublabel: 'Estoque × Ads',
+    icon: <GitMerge size={15} strokeWidth={2} />,
+    path: '/stock-ads',
+    group: 'INTEL',
+  },
+  {
+    id: 'hidden',
+    label: 'POTENCIAL',
+    sublabel: 'Estoque escondido',
+    icon: <Gem size={15} strokeWidth={2} />,
+    path: '/hidden-potential',
+    group: 'INTEL',
   },
 ];
 
@@ -712,6 +749,7 @@ export function Layout({ children }: { children: ReactNode }) {
       {/* Main area */}
       <div className="flex-1 flex flex-col relative min-w-0 overflow-hidden">
         <Topbar onMenuClick={() => setMobileOpen(true)} />
+        <SalesTicker />
 
         <main className="flex-1 overflow-x-hidden overflow-y-auto">
           <div

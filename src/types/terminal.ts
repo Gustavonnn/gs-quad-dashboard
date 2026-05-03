@@ -1,3 +1,42 @@
+export interface ChartDataPoint {
+  date: string;
+  revenue: number;
+  sales: number;
+  // Comparative overlay (previous period)
+  prev_sales?: number;
+  prev_revenue?: number;
+  // Forecast (future predictions)
+  forecast_sales?: number;
+  forecast_revenue?: number;
+  seasonality_factor?: number;
+  confidence?: number;
+}
+
+// ─── SKU User Notes ───────────────────────────────────────────────────────────
+export type NotaTipoAcao = 'OBSERVACAO' | 'ALTERACAO_PRECO' | 'PAUSA_ADS' | 'REPOSICAO' | 'OUTRO';
+
+export interface SKUUserNote {
+  id: number;
+  sku: string;
+  nota: string;
+  tipo_acao: NotaTipoAcao;
+  resolvido: boolean;
+  created_at: string;
+  created_by: string;
+}
+
+// ─── Causa e Efeito ──────────────────────────────────────────────────────────
+export interface CausaEfeito {
+  causa_primaria: string;
+  causa_secundaria?: string;
+  severidade: 'CRITICO' | 'ALTO' | 'MEDIO';
+  vendas_curr_7d: number;
+  vendas_prev_7d: number;
+  delta_vendas_pct: number;
+  evidencia: string;
+  recomendacao: string;
+}
+
 export interface MlbItem {
   mlb_id: string;
   title: string;
@@ -9,7 +48,7 @@ export interface MlbItem {
   sales_15d: number;
   sales_30d: number;
   sales_yesterday: number;
-  chartData: { date: string; revenue: number; sales: number }[];
+  chartData: ChartDataPoint[];
 }
 
 export interface TerminalSkuItem {
@@ -27,7 +66,21 @@ export interface TerminalSkuItem {
   global_stock: number;
   trend: 'UP' | 'DOWN' | 'STABLE' | string;
   mlbs: MlbItem[];
-  chartData: { date: string; revenue: number; sales: number }[];
+  chartData: ChartDataPoint[];
+  // PoP Comparative Deltas
+  sales_delta_7d_pct?: number;
+  rev_delta_7d_pct?: number;
+  sales_delta_30d_pct?: number;
+  rev_delta_30d_pct?: number;
+  // Forecast
+  forecast_7d?: number;
+  forecast_confidence?: number;
+  rupture_risk?: number;
+  // Causa e Efeito
+  causa_efeito?: CausaEfeito;
+  // User annotations & stockout tracking
+  notes?: SKUUserNote[];
+  stockoutDates?: string[];
 }
 
 // ─── ADS_RADAR Types ──────────────────────────────────────────────────────────

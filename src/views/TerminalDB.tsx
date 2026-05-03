@@ -3,15 +3,19 @@ import { useSearchParams } from 'react-router-dom';
 import { useTerminalData } from '@/hooks';
 import type { TerminalSkuItem } from '../types/terminal';
 import {
-  AreaChart,
   Area,
+  Line,
   XAxis,
   YAxis,
   Tooltip,
   ResponsiveContainer,
   CartesianGrid,
+  ComposedChart,
+  ReferenceDot,
+  ReferenceArea,
 } from 'recharts';
-import { Box, Package, Activity, TrendingUp, Search, AlertTriangle } from 'lucide-react';
+import { Box, Package, Activity, TrendingUp, TrendingDown, Search, AlertTriangle, Zap, BarChart3, Eye, BookMarked } from 'lucide-react';
+import { SKUNotesPanel } from '@/components/SKUNotesPanel';
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
@@ -37,6 +41,9 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
   const [selectedMlbId, setSelectedMlbId] = useState<string | null>(null);
   const [search, setSearch] = useState(urlSku || '');
   const [filterClass, setFilterClass] = useState<'ALL' | 'A' | 'B' | 'C'>('ALL');
+  const [showComparative, setShowComparative] = useState(false);
+  const [showForecast, setShowForecast] = useState(false);
+  const [notesPanelOpen, setNotesPanelOpen] = useState(false);
 
   const filteredData = useMemo(() => {
     return (data ?? []).filter((item) => {
@@ -95,6 +102,15 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
 
     return { data: selectedSku.chartData, label: 'VELOCIDADE AGREGADA SKU' };
   }, [selectedSku, selectedMlbId]);
+
+  // Stockout markers: convert ISO dates ("2026-05-01") → chart format ("01/05")
+  const stockoutMarkers = useMemo(() => {
+    if (!selectedSku?.stockoutDates?.length) return [];
+    return selectedSku.stockoutDates.map(isoDate => {
+      const [, month, day] = isoDate.split('-');
+      return `${day}/${month}`;
+    });
+  }, [selectedSku]);
 
   if (loading) {
     return (
@@ -301,6 +317,27 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
                   {selectedSku.trend === 'DOWN' && (
                     <TrendingUp className="w-4 h-4 text-gs-red transform rotate-180" />
                   )}
+                  {/* Annotations button */}
+                  <button
+                    onClick={() => setNotesPanelOpen(true)}
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-sm font-mono text-[10px] font-bold uppercase tracking-widest transition-colors hover:bg-gs-surface"
+                    style={{ border: '1px solid var(--color-gs-border)', color: 'var(--color-gs-green)' }}
+                  >
+                    <BookMarked className="w-3.5 h-3.5" />
+                    ANOTAÇÕES
+                    {(selectedSku.notes?.length ?? 0) > 0 && (
+                      <span
+                        className="rounded-full flex items-center justify-center font-mono"
+                        style={{
+                          width: 16, height: 16, fontSize: 9,
+                          background: 'var(--color-gs-red)',
+                          color: '#fff',
+                        }}
+                      >
+                        {selectedSku.notes!.length}
+                      </span>
+                    )}
+                  </button>
                 </div>
                 <p className="text-sm text-gs-muted font-mono">{selectedSku.title}</p>
                 {selectedSku.sku_master && selectedSku.sku_master !== selectedSku.sku && (
@@ -318,6 +355,14 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
                   <span className="text-lg font-bold text-gs-green font-mono leading-none">
                     {formatCurrency(selectedSku.total_revenue_30d)}
                   </span>
+                  {selectedSku.rev_delta_7d_pct !== undefined && (
+                    <span className={`text-[9px] font-mono mt-1 flex items-center gap-0.5 ${
+                      selectedSku.rev_delta_7d_pct >= 0 ? 'text-gs-green' : 'text-red-400'
+                    }`}>
+                      {selectedSku.rev_delta_7d_pct >= 0 ? <TrendingUp className="w-2.5 h-2.5" /> : <TrendingDown className="w-2.5 h-2.5" />}
+                      {selectedSku.rev_delta_7d_pct >= 0 ? '+' : ''}{selectedSku.rev_delta_7d_pct}% vs 7d ant.
+                    </span>
+                  )}
                 </div>
                 <div className="flex-1 lg:flex-none flex flex-col bg-gs-bg/30 border border-gs-border/50 rounded-sm px-4 py-2 min-w-[120px]">
                   <span className="text-[9px] text-gs-muted font-mono tracking-widest uppercase mb-1 flex items-center gap-1">
@@ -327,6 +372,12 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
                     {selectedSku.global_stock}{' '}
                     <span className="text-[10px] text-gs-muted font-normal ml-1">un.</span>
                   </span>
+                  {selectedSku.rupture_risk !== undefined && selectedSku.rupture_risk > 0.5 && (
+                    <span className="text-[9px] font-mono mt-1 text-red-400 flex items-center gap-0.5 animate-pulse">
+                      <AlertTriangle className="w-2.5 h-2.5" />
+                      Risco Ruptura: {Math.round(selectedSku.rupture_risk * 100)}%
+                    </span>
+                  )}
                 </div>
                 <div className="flex w-full lg:w-auto gap-1.5 lg:ml-auto lg:border-l lg:border-gs-border/50 lg:pl-4 items-center justify-between lg:justify-end">
                   <div className="flex flex-col items-center px-3 py-1 bg-[var(--color-gs-hover-overlay)] border border-[var(--color-gs-border)] rounded-sm">
@@ -334,6 +385,11 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
                     <span className="text-sm font-bold font-mono text-gs-text">
                       {selectedSku.sales_7d}
                     </span>
+                    {selectedSku.sales_delta_7d_pct !== undefined && (
+                      <span className={`text-[7px] font-mono ${selectedSku.sales_delta_7d_pct >= 0 ? 'text-gs-green' : 'text-red-400'}`}>
+                        {selectedSku.sales_delta_7d_pct >= 0 ? '+' : ''}{selectedSku.sales_delta_7d_pct}%
+                      </span>
+                    )}
                   </div>
                   <div className="flex flex-col items-center px-3 py-1 bg-[var(--color-gs-hover-overlay)] border border-[var(--color-gs-border)] rounded-sm">
                     <span className="text-[8px] text-gs-muted font-mono uppercase">15D</span>
@@ -360,39 +416,67 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
             {/* Split layout inside detail: Chart top, MLBs bottom */}
             <div className="flex-1 flex flex-col p-6 gap-6 overflow-y-auto custom-scrollbar">
               {/* Terminal Graph */}
-              <div className="h-[240px] flex flex-col border border-gs-border/50 rounded-sm bg-gs-bg/10 p-4">
-                <div className="flex justify-between items-center mb-4">
+              <div className="flex flex-col border border-gs-border/50 rounded-sm bg-gs-bg/10 p-4" style={{ minHeight: '280px' }}>
+                <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
                   <span className="text-[10px] text-gs-muted font-mono tracking-widest uppercase flex items-center gap-2">
                     <div className="w-1.5 h-1.5 bg-gs-blue rounded-full animate-pulse"></div>
                     {chartInfo.label}
                   </span>
-                  {selectedMlbId ? (
+                  <div className="flex items-center gap-2">
+                    {/* Comparative Toggle */}
                     <button
-                      onClick={() => setSelectedMlbId(null)}
-                      className="text-[9px] font-mono text-gs-green border border-gs-green/30 px-2 py-0.5 rounded-sm hover:bg-gs-green/10 transition-colors"
+                      onClick={() => setShowComparative(!showComparative)}
+                      className={`text-[9px] font-mono px-2 py-1 rounded-sm border transition-all flex items-center gap-1 ${
+                        showComparative
+                          ? 'border-gs-blue/60 text-gs-blue bg-gs-blue/10 shadow-[0_0_8px_rgba(56,189,248,0.2)]'
+                          : 'border-gs-border/50 text-gs-muted hover:text-gs-text hover:border-gs-border'
+                      }`}
                     >
-                      &gt;_ VER_AGREGADO
+                      <BarChart3 className="w-3 h-3" /> COMPARATIVO
                     </button>
-                  ) : (
-                    <span className="text-[10px] font-mono text-gs-text">
-                      UNIDADES/DIA: {selectedSku.total_sales_units}
-                    </span>
-                  )}
+                    {/* Forecast Toggle */}
+                    <button
+                      onClick={() => setShowForecast(!showForecast)}
+                      className={`text-[9px] font-mono px-2 py-1 rounded-sm border transition-all flex items-center gap-1 ${
+                        showForecast
+                          ? 'border-gs-green/60 text-gs-green bg-gs-green/10 shadow-[0_0_8px_rgba(74,222,128,0.2)]'
+                          : 'border-gs-border/50 text-gs-muted hover:text-gs-text hover:border-gs-border'
+                      }`}
+                    >
+                      <Eye className="w-3 h-3" /> FORECAST
+                    </button>
+                    {selectedMlbId ? (
+                      <button
+                        onClick={() => setSelectedMlbId(null)}
+                        className="text-[9px] font-mono text-gs-green border border-gs-green/30 px-2 py-1 rounded-sm hover:bg-gs-green/10 transition-colors"
+                      >
+                        &gt;_ VER_AGREGADO
+                      </button>
+                    ) : (
+                      <span className="text-[10px] font-mono text-gs-text">
+                        {selectedSku.total_sales_units} UN/30D
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <div className="flex-1 w-full" style={{ minHeight: '180px' }}>
+                <div className="flex-1 w-full" style={{ minHeight: '200px' }}>
                   <ResponsiveContainer
                     width="99%"
                     height="100%"
-                    key={`chart-${selectedSku.sku}-${selectedMlbId}`}
+                    key={`chart-${selectedSku.sku}-${selectedMlbId}-${showComparative}-${showForecast}`}
                   >
-                    <AreaChart
-                      data={chartInfo.data}
+                    <ComposedChart
+                      data={showForecast ? chartInfo.data : chartInfo.data.filter(d => !d.forecast_sales)}
                       margin={{ top: 20, right: 10, left: -20, bottom: 0 }}
                     >
                       <defs>
                         <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="var(--color-gs-green)" stopOpacity={0.45} />
                           <stop offset="95%" stopColor="var(--color-gs-green)" stopOpacity={0} />
+                        </linearGradient>
+                        <linearGradient id="colorForecast" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#38bdf8" stopOpacity={0.2} />
+                          <stop offset="95%" stopColor="#38bdf8" stopOpacity={0} />
                         </linearGradient>
                       </defs>
                       <CartesianGrid
@@ -432,6 +516,7 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
                           strokeDasharray: '3 3',
                         }}
                       />
+                      {/* Main sales area */}
                       <Area
                         type="monotone"
                         dataKey="sales"
@@ -443,20 +528,102 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
                         activeDot={{ r: 4, strokeWidth: 0 }}
                         animationDuration={1000}
                       />
-                      <Area
-                        type="monotone"
-                        dataKey="revenue"
-                        name="Faturamento"
-                        stroke="var(--color-gs-blue)"
-                        fill="transparent"
-                        strokeWidth={1}
-                        strokeDasharray="4 4"
-                        hide={true} // Mantemos os dados para o tooltip mas limpamos o visual principal
-                      />
-                    </AreaChart>
+                      {/* Comparative: Previous period overlay */}
+                      {showComparative && (
+                        <Line
+                          type="monotone"
+                          dataKey="prev_sales"
+                          name="Período Anterior"
+                          stroke="#64748b"
+                          strokeWidth={1.5}
+                          strokeDasharray="6 3"
+                          dot={false}
+                          animationDuration={800}
+                        />
+                      )}
+                      {/* Forecast: Future prediction line */}
+                      {showForecast && (
+                        <Area
+                          type="monotone"
+                          dataKey="forecast_sales"
+                          name="Previsão"
+                          stroke="#38bdf8"
+                          fill="url(#colorForecast)"
+                          strokeWidth={2}
+                          strokeDasharray="4 4"
+                          dot={{ r: 3, fill: '#38bdf8', strokeWidth: 0 }}
+                          animationDuration={800}
+                        />
+                      )}
+                      {/* Stockout markers: red dots on days with zero stock */}
+                      {stockoutMarkers.map(date => (
+                        <ReferenceDot
+                          key={date}
+                          x={date}
+                          y={0}
+                          r={6}
+                          fill="var(--color-gs-red)"
+                          stroke="var(--color-gs-red)"
+                          strokeWidth={2}
+                          ifOverflow="extendDomain"
+                        />
+                      ))}
+                    </ComposedChart>
                   </ResponsiveContainer>
                 </div>
               </div>
+
+              {/* Causa e Efeito Panel */}
+              {selectedSku.causa_efeito && (
+                <div className={`border rounded-sm p-4 ${
+                  selectedSku.causa_efeito.severidade === 'CRITICO'
+                    ? 'border-red-500/40 bg-red-500/5'
+                    : selectedSku.causa_efeito.severidade === 'ALTO'
+                    ? 'border-orange-500/40 bg-orange-500/5'
+                    : 'border-gs-border/50 bg-gs-bg/10'
+                }`}>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[10px] text-gs-muted font-mono tracking-widest uppercase flex items-center gap-2">
+                      <Zap className={`w-3.5 h-3.5 ${
+                        selectedSku.causa_efeito.severidade === 'CRITICO' ? 'text-red-400 animate-pulse' : 'text-orange-400'
+                      }`} />
+                      DIAGNÓSTICO — CAUSA {'&'} EFEITO
+                    </span>
+                    <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-sm border ${
+                      selectedSku.causa_efeito.severidade === 'CRITICO'
+                        ? 'border-red-500/40 text-red-400 bg-red-500/10'
+                        : selectedSku.causa_efeito.severidade === 'ALTO'
+                        ? 'border-orange-500/40 text-orange-400 bg-orange-500/10'
+                        : 'border-gs-blue/40 text-gs-blue bg-gs-blue/10'
+                    }`}>
+                      {selectedSku.causa_efeito.severidade}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[8px] text-gs-muted font-mono uppercase">Causa Primária</span>
+                      <span className="text-xs font-mono font-bold text-gs-text">{selectedSku.causa_efeito.causa_primaria}</span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[8px] text-gs-muted font-mono uppercase">Delta Vendas</span>
+                      <span className={`text-xs font-mono font-bold ${selectedSku.causa_efeito.delta_vendas_pct >= 0 ? 'text-gs-green' : 'text-red-400'}`}>
+                        {selectedSku.causa_efeito.delta_vendas_pct >= 0 ? '+' : ''}{selectedSku.causa_efeito.delta_vendas_pct}%
+                        <span className="text-[9px] text-gs-muted font-normal ml-1">
+                          ({selectedSku.causa_efeito.vendas_prev_7d} → {selectedSku.causa_efeito.vendas_curr_7d})
+                        </span>
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[8px] text-gs-muted font-mono uppercase">Evidência</span>
+                      <span className="text-[10px] font-mono text-gs-muted">{selectedSku.causa_efeito.evidencia}</span>
+                    </div>
+                  </div>
+                  <div className="mt-3 pt-3 border-t border-white/5">
+                    <span className="text-[8px] text-gs-muted font-mono uppercase">Recomendação GS-Claw</span>
+                    <p className="text-[10px] font-mono text-gs-blue mt-1">{selectedSku.causa_efeito.recomendacao}</p>
+                  </div>
+                </div>
+              )}
 
               {/* MLBs Data Grid */}
               <div className="flex flex-col">
@@ -611,6 +778,16 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
           </div>
         )}
       </div>
+
+      {/* SKU Notes Panel */}
+      {selectedSku && (
+        <SKUNotesPanel
+          sku={selectedSku.sku}
+          notes={selectedSku.notes ?? []}
+          open={notesPanelOpen}
+          onClose={() => setNotesPanelOpen(false)}
+        />
+      )}
     </div>
   );
 }

@@ -12,7 +12,6 @@ import {
   CartesianGrid,
   ComposedChart,
   ReferenceDot,
-  ReferenceArea,
 } from 'recharts';
 import { Box, Package, Activity, TrendingUp, TrendingDown, Search, AlertTriangle, Zap, BarChart3, Eye, BookMarked } from 'lucide-react';
 import { SKUNotesPanel } from '@/components/SKUNotesPanel';
@@ -463,7 +462,7 @@ export function TerminalDB({ preSelectedSkuId }: TerminalDBProps) {
                   <ResponsiveContainer
                     width="99%"
                     height="100%"
-                    key={`chart-${selectedSku.sku}-${selectedMlbId}-${showComparative}-${showForecast}`}
+                    key={`chart-${selectedSku.sku}-${selectedMlbId}`}
                   >
                     <ComposedChart
                       data={showForecast ? chartInfo.data : chartInfo.data.filter(d => !d.forecast_sales)}

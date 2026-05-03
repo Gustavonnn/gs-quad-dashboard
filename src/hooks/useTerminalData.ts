@@ -72,15 +72,15 @@ export function useTerminalData() {
 
         if (!vendasMap[s]) vendasMap[s] = {};
         if (!vendasMap[s][d]) vendasMap[s][d] = { revenue: 0, sales: 0 };
-        vendasMap[s][d].revenue += parseFloat(v.receita_total || '0');
-        vendasMap[s][d].sales += parseInt(v.quantidade || '0', 10);
+        vendasMap[s][d].revenue += Number(v.receita_total) || 0;
+        vendasMap[s][d].sales += Number(v.quantidade) || 0;
 
         if (m) {
           if (!mlbVendasMap[s]) mlbVendasMap[s] = {};
           if (!mlbVendasMap[s][m]) mlbVendasMap[s][m] = {};
           if (!mlbVendasMap[s][m][d]) mlbVendasMap[s][m][d] = { revenue: 0, sales: 0 };
-          mlbVendasMap[s][m][d].revenue += parseFloat(v.receita_total || '0');
-          mlbVendasMap[s][m][d].sales += parseInt(v.quantidade || '0', 10);
+          mlbVendasMap[s][m][d].revenue += Number(v.receita_total) || 0;
+          mlbVendasMap[s][m][d].sales += Number(v.quantidade) || 0;
         }
       });
 

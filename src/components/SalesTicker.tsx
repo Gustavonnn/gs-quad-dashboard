@@ -26,7 +26,9 @@ export function SalesTicker() {
 
       if (!produtos || produtos.length === 0) return [];
 
-      const skus = produtos.map((p: Record<string, unknown>) => p.sku as string).filter(Boolean);
+      const skus = produtos
+        .map((p: Record<string, unknown>) => String(p.sku || '').trim())
+        .filter(s => s && s.toLowerCase() !== 'nan');
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 14);
 
@@ -57,9 +59,9 @@ export function SalesTicker() {
         const age = now - new Date(v.data_venda as string).getTime();
         // Use receita_total from real schema
         if (age < 7 * msPerDay) {
-          entry.curr += (v.receita_total as number) ?? 0;
+          entry.curr += Number(v.receita_total) || 0;
         } else {
-          entry.prev += (v.receita_total as number) ?? 0;
+          entry.prev += Number(v.receita_total) || 0;
         }
       }
 

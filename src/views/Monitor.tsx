@@ -5,6 +5,8 @@ import { Skeleton } from '@/components/Skeleton';
 import { ALERTA_RANK } from '@/lib/schemas';
 
 const SEV_BORDER: Record<string, string> = {
+  CRITICO: 'border-l-gs-red',
+  MEDIO: 'border-l-gs-blue',
   CRÍTICO: 'border-l-gs-text',
   ALTO: 'border-l-gs-yellow',
   MÉDIO: 'border-l-gs-blue',
@@ -12,6 +14,8 @@ const SEV_BORDER: Record<string, string> = {
 };
 
 const SEV_TEXT: Record<string, string> = {
+  CRITICO: 'text-gs-red',
+  MEDIO: 'text-gs-blue',
   CRÍTICO: 'text-gs-text',
   ALTO: 'text-gs-yellow',
   MÉDIO: 'text-gs-blue',

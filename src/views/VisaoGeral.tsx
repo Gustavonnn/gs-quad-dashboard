@@ -1,745 +1,349 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
+import { Link } from 'react-router-dom';
+import {
+  Activity,
+  AlertTriangle,
+  ArrowRight,
+  BarChart3,
+  Package,
+  Radar,
+  Search,
+  ShieldCheck,
+  TrendingUp,
+} from 'lucide-react';
 import { useLiveMetrics, useIAAlertas, useStockAlerts } from '@/hooks';
 import { useAdsRadar } from '@/hooks/useAdsRadar';
-import { Sparkline } from '@/components/Sparkline';
 import { OperationKPIBar } from '@/components/OperationKPIBar';
+import { Sparkline } from '@/components/Sparkline';
 import {
-  TrendingUp,
-  TrendingDown,
-  AlertTriangle,
-  Package,
-  Zap,
-  Activity,
-  BarChart2,
-  Target,
-  ArrowRight,
-} from 'lucide-react';
+  DataPanel,
+  EmptyState,
+  MetricCard,
+  ModuleHeader,
+  PageShell,
+  StatusBadge,
+} from '@/components/dashboard';
 
-// ─── Formatters ───────────────────────────────────────────────────────────────
-
-function fmt(v: number) {
+function currency(value: number) {
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL',
     maximumFractionDigits: 0,
-  }).format(v);
+  }).format(value);
 }
 
-function fmtK(v: number) {
-  if (v >= 1000) return `${(v / 1000).toFixed(1)}K`;
-  return String(v);
-}
-
-// ─── Pulse dot ───────────────────────────────────────────────────────────────
-
-function PulseDot({ color = '#3483fa' }: { color?: string }) {
-  return (
-    <div className="relative flex items-center justify-center" style={{ width: 8, height: 8 }}>
-      <span
-        className="animate-ping absolute inline-flex w-full h-full rounded-full opacity-50"
-        style={{ backgroundColor: color }}
-      />
-      <span
-        className="relative inline-flex rounded-full w-2 h-2"
-        style={{ backgroundColor: color }}
-      />
-    </div>
+function compact(value: number) {
+  return new Intl.NumberFormat('pt-BR', { notation: 'compact', maximumFractionDigits: 1 }).format(
+    value
   );
 }
 
-// ─── KPI Card ────────────────────────────────────────────────────────────────
-
-interface KpiCardProps {
-  label: string;
-  value: string;
-  sub?: string;
-  accent: string; // CSS color
-  icon: React.ReactNode;
-  trend?: 'up' | 'down' | 'neutral';
-  trendLabel?: string;
-  loading?: boolean;
-  barPct?: number;
+function severityTone(severity?: string): 'red' | 'yellow' | 'blue' | 'neutral' {
+  if (severity === 'CRITICO') return 'red';
+  if (severity === 'ALTO') return 'yellow';
+  if (severity === 'MEDIO') return 'blue';
+  return 'neutral';
 }
-
-function KpiCard({
-  label,
-  value,
-  sub,
-  accent,
-  icon,
-  trend,
-  trendLabel,
-  loading,
-  barPct,
-}: KpiCardProps) {
-  const TrendIcon = trend === 'up' ? TrendingUp : trend === 'down' ? TrendingDown : null;
-
-  return (
-    <div
-      className="relative flex flex-col gap-3 p-4 sm:p-5 flex-1 overflow-hidden group"
-      style={{
-        background: 'var(--color-gs-panel)',
-        border: '1px solid var(--color-gs-border)',
-        borderRadius: '2px',
-      }}
-    >
-      {/* Top accent line */}
-      <div
-        className="absolute top-0 left-0 right-0 h-[1px]"
-        style={{ background: accent, opacity: 0.6 }}
-      />
-
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <span
-          className="font-mono text-[9px] tracking-[0.22em] uppercase"
-          style={{ color: 'var(--color-gs-muted)' }}
-        >
-          {label}
-        </span>
-        <span style={{ color: accent, opacity: 0.7 }}>{icon}</span>
-      </div>
-
-      {/* Value */}
-      {loading ? (
-        <div
-          className="h-9 rounded-sm animate-pulse"
-          style={{ background: 'var(--color-gs-border)', width: '60%' }}
-        />
-      ) : (
-        <div
-          className="font-heading font-black tracking-tight leading-none text-2xl sm:text-[28px]"
-          style={{ color: 'var(--color-gs-text)' }}
-        >
-          {value}
-        </div>
-      )}
-
-      {/* Progress bar */}
-      {barPct !== undefined && (
-        <div
-          className="h-[2px] w-full"
-          style={{ background: 'var(--color-gs-border)', borderRadius: 1 }}
-        >
-          <div
-            className="h-full"
-            style={{
-              width: `${Math.min(barPct, 100)}%`,
-              background: accent,
-              borderRadius: 1,
-              transition: 'width 1s ease',
-            }}
-          />
-        </div>
-      )}
-
-      {/* Footer */}
-      {(trendLabel || sub) && (
-        <div className="flex items-center gap-1.5">
-          {TrendIcon && (
-            <TrendIcon
-              size={10}
-              style={{ color: trend === 'up' ? 'var(--color-gs-green)' : 'var(--color-gs-text)' }}
-            />
-          )}
-          <span
-            className="font-mono text-[9px]"
-            style={{
-              color:
-                trend === 'up'
-                  ? 'var(--color-gs-green)'
-                  : trend === 'down'
-                    ? 'var(--color-gs-text)'
-                    : 'var(--color-gs-muted)',
-            }}
-          >
-            {trendLabel || sub}
-          </span>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── Terminal Live Feed ────────────────────────────────────────────────────────
-
-interface LogLine {
-  id: number;
-  type: 'SYS' | 'INTEL' | 'OK' | 'WARN' | 'ADS' | 'SALE';
-  msg: string;
-}
-
-const TYPE_COLOR: Record<LogLine['type'], string> = {
-  SYS: '#666666',
-  INTEL: '#3483FA',
-  OK: '#3483FA',
-  WARN: '#FF9500',
-  ADS: '#00ADEF',
-  SALE: '#3483FA',
-};
-
-function TerminalFeed({ lines }: { lines: LogLine[] }) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [lines]);
-
-  return (
-    <div
-      className="flex flex-col h-full"
-      style={{
-        background: 'var(--color-gs-bg)',
-        border: '1px solid var(--color-gs-border)',
-        borderRadius: '2px',
-        overflow: 'hidden',
-      }}
-    >
-      {/* Terminal chrome */}
-      <div
-        className="flex items-center gap-2 px-3 shrink-0"
-        style={{
-          height: '32px',
-          borderBottom: '1px solid var(--color-gs-border)',
-          background: 'var(--color-gs-panel)',
-        }}
-      >
-        <div className="flex gap-1.5">
-          <span className="w-2 h-2 rounded-full" style={{ background: '#666666', opacity: 0.6 }} />
-          <span
-            className="w-2 h-2 rounded-full"
-            style={{ background: 'var(--color-gs-yellow)', opacity: 0.6 }}
-          />
-          <span
-            className="w-2 h-2 rounded-full"
-            style={{ background: 'var(--color-gs-green)', opacity: 0.6 }}
-          />
-        </div>
-        <span
-          className="font-mono text-[9px] tracking-[0.2em] uppercase"
-          style={{ color: 'var(--color-gs-muted)' }}
-        >
-          TERMINAL_LIVE_FEED
-        </span>
-        <PulseDot />
-      </div>
-
-      {/* Log lines */}
-      <div
-        ref={scrollRef}
-        className="flex-1 overflow-y-auto p-3 flex flex-col gap-1 custom-scrollbar"
-        style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', lineHeight: 1.7 }}
-      >
-        {lines.map((line) => (
-          <div
-            key={line.id}
-            className="flex items-start gap-2"
-            style={{ color: 'rgba(51,51,51,0.6)', animationFillMode: 'forwards' }}
-          >
-            <span className="font-bold shrink-0" style={{ color: TYPE_COLOR[line.type] }}>
-              {line.type}:
-            </span>
-            <span>{line.msg}</span>
-          </div>
-        ))}
-        {/* Blinking cursor */}
-        <div className="flex items-center gap-1" style={{ color: 'var(--color-gs-green)' }}>
-          <span>▸</span>
-          <span
-            className="animate-blink"
-            style={{
-              display: 'inline-block',
-              width: 6,
-              height: 11,
-              background: 'var(--color-gs-green)',
-              marginLeft: 2,
-            }}
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Alert Row ────────────────────────────────────────────────────────────────
-
-function AlertRow({ sku, tipo, severity }: { sku: string; tipo: string; severity: string }) {
-  const color =
-    severity === 'CRÍTICO' ? 'var(--color-gs-text)' : severity === 'ALTO' ? '#FF9500' : '#FFCC00';
-  return (
-    <div
-      className="flex items-center gap-2 py-1.5 border-b"
-      style={{ borderColor: 'var(--color-gs-border)', opacity: 0.9 }}
-    >
-      <div className="w-1 h-1 rounded-full shrink-0" style={{ background: color }} />
-      <span className="font-mono text-[9px] font-bold shrink-0" style={{ color, minWidth: 36 }}>
-        {severity.slice(0, 3)}
-      </span>
-      <span
-        className="font-mono text-[10px] font-bold"
-        style={{ color: 'var(--color-gs-text)', minWidth: 80 }}
-      >
-        {sku}
-      </span>
-      <span className="font-mono text-[9px] truncate" style={{ color: 'var(--color-gs-muted)' }}>
-        {tipo}
-      </span>
-    </div>
-  );
-}
-
-// ─── Main View ────────────────────────────────────────────────────────────────
-
-const SEED_LINES: Omit<LogLine, 'id'>[] = [
-  { type: 'SYS', msg: 'Conectado ao Supabase Realtime.' },
-  { type: 'INTEL', msg: 'Carregando inferências de ML...' },
-  { type: 'OK', msg: 'Pipeline DuckDB → Supabase: sincronizado.' },
-  { type: 'SYS', msg: 'Aguardando novos eventos...' },
-];
 
 export function VisaoGeral() {
   const { data: metricsData, isLoading: metricsLoading } = useLiveMetrics();
-  const { data: alertasRaw, isLoading: alertasLoading } = useIAAlertas();
-  const { data: stockAlertsRaw } = useStockAlerts();
-  const { summary: adsSummary } = useAdsRadar();
+  const { data: alertasRaw, isLoading: alertasLoading } = useIAAlertas(80);
+  const { data: stockAlertsRaw, isLoading: stockLoading } = useStockAlerts();
+  const { summary: adsSummary, loading: adsLoading } = useAdsRadar();
 
-  const metrics = useMemo(
-    () =>
-      metricsData ?? {
-        totalVendas: 0,
-        alertasAtivos: 0,
-        totalProdutos: 0,
-        sparkData: [] as number[],
-      },
-    [metricsData]
-  );
-
+  const metrics = metricsData ?? {
+    totalVendas: 0,
+    alertasAtivos: 0,
+    totalProdutos: 0,
+    sparkData: [] as number[],
+  };
   const alertas = useMemo(() => alertasRaw ?? [], [alertasRaw]);
   const stockAlerts = useMemo(() => stockAlertsRaw ?? [], [stockAlertsRaw]);
 
-  const logIdRef = useRef(SEED_LINES.length);
-
-  const [logLines, setLogLines] = useState<LogLine[]>(() =>
-    SEED_LINES.map((l, idx) => ({ ...l, id: idx + 1 }))
+  const criticalAlerts = useMemo(
+    () => alertas.filter((alerta) => ['CRITICO', 'ALTO'].includes(alerta.severity ?? '')),
+    [alertas]
   );
 
-  // Live feed simulator: inject events about ads/sales (no timestamps)
-  const pushLine = useCallback((line: Omit<LogLine, 'id'>) => {
-    setLogLines((prev) => {
-      const next = [...prev, { ...line, id: ++logIdRef.current }];
-      return next.length > 40 ? next.slice(-40) : next;
-    });
-  }, []);
-
-  useEffect(() => {
-    if (!metricsLoading && metrics.totalVendas > 0) {
-      pushLine({ type: 'SALE', msg: `Receita atualizada → ${fmt(metrics.totalVendas)}` });
-    }
-  }, [metrics, metricsLoading, pushLine]);
-
-  useEffect(() => {
-    if (!alertasLoading && alertas.length > 0) {
-      pushLine({ type: 'WARN', msg: `${alertas.length} alertas ativos detectados.` });
-    }
-  }, [alertas, alertasLoading, pushLine]);
-
-  useEffect(() => {
-    if (adsSummary.kills > 0) {
-      pushLine({ type: 'ADS', msg: `ADS_RADAR: ${adsSummary.kills} anúncios para desligar.` });
-    }
-    if (adsSummary.winners > 0) {
-      pushLine({ type: 'ADS', msg: `ADS_RADAR: ${adsSummary.winners} anúncios vencedores.` });
-    }
-  }, [adsSummary, pushLine]);
-
-  useEffect(() => {
-    if (stockAlerts.length > 0) {
-      pushLine({ type: 'WARN', msg: `${stockAlerts.length} SKUs com estoque zerado.` });
-    }
-  }, [stockAlerts, pushLine]);
-
-  const sparkData = metrics?.sparkData ?? [];
-  const totalAlerts = alertas.length;
-  const sparkTrend: 'up' | 'down' | 'neutral' =
-    sparkData.length >= 2
-      ? sparkData[sparkData.length - 1] > sparkData[0]
-        ? 'up'
-        : 'down'
-      : 'neutral';
-
-  const criticalAlerts = alertas.filter((a) => a.severity === 'CRÍTICO' || a.severity === 'ALTO');
+  const feedLines = useMemo(
+    () => [
+      { label: 'SUPABASE', text: `${compact(metrics.totalProdutos)} produtos carregados` },
+      { label: 'RECEITA', text: `${currency(metrics.totalVendas)} no último corte de vendas` },
+      { label: 'ALERTAS', text: `${alertas.length} sinais operacionais ativos` },
+      { label: 'ADS', text: `${adsSummary.winners} winners, ${adsSummary.kills} para ação` },
+      { label: 'ESTOQUE', text: `${stockAlerts.length} SKUs em ruptura monitorada` },
+    ],
+    [metrics.totalProdutos, metrics.totalVendas, alertas.length, adsSummary, stockAlerts.length]
+  );
 
   return (
-    <div className="flex flex-col gap-5 animate-fade-in">
-      {/* ── PAGE HEADER ── */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <PulseDot />
-            <span
-              className="font-mono text-[9px] tracking-[0.25em] uppercase"
-              style={{ color: 'var(--color-gs-green)' }}
+    <PageShell>
+      <ModuleHeader
+        eyebrow="Operação ativa"
+        title="WAR_ROOM"
+        accent="INTEL"
+        description="Visão executiva do Mercado Livre para diagnóstico rápido, priorização de risco e ação comercial."
+        icon={<ShieldCheck size={16} />}
+        actions={
+          <>
+            <Link
+              to="/search"
+              className="inline-flex h-9 items-center gap-2 rounded-[6px] border border-[var(--color-gs-border)] px-3 text-sm text-[var(--color-gs-text)] hover:bg-[var(--color-gs-hover-overlay)]"
             >
-              OPERAÇÃO ATIVA
-            </span>
-          </div>
-          <h2
-            className="font-heading font-black tracking-wide uppercase"
-            style={{ fontSize: '22px', color: 'var(--color-gs-text)', lineHeight: 1 }}
-          >
-            WAR_ROOM <span style={{ color: 'var(--color-gs-green)' }}>INTEL</span>
-          </h2>
-          <p
-            className="font-mono text-[9px] tracking-[0.2em] uppercase mt-1"
-            style={{ color: 'var(--color-gs-muted)' }}
-          >
-            GS-QUAD · INTEL OPS · ARMAZENACORP
-          </p>
-        </div>
+              <Search size={15} />
+              Buscar
+            </Link>
+            <Link
+              to="/hub"
+              className="inline-flex h-9 items-center gap-2 rounded-[6px] bg-[var(--color-gs-blue)] px-3 text-sm font-bold text-white hover:opacity-90"
+            >
+              OP_HUB
+              <ArrowRight size={15} />
+            </Link>
+          </>
+        }
+      />
 
-        {/* Quick stats strip */}
-        <div
-          className="hidden lg:flex items-center gap-0 border"
-          style={{
-            borderColor: 'var(--color-gs-border)',
-            background: 'var(--color-gs-panel)',
-            borderRadius: '2px',
-          }}
-        >
-          {[
-            { v: fmtK(metrics?.totalProdutos ?? 0), l: 'produtos' },
-            { v: String(adsSummary.total), l: 'anúncios' },
-            { v: String(adsSummary.winners), l: 'winners' },
-            { v: String(stockAlerts.length), l: 'sem estoque' },
-          ].map((s, i) => (
-            <div
-              key={i}
-              className="flex flex-col items-center px-5 py-2"
-              style={{
-                borderRight: i < 3 ? '1px solid var(--color-gs-border)' : 'none',
-              }}
-            >
-              <span
-                className="font-heading font-black text-base"
-                style={{ color: 'var(--color-gs-text)' }}
-              >
-                {s.v}
-              </span>
-              <span
-                className="font-mono text-[8px] uppercase tracking-widest"
-                style={{ color: 'var(--color-gs-muted)' }}
-              >
-                {s.l}
-              </span>
-            </div>
-          ))}
-        </div>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <MetricCard
+          label="Receita do dia"
+          value={currency(metrics.totalVendas)}
+          detail="Última data disponível em live_vendas"
+          icon={<TrendingUp size={18} />}
+          tone="green"
+          progress={Math.min((metrics.totalVendas / 50000) * 100, 100)}
+          loading={metricsLoading}
+        />
+        <MetricCard
+          label="Alertas ativos"
+          value={alertas.length.toString().padStart(2, '0')}
+          detail={`${criticalAlerts.length} críticos ou altos`}
+          icon={<AlertTriangle size={18} />}
+          tone={criticalAlerts.length > 0 ? 'red' : 'green'}
+          progress={Math.min((alertas.length / 80) * 100, 100)}
+          loading={alertasLoading}
+        />
+        <MetricCard
+          label="Portfolio Ads"
+          value={`${adsSummary.portfolioScore}/100`}
+          detail={`${adsSummary.winners} winners | ${adsSummary.monitors} monitor | ${adsSummary.kills} kill`}
+          icon={<Radar size={18} />}
+          tone={adsSummary.portfolioScore >= 65 ? 'green' : 'yellow'}
+          progress={adsSummary.portfolioScore}
+          loading={adsLoading}
+        />
+        <MetricCard
+          label="Ruptura"
+          value={stockAlerts.length.toString().padStart(2, '0')}
+          detail="SKUs sem disponibilidade detectada"
+          icon={<Package size={18} />}
+          tone={stockAlerts.length > 0 ? 'red' : 'green'}
+          progress={Math.min((stockAlerts.length / 30) * 100, 100)}
+          loading={stockLoading}
+        />
       </div>
 
-      {/* ── OPERATION KPI BAR ── */}
       <OperationKPIBar />
 
-      {/* ── KPI CARDS ROW ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <KpiCard
-          label="Receita do Dia"
-          value={fmt(metrics?.totalVendas ?? 0)}
-          accent="var(--color-gs-green)"
-          icon={<TrendingUp size={14} />}
-          trend={sparkTrend}
-          trendLabel={
-            sparkTrend === 'up'
-              ? 'tendência de alta'
-              : sparkTrend === 'down'
-                ? 'tendência de queda'
-                : 'estável'
-          }
-          loading={metricsLoading}
-          barPct={82}
-        />
-        <KpiCard
-          label="Alertas Ativos"
-          value={String(totalAlerts).padStart(2, '0')}
-          accent={totalAlerts > 0 ? 'var(--color-gs-yellow)' : 'var(--color-gs-green)'}
-          icon={<AlertTriangle size={14} />}
-          trend={totalAlerts > 0 ? 'down' : 'up'}
-          trendLabel={
-            totalAlerts > 0 ? `${criticalAlerts.length} críticos / altos` : 'sem alertas críticos'
-          }
-          loading={alertasLoading}
-          barPct={Math.min((totalAlerts / 20) * 100, 100)}
-        />
-        <KpiCard
-          label="Portfólio Ads"
-          value={String(adsSummary.portfolioScore)}
-          sub="/100 score"
-          accent={
-            adsSummary.portfolioScore >= 65
-              ? 'var(--color-gs-green)'
-              : adsSummary.portfolioScore >= 40
-                ? 'var(--color-gs-yellow)'
-                : 'var(--color-gs-text)'
-          }
-          icon={<Target size={14} />}
-          trendLabel={`${adsSummary.winners}W · ${adsSummary.monitors}M · ${adsSummary.kills}K`}
-          barPct={adsSummary.portfolioScore}
-        />
-        <KpiCard
-          label="Sem Estoque"
-          value={String(stockAlerts.length).padStart(2, '0')}
-          accent={stockAlerts.length > 0 ? 'var(--color-gs-text)' : 'var(--color-gs-green)'}
-          icon={<Package size={14} />}
-          trend={stockAlerts.length > 0 ? 'down' : 'neutral'}
-          trendLabel={stockAlerts.length > 0 ? 'SKUs sem estoque ativo' : 'estoque OK'}
-          barPct={Math.min((stockAlerts.length / 10) * 100, 100)}
-        />
-      </div>
-
-      {/* ── MAIN AREA: Chart + Alerts + Terminal ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3" style={{ minHeight: '280px' }}>
-        {/* Sparkline — 2 cols */}
-        <div
-          className="lg:col-span-2 flex flex-col min-h-[220px]"
-          style={{
-            background: 'var(--color-gs-panel)',
-            border: '1px solid var(--color-gs-border)',
-            borderRadius: '2px',
-            overflow: 'hidden',
-          }}
+      <div className="grid grid-cols-1 gap-3 xl:grid-cols-12">
+        <DataPanel
+          className="xl:col-span-8"
+          title="Receita e pulso operacional"
+          eyebrow="Live metrics"
+          action={<StatusBadge tone="green">online</StatusBadge>}
+          contentClassName="min-h-[300px]"
         >
-          <div className="flex items-center justify-between px-5 pt-4 pb-3 shrink-0">
-            <div className="flex items-center gap-2">
-              <BarChart2 size={12} style={{ color: 'var(--color-gs-green)' }} />
-              <span
-                className="font-mono text-[9px] tracking-[0.22em] uppercase font-bold"
-                style={{ color: 'var(--color-gs-muted)' }}
-              >
-                RECEITA 7 DIAS
-              </span>
+          <div className="grid h-full grid-cols-1 gap-4 lg:grid-cols-[1fr_240px]">
+            <div className="min-h-[220px]">
+              <Sparkline data={metrics.sparkData} color="var(--color-gs-green)" />
             </div>
-            <div className="flex items-center gap-1.5">
-              <PulseDot />
-              <span
-                className="font-mono text-[8px] uppercase tracking-widest"
-                style={{ color: 'var(--color-gs-green)' }}
-              >
-                LIVE
-              </span>
-            </div>
-          </div>
-          <div className="flex-1 px-1 pb-3">
-            <Sparkline data={sparkData} color="var(--color-gs-green)" />
-          </div>
-        </div>
-
-        {/* Terminal Feed — 1 col */}
-        <div className="flex flex-col min-h-[260px] lg:min-h-0">
-          <TerminalFeed lines={logLines} />
-        </div>
-      </div>
-
-      {/* ── BOTTOM ROW: Alerts + ADS Radar summary ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-        {/* Critical Alerts */}
-        <div
-          className="flex flex-col"
-          style={{
-            background: 'var(--color-gs-panel)',
-            border: '1px solid var(--color-gs-border)',
-            borderRadius: '2px',
-            overflow: 'hidden',
-          }}
-        >
-          <div
-            className="flex items-center justify-between px-4 py-3 border-b shrink-0"
-            style={{ borderColor: 'var(--color-gs-border)' }}
-          >
-            <div className="flex items-center gap-2">
-              <AlertTriangle size={11} style={{ color: 'var(--color-gs-yellow)' }} />
-              <span
-                className="font-mono text-[9px] tracking-[0.2em] uppercase font-bold"
-                style={{ color: 'var(--color-gs-muted)' }}
-              >
-                ALERTAS RECENTES
-              </span>
-            </div>
-            <span
-              className="font-mono text-[8px] px-2 py-0.5"
-              style={{
-                border: '1px solid var(--color-gs-border)',
-                color: 'var(--color-gs-muted)',
-                borderRadius: 1,
-              }}
-            >
-              {alertas.length} total
-            </span>
-          </div>
-          <div
-            className="flex-1 overflow-y-auto px-4 py-2 custom-scrollbar"
-            style={{ maxHeight: '200px' }}
-          >
-            {alertasLoading ? (
-              <div className="flex flex-col gap-2 py-2">
-                {[1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className="h-5 animate-pulse rounded-sm"
-                    style={{ background: 'var(--color-gs-border)', width: `${60 + i * 15}%` }}
-                  />
-                ))}
-              </div>
-            ) : alertas.length === 0 ? (
-              <div className="flex items-center gap-2 py-4">
-                <Activity size={12} style={{ color: 'var(--color-gs-green)' }} />
-                <span
-                  className="font-mono text-[9px] tracking-widest uppercase"
-                  style={{ color: 'var(--color-gs-muted)' }}
+            <div className="grid gap-2">
+              {feedLines.map((line) => (
+                <div
+                  key={line.label}
+                  className="rounded-[6px] border border-[var(--color-gs-border)] bg-[var(--color-gs-bg)] p-3"
                 >
-                  Sem alertas ativos
-                </span>
-              </div>
-            ) : (
-              alertas
-                .slice(0, 8)
-                .map((a) => (
-                  <AlertRow
-                    key={a.id}
-                    sku={a.sku ?? ''}
-                    tipo={a.tipo_alerta ?? ''}
-                    severity={a.severity ?? 'BAIXO'}
-                  />
-                ))
-            )}
-          </div>
-        </div>
-
-        {/* ADS Radar mini summary */}
-        <div
-          className="flex flex-col"
-          style={{
-            background: 'var(--color-gs-panel)',
-            border: '1px solid var(--color-gs-border)',
-            borderRadius: '2px',
-            overflow: 'hidden',
-          }}
-        >
-          <div
-            className="flex items-center justify-between px-4 py-3 border-b shrink-0"
-            style={{ borderColor: 'var(--color-gs-border)' }}
-          >
-            <div className="flex items-center gap-2">
-              <Zap size={11} style={{ color: 'var(--color-gs-green)' }} />
-              <span
-                className="font-mono text-[9px] tracking-[0.2em] uppercase font-bold"
-                style={{ color: 'var(--color-gs-muted)' }}
-              >
-                ADS_RADAR SNAPSHOT
-              </span>
+                  <div className="font-mono text-[9px] font-bold text-[var(--color-gs-blue)]">
+                    {line.label}
+                  </div>
+                  <div className="mt-1 text-sm text-[var(--color-gs-text)]">{line.text}</div>
+                </div>
+              ))}
             </div>
-            <a
-              href="/ads-radar"
-              className="flex items-center gap-1 font-mono text-[8px] uppercase tracking-widest transition-colors"
-              style={{ color: 'var(--color-gs-green)', textDecoration: 'none' }}
-              onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.7')}
-              onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
-            >
-              VER TUDO <ArrowRight size={9} />
-            </a>
           </div>
+        </DataPanel>
 
-          <div
-            className="flex-1 grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x"
-            style={{ borderColor: 'var(--color-gs-border)' }}
-          >
+        <DataPanel
+          className="xl:col-span-4"
+          title="Fila de atenção"
+          eyebrow="Prioridade"
+          action={
+            <Link
+              to="/monitor"
+              className="inline-flex items-center gap-1 font-mono text-[10px] font-bold uppercase text-[var(--color-gs-blue)]"
+            >
+              Monitor <ArrowRight size={12} />
+            </Link>
+          }
+          contentClassName="space-y-2"
+        >
+          {alertasLoading ? (
+            <div className="space-y-2">
+              {[0, 1, 2].map((item) => (
+                <div
+                  key={item}
+                  className="h-14 animate-pulse rounded-[6px] bg-[var(--color-gs-border)]"
+                />
+              ))}
+            </div>
+          ) : criticalAlerts.length === 0 ? (
+            <EmptyState
+              icon={<Activity size={22} />}
+              title="Sem alerta crítico"
+              description="A fila urgente está limpa neste momento."
+            />
+          ) : (
+            criticalAlerts.slice(0, 7).map((alerta) => (
+              <Link
+                key={alerta.id}
+                to="/monitor"
+                className="block rounded-[6px] border border-[var(--color-gs-border)] p-3 hover:bg-[var(--color-gs-hover-overlay)]"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <span className="truncate font-mono text-xs font-bold text-[var(--color-gs-text)]">
+                    {alerta.sku}
+                  </span>
+                  <StatusBadge tone={severityTone(alerta.severity)}>{alerta.severity}</StatusBadge>
+                </div>
+                <p className="mt-2 truncate text-xs text-[var(--color-gs-muted)]">
+                  {alerta.tipo_alerta || alerta.descricao || 'Alerta operacional'}
+                </p>
+              </Link>
+            ))
+          )}
+        </DataPanel>
+      </div>
+
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+        <DataPanel
+          title="Ads Radar"
+          eyebrow="Winners / monitor / kill"
+          action={
+            <Link
+              to="/ads-radar"
+              className="inline-flex items-center gap-1 font-mono text-[10px] font-bold uppercase text-[var(--color-gs-blue)]"
+            >
+              Abrir <ArrowRight size={12} />
+            </Link>
+          }
+        >
+          <div className="grid grid-cols-3 gap-2">
             {[
-              {
-                label: 'WINNERS',
-                val: adsSummary.winners,
-                color: 'var(--color-gs-green)',
-                sub: 'escalar',
-              },
-              {
-                label: 'ATENÇÃO',
-                val: adsSummary.monitors,
-                color: 'var(--color-gs-yellow)',
-                sub: 'monitorar',
-              },
-              {
-                label: 'DESLIGAR',
-                val: adsSummary.kills,
-                color: 'var(--color-gs-text)',
-                sub: 'pausar',
-              },
+              { label: 'WINNERS', value: adsSummary.winners, tone: 'green' as const },
+              { label: 'MONITOR', value: adsSummary.monitors, tone: 'yellow' as const },
+              { label: 'KILL', value: adsSummary.kills, tone: 'red' as const },
             ].map((item) => (
               <div
                 key={item.label}
-                className="flex flex-col items-center justify-center gap-1 py-5"
-                style={{ borderColor: 'var(--color-gs-border)' }}
+                className="rounded-[6px] border border-[var(--color-gs-border)] bg-[var(--color-gs-bg)] p-4 text-center"
               >
-                <span className="font-heading font-black text-2xl" style={{ color: item.color }}>
-                  {item.val}
-                </span>
-                <span
-                  className="font-mono text-[8px] tracking-[0.18em] uppercase"
-                  style={{ color: 'var(--color-gs-muted)' }}
-                >
-                  {item.label}
-                </span>
-                <span className="font-mono text-[7px]" style={{ color: item.color, opacity: 0.6 }}>
-                  → {item.sub}
-                </span>
+                <StatusBadge tone={item.tone}>{item.label}</StatusBadge>
+                <div className="mt-3 font-heading text-3xl font-black text-[var(--color-gs-text)]">
+                  {item.value}
+                </div>
               </div>
             ))}
           </div>
+        </DataPanel>
 
-          {/* Score bar */}
-          <div
-            className="px-4 pb-4 pt-2 border-t"
-            style={{ borderColor: 'var(--color-gs-border)' }}
-          >
-            <div className="flex justify-between mb-1.5">
-              <span
-                className="font-mono text-[8px] uppercase tracking-widest"
-                style={{ color: 'var(--color-gs-muted)' }}
-              >
-                PORTFOLIO SCORE
-              </span>
-              <span
-                className="font-mono text-[9px] font-bold"
-                style={{
-                  color:
-                    adsSummary.portfolioScore >= 65
-                      ? 'var(--color-gs-green)'
-                      : 'var(--color-gs-yellow)',
-                }}
-              >
-                {adsSummary.portfolioScore}/100
-              </span>
+        <DataPanel
+          title="Ruptura de estoque"
+          eyebrow="Ação rápida"
+          action={
+            <StatusBadge tone={stockAlerts.length > 0 ? 'red' : 'green'}>
+              {stockAlerts.length}
+            </StatusBadge>
+          }
+        >
+          {stockLoading ? (
+            <div className="h-24 animate-pulse rounded-[6px] bg-[var(--color-gs-border)]" />
+          ) : stockAlerts.length === 0 ? (
+            <EmptyState
+              icon={<Package size={22} />}
+              title="Estoque sem ruptura"
+              description="Nenhum SKU zerado apareceu na amostra atual."
+            />
+          ) : (
+            <div className="grid gap-2 sm:grid-cols-2">
+              {stockAlerts.slice(0, 6).map((item) => (
+                <Link
+                  key={item.sku}
+                  to={`/terminal?sku=${item.sku}`}
+                  className="rounded-[6px] border border-[var(--color-gs-border)] p-3 hover:bg-[var(--color-gs-hover-overlay)]"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-mono text-xs font-bold text-[var(--color-gs-text)]">
+                      {item.sku}
+                    </span>
+                    <StatusBadge tone="red">zero</StatusBadge>
+                  </div>
+                  <p className="mt-2 truncate text-xs text-[var(--color-gs-muted)]">
+                    {item.titulo}
+                  </p>
+                </Link>
+              ))}
             </div>
-            <div
-              className="h-[3px] w-full"
-              style={{ background: 'var(--color-gs-border)', borderRadius: 1 }}
-            >
-              <div
-                className="h-full"
-                style={{
-                  width: `${adsSummary.portfolioScore}%`,
-                  background:
-                    adsSummary.portfolioScore >= 65
-                      ? 'var(--color-gs-green)'
-                      : adsSummary.portfolioScore >= 40
-                        ? 'var(--color-gs-yellow)'
-                        : 'var(--color-gs-text)',
-                  borderRadius: 1,
-                  transition: 'width 1s ease',
-                }}
-              />
-            </div>
-          </div>
-        </div>
+          )}
+        </DataPanel>
       </div>
-    </div>
+
+      <DataPanel
+        title="Mapa de módulos"
+        eyebrow="Próximas ações"
+        contentClassName="grid gap-2 sm:grid-cols-2 lg:grid-cols-4"
+      >
+        {[
+          {
+            to: '/terminal',
+            label: 'Terminal DB',
+            icon: BarChart3,
+            text: 'SKU, MLB, forecast e notas',
+          },
+          {
+            to: '/conversion',
+            label: 'Conversion Radar',
+            icon: Activity,
+            text: 'Taxa de conversão e diagnóstico',
+          },
+          {
+            to: '/stock-ads',
+            label: 'Stock Ads',
+            icon: Package,
+            text: 'Quadrantes estoque x investimento',
+          },
+          {
+            to: '/hidden-potential',
+            label: 'Potencial',
+            icon: TrendingUp,
+            text: 'Estoque parado e receita oculta',
+          },
+        ].map((item) => {
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.to}
+              to={item.to}
+              className="rounded-[6px] border border-[var(--color-gs-border)] bg-[var(--color-gs-bg)] p-4 hover:bg-[var(--color-gs-hover-overlay)]"
+            >
+              <Icon size={18} className="text-[var(--color-gs-blue)]" />
+              <div className="mt-3 font-heading text-sm font-extrabold uppercase text-[var(--color-gs-text)]">
+                {item.label}
+              </div>
+              <p className="mt-1 text-xs text-[var(--color-gs-muted)]">{item.text}</p>
+            </Link>
+          );
+        })}
+      </DataPanel>
+    </PageShell>
   );
 }

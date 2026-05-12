@@ -68,10 +68,10 @@ const getScreenContext = (): string => {
 const fetchDbContext = async (): Promise<string> => {
   try {
     const { data, error } = await supabase
-      .from('gs_anuncios')
-      .select('sku, titulo, status, leads, custo')
+      .from('live_produtos')
+      .select('sku, titulo, status, estoque, visitas_total, vendas_total')
       .limit(8);
-    if (error || !data || data.length === 0) return 'Sem anúncios ativos.';
+    if (error || !data || data.length === 0) return 'Sem produtos ativos.';
     return JSON.stringify(data);
   } catch {
     return 'Indisponível.';
@@ -87,7 +87,7 @@ const buildSystemPrompt = (
 Contexto Imediato:
 - Rota atual: ${route}
 - Tela visualizada: ${screen || 'Sem conteúdo visível relevante.'}
-- Dados Ativos em Banco (gs_anuncios): ${db}
+- Dados ativos em banco (live_produtos): ${db}
 
 Missão: conecte os pontos acima ao comando de voz do usuário e retorne a fala bruta (text-to-speech) que você verbalizará agora. Não use markdown, listas, nem prefixos como "F.R.I.D.A.Y:". Apenas fale.`;
 

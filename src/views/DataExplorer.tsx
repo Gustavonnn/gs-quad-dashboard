@@ -33,7 +33,7 @@ export function DataExplorer() {
     { id: 'curva_abc', label: 'Curva ABC', count: curvaData?.length ?? 0, loading: curvaLoading },
     {
       id: 'ia_alertas',
-      label: 'IA Alertas',
+      label: 'Alertas Ops',
       count: alertasData?.length ?? 0,
       loading: alertasLoading,
     },
@@ -79,7 +79,9 @@ export function DataExplorer() {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const c = (row.original as any).curva_abc;
           return (
-            <Badge variant={c === 'A' ? 'success' : c === 'B' ? 'warning' : 'secondary'}>{c as string}</Badge>
+            <Badge variant={c === 'A' ? 'success' : c === 'B' ? 'warning' : 'secondary'}>
+              {c as string}
+            </Badge>
           );
         },
       },
@@ -154,9 +156,7 @@ export function DataExplorer() {
         accessorKey: 'tipo_alerta',
         header: 'Tipo',
         size: 150,
-        cell: ({ row }) => (
-          <span className="text-xs">{(row.original as any).tipo_alerta}</span>
-        ),
+        cell: ({ row }) => <span className="text-xs">{(row.original as any).tipo_alerta}</span>,
       },
       {
         accessorKey: 'descricao',
@@ -174,9 +174,7 @@ export function DataExplorer() {
         size: 100,
         cell: ({ row }) => (
           <span className="font-mono text-[10px] text-[var(--color-gs-muted)]">
-            {new Date((row.original as any).data_registro).toLocaleDateString(
-              'pt-BR'
-            )}
+            {new Date((row.original as any).data_registro).toLocaleDateString('pt-BR')}
           </span>
         ),
       },
@@ -232,9 +230,7 @@ export function DataExplorer() {
         accessorKey: 'ml_cluster',
         header: 'Cluster',
         size: 90,
-        cell: ({ row }) => (
-          <Badge variant="secondary">{(row.original as any).ml_cluster}</Badge>
-        ),
+        cell: ({ row }) => <Badge variant="secondary">{(row.original as any).ml_cluster}</Badge>,
       },
       {
         accessorKey: 'elasticity',

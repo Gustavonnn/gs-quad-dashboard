@@ -52,8 +52,8 @@ export function GlobalSearch() {
           .or(`id.ilike.%${q}%,titulo.ilike.%${q}%`)
           .limit(5),
         supabase
-          .from('ia_alertas')
-          .select('id, sku, tipo_alerta, severity')
+          .from('ia_alertas_operacionais')
+          .select('id, sku, tipo_alerta, severidade')
           .ilike('sku', `%${q}%`)
           .limit(5),
         supabase
@@ -90,7 +90,7 @@ export function GlobalSearch() {
             type: 'ia_alertas',
             id: String(d.id || ''),
             title: `${d.tipo_alerta || ''} — ${d.sku || ''}`,
-            subtitle: `[${d.severity || ''}] ${d.sku || ''}`,
+            subtitle: `[${d.severidade || ''}] ${d.sku || ''}`,
             path: `/monitor`,
           });
         });

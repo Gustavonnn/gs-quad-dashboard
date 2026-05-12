@@ -1,21 +1,18 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
-import { toast } from 'sonner'
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabase';
+import { toast } from 'sonner';
 
 export interface UseMutationOptions<TInput, TOutput> {
-  table: string
-  mutationFn?: (
-    supabase: any,
-    input: TInput
-  ) => Promise<{ data: TOutput | null; error: any }>
-  invalidates?: string[]
+  table: string;
+  mutationFn?: (supabase: any, input: TInput) => Promise<{ data: TOutput | null; error: any }>;
+  invalidates?: string[];
   optimisticUpdate?: {
-    queryKey: string[]
-    updateFn: (oldData: any, input: TInput) => any
-    rollbackFn?: (oldData: any, input: TInput) => any
-  }
-  onSuccessMessage?: string
-  onErrorMessage?: string
+    queryKey: string[];
+    updateFn: (oldData: any, input: TInput) => any;
+    rollbackFn?: (oldData: any, input: TInput) => any;
+  };
+  onSuccessMessage?: string;
+  onErrorMessage?: string;
 }
 
 export function useSupabaseMutation<TInput, TOutput = any>({
@@ -26,31 +23,24 @@ export function useSupabaseMutation<TInput, TOutput = any>({
   onSuccessMessage,
   onErrorMessage,
 }: UseMutationOptions<TInput, TOutput>) {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
-  const defaultMutationFn = async (
-    supabase: any,
-    input: TInput
-  ) => {
+  const defaultMutationFn = async (supabase: any, input: TInput) => {
     // Default: INSERT if input has no id, UPDATE if it has id
-    const data = input as any
+    const data = input as any;
     if (data.id) {
       const { data: result, error } = await supabase
         .from(table)
         .update(data)
         .eq('id', data.id)
         .select()
-        .single()
-      return { data: result, error }
+        .single();
+      return { data: result, error };
     } else {
-      const { data: result, error } = await supabase
-        .from(table)
-        .insert(data)
-        .select()
-        .single()
-      return { data: result, error }
+      const { data: result, error } = await supabase.from(table).insert(data).select().single();
+      return { data: result, error };
     }
-  }
+  };
 
   return useMutation({
     mutationFn: mutationFn
@@ -58,87 +48,82 @@ export function useSupabaseMutation<TInput, TOutput = any>({
       : (input: TInput) => defaultMutationFn(supabase, input),
 
     onMutate: async (input) => {
-      if (!optimisticUpdate) return
+      if (!optimisticUpdate) return;
 
-      await queryClient.cancelQueries({ queryKey: optimisticUpdate.queryKey })
+      await queryClient.cancelQueries({ queryKey: optimisticUpdate.queryKey });
 
-      const previousData = queryClient.getQueryData(optimisticUpdate.queryKey)
+      const previousData = queryClient.getQueryData(optimisticUpdate.queryKey);
 
       queryClient.setQueryData(optimisticUpdate.queryKey, (old: any) =>
         optimisticUpdate.updateFn(old, input)
-      )
+      );
 
-      return { previousData }
+      return { previousData };
     },
 
     onError: (err, _input, context) => {
       if (optimisticUpdate && context?.previousData !== undefined) {
-        queryClient.setQueryData(optimisticUpdate.queryKey, context.previousData)
+        queryClient.setQueryData(optimisticUpdate.queryKey, context.previousData);
       }
 
-      const message = onErrorMessage ?? err?.message ?? 'Erro ao salvar'
-      toast.error(message)
+      const message = onErrorMessage ?? err?.message ?? 'Erro ao salvar';
+      toast.error(message);
     },
 
     onSuccess: (_data, _input) => {
       if (onSuccessMessage) {
-        toast.success(onSuccessMessage)
+        toast.success(onSuccessMessage);
       }
 
       // Invalidate queries
-      const toInvalidate = [...invalidates, ...(optimisticUpdate?.queryKey ?? [])]
+      const toInvalidate = [...invalidates, ...(optimisticUpdate?.queryKey ?? [])];
       toInvalidate.forEach((key) => {
-        queryClient.invalidateQueries({ queryKey: Array.isArray(key) ? key : [key] })
-      })
+        queryClient.invalidateQueries({ queryKey: Array.isArray(key) ? key : [key] });
+      });
     },
 
     onSettled: () => {
       if (optimisticUpdate) {
-        queryClient.invalidateQueries({ queryKey: optimisticUpdate.queryKey })
+        queryClient.invalidateQueries({ queryKey: optimisticUpdate.queryKey });
       }
     },
-  })
+  });
 }
 
 // ─── Pre-built mutations ──────────────────────────────────────
 
 export function useResolveAlerta() {
   return useSupabaseMutation({
-    table: 'ia_alertas',
+    table: 'ia_alertas_operacionais',
     mutationFn: async (supabase: any, alertId: string) => {
       return supabase
-        .from('ia_alertas')
+        .from('ia_alertas_operacionais')
         .update({
-          resolvido: true,
           status: 'RESOLVIDO',
           data_resolucao: new Date().toISOString(),
         })
-        .eq('id', alertId)
+        .eq('id', alertId);
     },
-    invalidates: ['ia_alertas'],
+    invalidates: ['ia-alertas', 'ia-alertas-paginated', 'live-metrics'],
     onSuccessMessage: 'Alerta resolvido',
     onErrorMessage: 'Erro ao resolver alerta',
-  })
+  });
 }
 
 export function useUpdateAlertaStatus() {
   return useSupabaseMutation({
-    table: 'ia_alertas',
-    mutationFn: async (
-      supabase: any,
-      { id, status }: { id: string; status: string }
-    ) => {
-      const updates: Record<string, any> = { status }
+    table: 'ia_alertas_operacionais',
+    mutationFn: async (supabase: any, { id, status }: { id: string; status: string }) => {
+      const updates: Record<string, any> = { status };
       if (status === 'RESOLVIDO' || status === 'IGNORADO') {
-        updates.resolvido = true
-        updates.data_resolucao = new Date().toISOString()
+        updates.data_resolucao = new Date().toISOString();
       }
-      return supabase.from('ia_alertas').update(updates).eq('id', id)
+      return supabase.from('ia_alertas_operacionais').update(updates).eq('id', id);
     },
-    invalidates: ['ia_alertas'],
+    invalidates: ['ia-alertas', 'ia-alertas-paginated', 'live-metrics'],
     onSuccessMessage: 'Status atualizado',
     onErrorMessage: 'Erro ao atualizar status',
-  })
+  });
 }
 
 export function useUpdateGrowthPlanStatus() {
@@ -148,13 +133,10 @@ export function useUpdateGrowthPlanStatus() {
       supabase: any,
       { id, status_intervencao }: { id: string; status_intervencao: string }
     ) => {
-      return supabase
-        .from('ia_growth_plans')
-        .update({ status_intervencao })
-        .eq('id', id)
+      return supabase.from('ia_growth_plans').update({ status_intervencao }).eq('id', id);
     },
     invalidates: ['ia_growth_plans'],
     onSuccessMessage: 'Plano atualizado',
     onErrorMessage: 'Erro ao atualizar plano',
-  })
+  });
 }

@@ -196,8 +196,8 @@ export function OperationKPIBar() {
     queryFn: async () => {
       const { data: produtos } = await supabase
         .from('live_produtos')
-        .select('conversao, visits')
-        .limit(500);
+        .select('visitas_total, vendas_total')
+        .limit(1000);
 
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
@@ -206,27 +206,25 @@ export function OperationKPIBar() {
 
       const { data: vendas7d } = await supabase
         .from('live_vendas')
-        .select('receita')
+        .select('receita_total')
         .gte('data_venda', sevenDaysAgo.toISOString());
 
       const { data: vendas30d } = await supabase
         .from('live_vendas')
-        .select('receita, data_venda')
+        .select('receita_total, data_venda')
         .gte('data_venda', thirtyDaysAgo.toISOString())
         .lt('data_venda', sevenDaysAgo.toISOString());
 
       const prods = produtos ?? [];
-      const avgConv =
-        prods.length > 0
-          ? prods.reduce((s, p) => s + ((p.conversao as number) ?? 0), 0) / prods.length
-          : 0;
-      const totalVisits7d = prods.reduce((s, p) => s + ((p.visits as number) ?? 0), 0);
+      const totalVisits7d = prods.reduce((s, p) => s + (Number(p.visitas_total) || 0), 0);
+      const totalSales = prods.reduce((s, p) => s + (Number(p.vendas_total) || 0), 0);
+      const avgConv = totalVisits7d > 0 ? (totalSales / totalVisits7d) * 100 : 0;
 
       const prev30dVisits = totalVisits7d;
       const visitsVariation = prev30dVisits > 0 ? 0 : 0;
 
-      const receita7d = (vendas7d ?? []).reduce((s, v) => s + ((v.receita as number) ?? 0), 0);
-      const receita30d = (vendas30d ?? []).reduce((s, v) => s + ((v.receita as number) ?? 0), 0);
+      const receita7d = (vendas7d ?? []).reduce((s, v) => s + (Number(v.receita_total) || 0), 0);
+      const receita30d = (vendas30d ?? []).reduce((s, v) => s + (Number(v.receita_total) || 0), 0);
       const meta = receita30d > 0 ? receita30d / 4 : receita7d;
       const metaPct = meta > 0 ? (receita7d / meta) * 100 : 0;
 
@@ -278,7 +276,7 @@ export function OperationKPIBar() {
       <GaugeSVG
         value={kpi.totalVisits7d}
         max={Math.max(kpi.totalVisits7d * 1.5, 1000)}
-        label="VISITAS 7 DIAS"
+        label="VISITAS TOTAIS"
         sublabel={
           kpi.visitsVariation !== 0
             ? `${kpi.visitsVariation > 0 ? '+' : ''}${kpi.visitsVariation.toFixed(1)}%`

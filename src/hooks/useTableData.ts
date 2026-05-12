@@ -16,6 +16,9 @@ import {
 import type { IAAlerta, IAGrowthPlan, MLPriceTimeline, MLInsight, CurvaABC } from '@/lib/schemas';
 import { useRealtimeTable } from './useRealtimeTable';
 
+const ALERTAS_TABLE = 'ia_alertas_operacionais';
+const FINAL_ALERT_STATUS = '(RESOLVIDO,IGNORADO,CONCLUIDO,CONCLUÍDO)';
+
 // ─── Live Metrics ─────────────────────────────────────────────
 
 export interface LiveMetricsData {
@@ -43,9 +46,9 @@ export function useLiveMetrics() {
             ? supabase.from('live_vendas').select('receita_total').gte('data_venda', lastDate)
             : Promise.resolve({ data: [] }),
           supabase
-            .from('ia_alertas')
+            .from(ALERTAS_TABLE)
             .select('*', { count: 'exact', head: true })
-            .eq('resolvido', false),
+            .not('status', 'in', FINAL_ALERT_STATUS),
           supabase.from('live_produtos').select('*', { count: 'exact', head: true }),
         ]);
 
@@ -110,7 +113,7 @@ export function useCurvaABC(limit = 500) {
 export function useIAAlertas(limit = 50) {
   // Realtime disabled — data updated once per day via Excel
   useRealtimeTable({
-    table: 'ia_alertas',
+    table: ALERTAS_TABLE,
     event: '*',
     enabled: false,
   });
@@ -119,9 +122,9 @@ export function useIAAlertas(limit = 50) {
     queryKey: ['ia-alertas', limit],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('ia_alertas')
+        .from(ALERTAS_TABLE)
         .select('*')
-        .eq('resolvido', false)
+        .not('status', 'in', FINAL_ALERT_STATUS)
         .order('data_registro', { ascending: false })
         .limit(limit);
 
@@ -130,7 +133,7 @@ export function useIAAlertas(limit = 50) {
         const result = iaAlertaSchema.safeParse(row);
         if (!result.success) {
           console.error(
-            `[Schema Error] ia_alertas data mismatch for ID ${row.id}:`,
+            `[Schema Error] ${ALERTAS_TABLE} data mismatch for ID ${row.id}:`,
             result.error.format()
           );
           return row as unknown as IAAlerta;
@@ -151,16 +154,17 @@ export function useUpdateAlertaStatus() {
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
       const updates: Record<string, unknown> = { status };
       if (status === 'RESOLVIDO' || status === 'IGNORADO') {
-        updates.resolvido = true;
         updates.data_resolucao = new Date().toISOString();
       }
 
-      const { error } = await supabase.from('ia_alertas').update(updates).eq('id', id);
+      const { error } = await supabase.from(ALERTAS_TABLE).update(updates).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
       toast.success('Status atualizado');
       queryClient.invalidateQueries({ queryKey: ['ia-alertas'] });
+      queryClient.invalidateQueries({ queryKey: ['ia-alertas-paginated'] });
+      queryClient.invalidateQueries({ queryKey: ['live-metrics'] });
     },
     onError: (err) => {
       toast.error(`Erro ao atualizar: ${err.message}`);
@@ -351,14 +355,14 @@ export function usePaginatedAlertas({
     queryKey: ['ia-alertas-paginated', page, pageSize, severity, status, search],
     queryFn: async () => {
       let query = supabase
-        .from('ia_alertas')
+        .from(ALERTAS_TABLE)
         .select('*', { count: 'exact' })
-        .eq('resolvido', false)
+        .not('status', 'in', FINAL_ALERT_STATUS)
         .range(from, to);
 
-      if (severity) query = query.eq('severity', severity);
+      if (severity) query = query.eq('severidade', severity);
       if (status) query = query.eq('status', status);
-      if (search) query = query.ilike('sku', `%${search}%`);
+      if (search) query = query.or(`sku.ilike.%${search}%,descricao.ilike.%${search}%`);
 
       query = query.order('data_registro', { ascending: false });
 

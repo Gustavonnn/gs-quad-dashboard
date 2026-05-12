@@ -37,17 +37,44 @@ export const liveProdutosSchema = z.object({
 export type LiveProduto = z.infer<typeof liveProdutosSchema>;
 
 // ─── IA Alertas ──────────────────────────────────────────────
-export const iaAlertaSchema = z.object({
-  id: idSchema,
-  sku: z.string(),
-  tipo_alerta: z.string().nullable().optional(),
-  descricao: z.string().nullable().optional(),
-  severity: z.string().nullable().optional().default('BAIXO'),
-  resolvido: z.coerce.boolean().nullable().optional().default(false),
-  data_registro: z.string().nullable().optional(),
-  data_resolucao: z.string().nullable().optional(),
-  status: z.string().nullable().optional().default('PENDENTE'),
-});
+export const normalizeSeverity = (value?: string | null) => {
+  const raw = String(value || 'BAIXO')
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toUpperCase();
+
+  if (raw.includes('CRITICO')) return 'CRITICO';
+  if (raw.includes('ALTO')) return 'ALTO';
+  if (raw.includes('MEDIO')) return 'MEDIO';
+  return 'BAIXO';
+};
+
+export const iaAlertaSchema = z
+  .object({
+    id: idSchema,
+    sku: z.string().nullable().optional().default(''),
+    run_id: z.string().nullable().optional(),
+    tipo_alerta: z.string().nullable().optional(),
+    descricao: z.string().nullable().optional(),
+    resolucao: z.string().nullable().optional(),
+    severity: z.string().nullable().optional(),
+    severidade: z.string().nullable().optional(),
+    resolvido: z.coerce.boolean().nullable().optional(),
+    data_registro: z.string().nullable().optional(),
+    data_resolucao: z.string().nullable().optional(),
+    status: z.string().nullable().optional().default('PENDENTE'),
+  })
+  .transform((row) => ({
+    ...row,
+    sku: row.sku ?? '',
+    severity: normalizeSeverity(row.severity ?? row.severidade),
+    severidade: normalizeSeverity(row.severidade ?? row.severity),
+    resolvido:
+      row.resolvido ??
+      ['RESOLVIDO', 'IGNORADO', 'CONCLUIDO', 'CONCLUÍDO'].includes(
+        String(row.status || '').toUpperCase()
+      ),
+  }));
 
 export type IAAlerta = z.infer<typeof iaAlertaSchema>;
 

@@ -1,18 +1,27 @@
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/lib/supabase';
 import {
-  Command,
-  TrendingUp,
-  TrendingDown,
   AlertTriangle,
-  Zap,
   ClipboardList,
+  Command,
   Minus,
+  PackageCheck,
+  TrendingDown,
+  TrendingUp,
+  Zap,
 } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 import { Sparkline } from '@/components/Sparkline';
 import { MLBNotesDrawer } from '@/components/MLBNotesDrawer';
+import {
+  DataPanel,
+  EmptyState,
+  MetricCard,
+  ModuleHeader,
+  PageShell,
+  StatusBadge,
+} from '@/components/dashboard';
 
 type SalesFilter = 'ALL' | 'UP' | 'DOWN' | 'STABLE';
 
@@ -26,30 +35,100 @@ interface HubProduct {
   sparkData: number[];
 }
 
-function fmt(v: number) {
+interface HubAlert {
+  id: string;
+  sku: string;
+  tipo_alerta?: string | null;
+  severidade?: string | null;
+  descricao?: string | null;
+}
+
+function currency(value: number) {
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL',
     maximumFractionDigits: 0,
-  }).format(v);
+  }).format(value);
 }
 
-function VariationBadge({ value, compact }: { value: number; compact?: boolean }) {
-  const color =
-    value > 2
-      ? 'var(--color-gs-green)'
-      : value < -2
-        ? 'var(--color-gs-red)'
-        : 'var(--color-gs-muted)';
-  const arrow = value > 2 ? '↑' : value < -2 ? '↓' : '→';
+function shortCurrency(value: number) {
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+    notation: 'compact',
+    maximumFractionDigits: 1,
+  }).format(value);
+}
+
+function normalizeSeverity(value?: string | null) {
+  return String(value || 'BAIXO')
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toUpperCase();
+}
+
+function VariationBadge({ value }: { value: number }) {
+  const tone = value > 5 ? 'green' : value < -5 ? 'red' : 'neutral';
+  const Icon = value > 5 ? TrendingUp : value < -5 ? TrendingDown : Minus;
+
   return (
-    <span
-      className={`inline-flex items-center gap-0.5 font-mono font-bold rounded-sm ${compact ? 'text-[8px] px-1 py-0.5' : 'text-[9px] px-1.5 py-0.5'}`}
-      style={{ color, background: 'var(--color-gs-hover-overlay)' }}
-    >
-      {arrow} {value >= 0 ? '+' : ''}
+    <StatusBadge tone={tone}>
+      <Icon size={10} className="mr-1" />
+      {value >= 0 ? '+' : ''}
       {value.toFixed(1)}%
-    </span>
+    </StatusBadge>
+  );
+}
+
+function ProductRow({
+  product,
+  onOpen,
+  onNote,
+}: {
+  product: HubProduct;
+  onOpen: () => void;
+  onNote: () => void;
+}) {
+  const trendColor =
+    product.variacaoD7 > 5
+      ? 'var(--color-gs-green)'
+      : product.variacaoD7 < -5
+        ? 'var(--color-gs-red)'
+        : 'var(--color-gs-blue)';
+
+  return (
+    <div className="grid grid-cols-[1fr_auto] gap-3 border-b border-[var(--color-gs-border)] p-3 last:border-0 hover:bg-[var(--color-gs-hover-overlay)]">
+      <button className="min-w-0 text-left" onClick={onOpen}>
+        <div className="truncate font-mono text-xs font-bold text-[var(--color-gs-text)]">
+          {product.titulo || product.sku}
+        </div>
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <span className="font-mono text-[10px] text-[var(--color-gs-muted)]">{product.sku}</span>
+          <VariationBadge value={product.variacaoD1} />
+          <VariationBadge value={product.variacaoD7} />
+          <span className="font-mono text-[10px] font-bold text-[var(--color-gs-blue)]">
+            {shortCurrency(product.receita7d)}
+          </span>
+        </div>
+      </button>
+      <div className="flex items-center gap-2">
+        <div className="hidden h-9 w-24 sm:block">
+          <Sparkline
+            data={product.sparkData}
+            color={trendColor}
+            gradientId={`hub-${product.mlb}`}
+            showGrid={false}
+          />
+        </div>
+        <button
+          aria-label={`Anotar ${product.sku}`}
+          onClick={onNote}
+          className="inline-flex h-8 w-8 items-center justify-center rounded-[6px] border border-[var(--color-gs-border)] text-[var(--color-gs-muted)] hover:text-[var(--color-gs-blue)]"
+        >
+          <ClipboardList size={14} />
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -58,15 +137,18 @@ export function OperationHub() {
   const [filter, setFilter] = useState<SalesFilter>('ALL');
   const [drawerMlb, setDrawerMlb] = useState<{ mlb: string; sku: string } | null>(null);
 
-  // ia_alertas: tipo, severidade (real schema)
-  const { data: alertasRaw } = useQuery({
+  const { data: alertasRaw, isLoading: alertasLoading } = useQuery({
     queryKey: ['ia-alertas-hub'],
-    queryFn: async () => {
-      const { data } = await supabase
+    queryFn: async (): Promise<HubAlert[]> => {
+      const { data, error } = await supabase
         .from('ia_alertas_operacionais')
         .select('id, sku, tipo_alerta, severidade, descricao')
-        .limit(50);
-      return data ?? [];
+        .not('status', 'in', '(RESOLVIDO,IGNORADO,CONCLUIDO,CONCLUÍDO)')
+        .order('data_registro', { ascending: false })
+        .limit(80);
+
+      if (error) throw error;
+      return (data ?? []) as HubAlert[];
     },
     staleTime: 60_000,
   });
@@ -74,35 +156,34 @@ export function OperationHub() {
   const { data: hubProducts, isLoading } = useQuery({
     queryKey: ['operation-hub-products'],
     queryFn: async (): Promise<HubProduct[]> => {
-      // Real schema: item_id=mlb
-      const { data: produtos } = await supabase
+      const { data: produtos, error: produtosError } = await supabase
         .from('live_produtos')
         .select('item_id, sku, titulo')
-        .limit(200);
+        .limit(300);
 
+      if (produtosError) throw produtosError;
       if (!produtos || produtos.length === 0) return [];
 
-      const skus = produtos.map((p: Record<string, unknown>) => p.sku as string).filter(Boolean);
+      const skus = produtos.map((p) => String(p.sku || '')).filter(Boolean);
       const fourteenDaysAgo = new Date();
       fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
 
-      // Real schema: receita_total (not receita)
-      const { data: vendas } = await supabase
+      const { data: vendas, error: vendasError } = await supabase
         .from('live_vendas')
         .select('sku, receita_total, data_venda')
         .in('sku', skus)
         .gte('data_venda', fourteenDaysAgo.toISOString())
         .order('data_venda', { ascending: true });
 
+      if (vendasError) throw vendasError;
+
       const now = Date.now();
       const msPerDay = 86400000;
-      const skuToItem = new Map<string, Record<string, unknown>>();
-      for (const p of produtos) skuToItem.set(p.sku as string, p);
-
+      const skuToItem = new Map<string, (typeof produtos)[number]>();
       const byMlb = new Map<
         string,
         {
-          prod: Record<string, unknown>;
+          prod: (typeof produtos)[number];
           today: number;
           yesterday: number;
           week: number;
@@ -111,9 +192,12 @@ export function OperationHub() {
         }
       >();
 
-      for (const p of produtos) {
-        byMlb.set((p.item_id as string) ?? (p.sku as string), {
-          prod: p,
+      for (const product of produtos) {
+        const sku = String(product.sku || '');
+        const mlb = String(product.item_id || sku);
+        skuToItem.set(sku, product);
+        byMlb.set(mlb, {
+          prod: product,
           today: 0,
           yesterday: 0,
           week: 0,
@@ -122,482 +206,305 @@ export function OperationHub() {
         });
       }
 
-      for (const v of vendas ?? []) {
-        const prod = skuToItem.get(v.sku as string);
+      for (const venda of vendas ?? []) {
+        const prod = skuToItem.get(String(venda.sku || ''));
         if (!prod) continue;
-        const mlbKey = (prod.item_id as string) ?? (prod.sku as string);
-        const entry = byMlb.get(mlbKey);
+        const mlb = String(prod.item_id || prod.sku);
+        const entry = byMlb.get(mlb);
         if (!entry) continue;
 
-        const age = now - new Date(v.data_venda as string).getTime();
+        const age = now - new Date(String(venda.data_venda)).getTime();
         const dayIndex = Math.floor(age / msPerDay);
-        const receita = (v.receita_total as number) ?? 0;
+        const receita = Number(venda.receita_total) || 0;
 
         if (dayIndex === 0) entry.today += receita;
         if (dayIndex === 1) entry.yesterday += receita;
         if (dayIndex < 7) {
           entry.week += receita;
-          const sparkIdx = 6 - dayIndex;
-          entry.dailyData.set(sparkIdx, (entry.dailyData.get(sparkIdx) ?? 0) + receita);
+          entry.dailyData.set(6 - dayIndex, (entry.dailyData.get(6 - dayIndex) ?? 0) + receita);
         }
         if (dayIndex >= 7 && dayIndex < 14) entry.prevWeek += receita;
       }
 
-      const results: HubProduct[] = [];
-      for (const [mlb, entry] of byMlb) {
-        const varD1 =
-          entry.yesterday > 0 ? ((entry.today - entry.yesterday) / entry.yesterday) * 100 : 0;
-        const varD7 =
-          entry.prevWeek > 0 ? ((entry.week - entry.prevWeek) / entry.prevWeek) * 100 : 0;
-        const sparkData = Array.from({ length: 7 }, (_, i) => entry.dailyData.get(i) ?? 0);
-        results.push({
+      return Array.from(byMlb.entries())
+        .map(([mlb, entry]) => ({
           mlb,
-          sku: (entry.prod.sku as string) ?? '',
-          titulo: (entry.prod.titulo as string) ?? '',
+          sku: String(entry.prod.sku || ''),
+          titulo: String(entry.prod.titulo || ''),
           receita7d: entry.week,
-          variacaoD1: varD1,
-          variacaoD7: varD7,
-          sparkData,
-        });
-      }
-
-      return results.sort((a, b) => b.variacaoD7 - a.variacaoD7);
+          variacaoD1:
+            entry.yesterday > 0 ? ((entry.today - entry.yesterday) / entry.yesterday) * 100 : 0,
+          variacaoD7:
+            entry.prevWeek > 0 ? ((entry.week - entry.prevWeek) / entry.prevWeek) * 100 : 0,
+          sparkData: Array.from({ length: 7 }, (_, index) => entry.dailyData.get(index) ?? 0),
+        }))
+        .sort((a, b) => b.receita7d - a.receita7d);
     },
     staleTime: 60_000,
   });
 
-  const allProducts = useMemo(() => hubProducts ?? [], [hubProducts]);
+  const products = useMemo(() => hubProducts ?? [], [hubProducts]);
   const alertas = useMemo(() => alertasRaw ?? [], [alertasRaw]);
 
   const filtered = useMemo(() => {
-    switch (filter) {
-      case 'UP':
-        return allProducts.filter((p) => p.variacaoD7 > 5);
-      case 'DOWN':
-        return allProducts.filter((p) => p.variacaoD7 < -5);
-      case 'STABLE':
-        return allProducts.filter((p) => p.variacaoD7 >= -5 && p.variacaoD7 <= 5);
-      default:
-        return allProducts;
+    if (filter === 'UP') return products.filter((product) => product.variacaoD7 > 5);
+    if (filter === 'DOWN') return products.filter((product) => product.variacaoD7 < -5);
+    if (filter === 'STABLE') {
+      return products.filter((product) => product.variacaoD7 >= -5 && product.variacaoD7 <= 5);
     }
-  }, [allProducts, filter]);
+    return products;
+  }, [products, filter]);
 
-  const sortedByReceita = useMemo(
-    () => [...allProducts].sort((a, b) => b.receita7d - a.receita7d),
-    [allProducts]
-  );
-  const top5 = sortedByReceita.slice(0, 5);
-  const bottom5 = sortedByReceita.slice(-5).reverse();
-
-  // Real alert fields: severidade (CRITICO/ALTO/BAIXO)
   const criticalAlerts = useMemo(
     () =>
-      alertas.filter((a) => {
-        const sev = (a.severidade ?? '').toUpperCase();
-        return sev === 'CRITICO' || sev === 'CRÍTICO' || sev === 'ALTO';
+      alertas.filter((alerta) => {
+        const sev = normalizeSeverity(alerta.severidade);
+        return sev === 'CRITICO' || sev === 'ALTO';
       }),
     [alertas]
   );
 
-  const positiveAlerts = useMemo(
-    () =>
-      alertas.filter((a) => {
-        const sev = (a.severidade ?? '').toUpperCase();
-        return sev === 'BAIXO';
-      }),
+  const opportunityAlerts = useMemo(
+    () => alertas.filter((alerta) => normalizeSeverity(alerta.severidade) === 'BAIXO'),
     [alertas]
   );
+
+  const totalRevenue = products.reduce((sum, product) => sum + product.receita7d, 0);
+  const growing = products.filter((product) => product.variacaoD7 > 5).length;
+  const falling = products.filter((product) => product.variacaoD7 < -5).length;
+  const top5 = products.slice(0, 5);
+  const bottom5 = [...products].sort((a, b) => a.receita7d - b.receita7d).slice(0, 5);
 
   return (
-    <div className="flex flex-col gap-5 animate-fade-in">
-      <div>
-        <div className="flex items-center gap-2 mb-1">
-          <Command size={14} style={{ color: 'var(--color-gs-green)' }} />
-          <span
-            className="font-mono text-[9px] tracking-[0.25em] uppercase"
-            style={{ color: 'var(--color-gs-green)' }}
-          >
-            CENTRAL DE COMANDO
-          </span>
-        </div>
-        <h2
-          className="font-heading font-black tracking-wide uppercase"
-          style={{ fontSize: '22px', color: 'var(--color-gs-text)', lineHeight: 1 }}
-        >
-          OP_HUB<span style={{ color: 'var(--color-gs-green)' }}>.</span>
-        </h2>
-        <p
-          className="font-mono text-[9px] tracking-[0.2em] uppercase mt-1"
-          style={{ color: 'var(--color-gs-muted)' }}
-        >
-          TERMOMETRO DE VENDAS · ALERTAS · RANKING
-        </p>
+    <PageShell>
+      <ModuleHeader
+        eyebrow="Central de comando"
+        title="OP_HUB"
+        accent="LIVE"
+        description="Termômetro de vendas, alerta operacional e ranking de ação por SKU."
+        icon={<Command size={16} />}
+      />
+
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <MetricCard
+          label="Receita 7 dias"
+          value={currency(totalRevenue)}
+          detail={`${products.length} MLBs analisados`}
+          icon={<TrendingUp size={18} />}
+          tone="green"
+          progress={Math.min((totalRevenue / 250000) * 100, 100)}
+          loading={isLoading}
+        />
+        <MetricCard
+          label="Em alta"
+          value={growing}
+          detail="Variação D-7 acima de 5%"
+          icon={<Zap size={18} />}
+          tone="green"
+          progress={products.length ? (growing / products.length) * 100 : 0}
+          loading={isLoading}
+        />
+        <MetricCard
+          label="Em queda"
+          value={falling}
+          detail="Variação D-7 abaixo de -5%"
+          icon={<TrendingDown size={18} />}
+          tone={falling > 0 ? 'red' : 'neutral'}
+          progress={products.length ? (falling / products.length) * 100 : 0}
+          loading={isLoading}
+        />
+        <MetricCard
+          label="Alertas críticos"
+          value={criticalAlerts.length}
+          detail={`${opportunityAlerts.length} oportunidades leves`}
+          icon={<AlertTriangle size={18} />}
+          tone={criticalAlerts.length > 0 ? 'red' : 'green'}
+          progress={Math.min((criticalAlerts.length / 30) * 100, 100)}
+          loading={alertasLoading}
+        />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3" style={{ minHeight: '500px' }}>
-        {/* Sales Thermometer */}
-        <div
-          className="lg:col-span-4 flex flex-col"
-          style={{
-            background: 'var(--color-gs-panel)',
-            border: '1px solid var(--color-gs-border)',
-            borderRadius: '2px',
-            overflow: 'hidden',
-          }}
+      <div className="grid grid-cols-1 gap-3 xl:grid-cols-12">
+        <DataPanel
+          className="xl:col-span-6"
+          title="Termômetro de vendas"
+          eyebrow="MLB performance"
+          contentClassName="p-0"
+          action={
+            <div className="flex flex-wrap items-center gap-1">
+              {[
+                { key: 'ALL', label: 'Todos' },
+                { key: 'UP', label: 'Alta' },
+                { key: 'DOWN', label: 'Queda' },
+                { key: 'STABLE', label: 'Estável' },
+              ].map((item) => (
+                <button
+                  key={item.key}
+                  onClick={() => setFilter(item.key as SalesFilter)}
+                  className="h-7 rounded-[5px] px-2 font-mono text-[9px] font-bold uppercase"
+                  style={{
+                    background: filter === item.key ? 'var(--color-gs-blue)' : 'var(--color-gs-bg)',
+                    color: filter === item.key ? '#fff' : 'var(--color-gs-muted)',
+                    border: '1px solid var(--color-gs-border)',
+                  }}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          }
         >
-          <div
-            className="flex items-center justify-between px-3 py-2 shrink-0"
-            style={{ borderBottom: '1px solid var(--color-gs-border)' }}
-          >
-            <span
-              className="font-mono text-[9px] tracking-[0.2em] uppercase font-bold"
-              style={{ color: 'var(--color-gs-muted)' }}
-            >
-              TERMOMETRO VENDAS
-            </span>
-          </div>
-          <div
-            className="flex items-center gap-1 px-3 py-2 shrink-0"
-            style={{ borderBottom: '1px solid var(--color-gs-border)' }}
-          >
-            {(
-              [
-                { key: 'ALL', label: 'TODOS', icon: null },
-                { key: 'UP', label: 'ALTA', icon: <TrendingUp size={9} /> },
-                { key: 'DOWN', label: 'QUEDA', icon: <TrendingDown size={9} /> },
-                { key: 'STABLE', label: 'ESTAVEL', icon: <Minus size={9} /> },
-              ] as const
-            ).map((f) => (
-              <button
-                key={f.key}
-                onClick={() => setFilter(f.key)}
-                className="flex items-center gap-1 font-mono text-[8px] tracking-wider uppercase px-2 py-1 rounded-sm transition-all"
-                style={{
-                  background: filter === f.key ? 'var(--color-gs-green)' : 'transparent',
-                  color: filter === f.key ? '#000' : 'var(--color-gs-muted)',
-                  border: 'none',
-                  cursor: 'pointer',
-                }}
-              >
-                {f.icon}
-                {f.label}
-              </button>
-            ))}
-          </div>
-          <div className="flex-1 overflow-y-auto">
+          <div className="max-h-[620px] overflow-y-auto custom-scrollbar">
             {isLoading ? (
-              <div className="p-3 flex flex-col gap-2">
-                {[1, 2, 3, 4, 5].map((i) => (
+              <div className="space-y-2 p-3">
+                {[0, 1, 2, 3, 4].map((item) => (
                   <div
-                    key={i}
-                    className="h-14 animate-pulse rounded-sm"
-                    style={{ background: 'var(--color-gs-border)' }}
+                    key={item}
+                    className="h-16 animate-pulse rounded-[6px] bg-[var(--color-gs-border)]"
                   />
                 ))}
               </div>
             ) : filtered.length === 0 ? (
-              <div className="py-8 text-center">
-                <span className="font-mono text-[10px]" style={{ color: 'var(--color-gs-muted)' }}>
-                  Sem dados neste filtro
-                </span>
+              <div className="p-4">
+                <EmptyState
+                  icon={<PackageCheck size={22} />}
+                  title="Sem dados no filtro"
+                  description="Troque o modo do termômetro para ver outros SKUs."
+                />
               </div>
             ) : (
-              filtered.map((p) => (
-                <div
-                  key={p.mlb}
-                  onClick={() => navigate(`/terminal?sku=${p.sku}&mlb=${p.mlb}`)}
-                  className="flex items-center gap-2 px-3 py-2 transition-colors hover:bg-[var(--color-gs-hover-overlay)] cursor-pointer group"
-                  style={{ borderBottom: '1px solid var(--color-gs-border)' }}
-                >
-                  <div className="flex-1 min-w-0">
-                    <div
-                      className="font-mono text-[9px] font-bold truncate group-hover:text-gs-blue transition-colors"
-                      style={{ color: 'var(--color-gs-text)' }}
-                    >
-                      {p.titulo || p.sku}
-                    </div>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <span
-                        className="font-mono text-[8px]"
-                        style={{ color: 'var(--color-gs-muted)' }}
-                      >
-                        D-1
-                      </span>
-                      <VariationBadge value={p.variacaoD1} compact />
-                      <span
-                        className="font-mono text-[8px]"
-                        style={{ color: 'var(--color-gs-muted)' }}
-                      >
-                        D-7
-                      </span>
-                      <VariationBadge value={p.variacaoD7} compact />
-                    </div>
-                  </div>
-                  <div style={{ width: 80, height: 24 }}>
-                    <Sparkline
-                      data={p.sparkData}
-                      color={
-                        p.variacaoD7 > 0
-                          ? 'var(--color-gs-green)'
-                          : p.variacaoD7 < -5
-                            ? 'var(--color-gs-red)'
-                            : 'var(--color-gs-muted)'
-                      }
-                      gradientId={`hub-${p.mlb}`}
-                      showGrid={false}
-                    />
-                  </div>
-                </div>
+              filtered.map((product) => (
+                <ProductRow
+                  key={product.mlb}
+                  product={product}
+                  onOpen={() => navigate(`/terminal?sku=${product.sku}&mlb=${product.mlb}`)}
+                  onNote={() => setDrawerMlb({ mlb: product.mlb, sku: product.sku })}
+                />
               ))
             )}
           </div>
-        </div>
+        </DataPanel>
 
-        {/* Alerts Feed */}
-        <div
-          className="lg:col-span-4 flex flex-col"
-          style={{
-            background: 'var(--color-gs-panel)',
-            border: '1px solid var(--color-gs-border)',
-            borderRadius: '2px',
-            overflow: 'hidden',
-          }}
+        <DataPanel
+          className="xl:col-span-3"
+          title="Alertas e oportunidades"
+          eyebrow="Fila operacional"
+          contentClassName="space-y-3"
         >
-          <div
-            className="flex items-center px-3 py-2 shrink-0"
-            style={{ borderBottom: '1px solid var(--color-gs-border)' }}
-          >
-            <AlertTriangle size={11} style={{ color: 'var(--color-gs-yellow)' }} />
-            <span
-              className="font-mono text-[9px] tracking-[0.2em] uppercase font-bold ml-2"
-              style={{ color: 'var(--color-gs-muted)' }}
-            >
-              ALERTAS & OPORTUNIDADES
-            </span>
-          </div>
-          <div className="flex-1 overflow-y-auto">
-            <div className="px-3 py-2" style={{ borderBottom: '1px solid var(--color-gs-border)' }}>
-              <div className="flex items-center gap-1.5 mb-2">
-                <div
-                  className="w-1.5 h-1.5 rounded-full"
-                  style={{ background: 'var(--color-gs-red)' }}
-                />
-                <span
-                  className="font-mono text-[8px] tracking-[0.2em] uppercase font-bold"
-                  style={{ color: 'var(--color-gs-red)' }}
-                >
-                  PIORANDO AGORA ({criticalAlerts.length})
-                </span>
-              </div>
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <StatusBadge tone="red">piorando</StatusBadge>
+              <span className="font-mono text-[10px] text-[var(--color-gs-muted)]">
+                {criticalAlerts.length}
+              </span>
+            </div>
+            <div className="space-y-2">
               {criticalAlerts.length === 0 ? (
-                <span className="font-mono text-[9px]" style={{ color: 'var(--color-gs-muted)' }}>
-                  Sem alertas criticos
-                </span>
+                <EmptyState title="Fila crítica limpa" />
               ) : (
-                criticalAlerts.slice(0, 8).map((a, i) => (
-                  <div
-                    key={`crit-${i}`}
-                    className="flex items-start gap-2 py-1.5"
-                    style={{ borderBottom: '1px solid var(--color-gs-border)' }}
+                criticalAlerts.slice(0, 7).map((alerta) => (
+                  <button
+                    key={alerta.id}
+                    onClick={() => navigate('/monitor')}
+                    className="block w-full rounded-[6px] border border-[var(--color-gs-border)] p-3 text-left hover:bg-[var(--color-gs-hover-overlay)]"
                   >
-                    <span
-                      className="font-mono text-[8px] font-bold shrink-0 px-1 py-0.5 rounded-sm"
-                      style={{ color: 'var(--color-gs-red)', background: 'rgba(255,59,48,0.1)' }}
-                    >
-                      {(a.severidade ?? '').slice(0, 3).toUpperCase()}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <span
-                        className="font-mono text-[9px] font-bold"
-                        style={{ color: 'var(--color-gs-text)' }}
-                      >
-                        {a.sku}
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="truncate font-mono text-xs font-bold text-[var(--color-gs-text)]">
+                        {alerta.sku}
                       </span>
-                      <span
-                        className="font-mono text-[8px] truncate block"
-                        style={{ color: 'var(--color-gs-muted)' }}
+                      <StatusBadge
+                        tone={normalizeSeverity(alerta.severidade) === 'CRITICO' ? 'red' : 'yellow'}
                       >
-                        {a.tipo_alerta}
-                      </span>
+                        {normalizeSeverity(alerta.severidade)}
+                      </StatusBadge>
                     </div>
-                  </div>
-                ))
-              )}
-            </div>
-            <div className="px-3 py-2">
-              <div className="flex items-center gap-1.5 mb-2">
-                <Zap size={10} style={{ color: 'var(--color-gs-green)' }} />
-                <span
-                  className="font-mono text-[8px] tracking-[0.2em] uppercase font-bold"
-                  style={{ color: 'var(--color-gs-green)' }}
-                >
-                  OPORTUNIDADES ({positiveAlerts.length})
-                </span>
-              </div>
-              {positiveAlerts.length === 0 ? (
-                <span className="font-mono text-[9px]" style={{ color: 'var(--color-gs-muted)' }}>
-                  Sem oportunidades detectadas
-                </span>
-              ) : (
-                positiveAlerts.slice(0, 6).map((a, i) => (
-                  <div
-                    key={`opp-${i}`}
-                    className="flex items-start gap-2 py-1.5"
-                    style={{ borderBottom: '1px solid var(--color-gs-border)' }}
-                  >
-                    <Zap size={9} style={{ color: 'var(--color-gs-green)' }} />
-                    <div className="min-w-0 flex-1">
-                      <span
-                        className="font-mono text-[9px] font-bold"
-                        style={{ color: 'var(--color-gs-text)' }}
-                      >
-                        {a.sku}
-                      </span>
-                      <span
-                        className="font-mono text-[8px] truncate block"
-                        style={{ color: 'var(--color-gs-muted)' }}
-                      >
-                        {a.tipo_alerta}
-                      </span>
-                    </div>
-                  </div>
+                    <p className="mt-2 truncate text-xs text-[var(--color-gs-muted)]">
+                      {alerta.tipo_alerta || alerta.descricao}
+                    </p>
+                  </button>
                 ))
               )}
             </div>
           </div>
-        </div>
 
-        {/* Rankings */}
-        <div
-          className="lg:col-span-4 flex flex-col"
-          style={{
-            background: 'var(--color-gs-panel)',
-            border: '1px solid var(--color-gs-border)',
-            borderRadius: '2px',
-            overflow: 'hidden',
-          }}
+          <div className="border-t border-[var(--color-gs-border)] pt-3">
+            <div className="mb-2 flex items-center justify-between">
+              <StatusBadge tone="green">oportunidade</StatusBadge>
+              <span className="font-mono text-[10px] text-[var(--color-gs-muted)]">
+                {opportunityAlerts.length}
+              </span>
+            </div>
+            <div className="space-y-2">
+              {opportunityAlerts.slice(0, 4).map((alerta) => (
+                <button
+                  key={alerta.id}
+                  onClick={() => navigate(`/terminal?sku=${alerta.sku}`)}
+                  className="block w-full rounded-[6px] border border-[var(--color-gs-border)] p-3 text-left hover:bg-[var(--color-gs-hover-overlay)]"
+                >
+                  <div className="font-mono text-xs font-bold text-[var(--color-gs-text)]">
+                    {alerta.sku}
+                  </div>
+                  <p className="mt-2 truncate text-xs text-[var(--color-gs-muted)]">
+                    {alerta.tipo_alerta || alerta.descricao}
+                  </p>
+                </button>
+              ))}
+            </div>
+          </div>
+        </DataPanel>
+
+        <DataPanel
+          className="xl:col-span-3"
+          title="Ranking 7 dias"
+          eyebrow="Top e bottom"
+          contentClassName="space-y-4"
         >
-          <div
-            className="flex items-center justify-between px-3 py-2 shrink-0"
-            style={{ borderBottom: '1px solid var(--color-gs-border)' }}
-          >
-            <span
-              className="font-mono text-[9px] tracking-[0.2em] uppercase font-bold"
-              style={{ color: 'var(--color-gs-muted)' }}
-            >
-              RANKING 7 DIAS
-            </span>
-          </div>
-          <div className="flex-1 overflow-y-auto">
-            <div className="px-3 py-2" style={{ borderBottom: '1px solid var(--color-gs-border)' }}>
-              <div className="flex items-center gap-1.5 mb-2">
-                <TrendingUp size={10} style={{ color: 'var(--color-gs-green)' }} />
-                <span
-                  className="font-mono text-[8px] tracking-[0.2em] uppercase font-bold"
-                  style={{ color: 'var(--color-gs-green)' }}
+          <div>
+            <StatusBadge tone="green">top 5</StatusBadge>
+            <div className="mt-2 space-y-2">
+              {top5.map((product, index) => (
+                <button
+                  key={product.mlb}
+                  onClick={() => navigate(`/terminal?sku=${product.sku}&mlb=${product.mlb}`)}
+                  className="grid w-full grid-cols-[28px_1fr_auto] items-center gap-2 rounded-[6px] border border-[var(--color-gs-border)] p-2 text-left hover:bg-[var(--color-gs-hover-overlay)]"
                 >
-                  TOP 5
-                </span>
-              </div>
-              {top5.map((p, i) => (
-                <div
-                  key={p.mlb}
-                  className="flex items-center gap-2 py-1.5"
-                  style={{ borderBottom: '1px solid var(--color-gs-border)' }}
-                >
-                  <span
-                    className="font-heading font-black text-sm shrink-0"
-                    style={{ color: 'var(--color-gs-green)', width: 20, textAlign: 'center' }}
-                  >
-                    {i + 1}
+                  <span className="font-heading text-lg font-black text-[var(--color-gs-green)]">
+                    {index + 1}
                   </span>
-                  <div
-                    className="flex-1 min-w-0 cursor-pointer group"
-                    onClick={() => navigate(`/terminal?sku=${p.sku}&mlb=${p.mlb}`)}
-                  >
-                    <span
-                      className="font-mono text-[9px] font-bold truncate block group-hover:text-gs-blue transition-colors"
-                      style={{ color: 'var(--color-gs-text)' }}
-                    >
-                      {p.titulo || p.sku}
-                    </span>
-                    <span
-                      className="font-mono text-[9px]"
-                      style={{ color: 'var(--color-gs-green)' }}
-                    >
-                      {fmt(p.receita7d)}
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => setDrawerMlb({ mlb: p.mlb, sku: p.sku })}
-                    className="flex items-center gap-1 font-mono text-[7px] tracking-wider uppercase px-1.5 py-1 rounded-sm"
-                    style={{
-                      color: 'var(--color-gs-muted)',
-                      border: '1px solid var(--color-gs-border)',
-                      background: 'transparent',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    <ClipboardList size={8} />
-                    ANOTAR
-                  </button>
-                </div>
-              ))}
-            </div>
-            <div className="px-3 py-2">
-              <div className="flex items-center gap-1.5 mb-2">
-                <TrendingDown size={10} style={{ color: 'var(--color-gs-red)' }} />
-                <span
-                  className="font-mono text-[8px] tracking-[0.2em] uppercase font-bold"
-                  style={{ color: 'var(--color-gs-red)' }}
-                >
-                  BOTTOM 5
-                </span>
-              </div>
-              {bottom5.map((p, i) => (
-                <div
-                  key={p.mlb}
-                  className="flex items-center gap-2 py-1.5"
-                  style={{ borderBottom: '1px solid var(--color-gs-border)' }}
-                >
-                  <span
-                    className="font-heading font-black text-sm shrink-0"
-                    style={{ color: 'var(--color-gs-red)', width: 20, textAlign: 'center' }}
-                  >
-                    {allProducts.length - 4 + i}
+                  <span className="truncate font-mono text-[11px] font-bold text-[var(--color-gs-text)]">
+                    {product.sku}
                   </span>
-                  <div
-                    className="flex-1 min-w-0 cursor-pointer group"
-                    onClick={() => navigate(`/terminal?sku=${p.sku}&mlb=${p.mlb}`)}
-                  >
-                    <span
-                      className="font-mono text-[9px] font-bold truncate block group-hover:text-gs-blue transition-colors"
-                      style={{ color: 'var(--color-gs-text)' }}
-                    >
-                      {p.titulo || p.sku}
-                    </span>
-                    <span className="font-mono text-[9px]" style={{ color: 'var(--color-gs-red)' }}>
-                      {fmt(p.receita7d)}
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => setDrawerMlb({ mlb: p.mlb, sku: p.sku })}
-                    className="flex items-center gap-1 font-mono text-[7px] tracking-wider uppercase px-1.5 py-1 rounded-sm"
-                    style={{
-                      color: 'var(--color-gs-muted)',
-                      border: '1px solid var(--color-gs-border)',
-                      background: 'transparent',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    <ClipboardList size={8} />
-                    ANOTAR
-                  </button>
-                </div>
+                  <span className="font-mono text-[10px] text-[var(--color-gs-green)]">
+                    {shortCurrency(product.receita7d)}
+                  </span>
+                </button>
               ))}
             </div>
           </div>
-        </div>
+
+          <div className="border-t border-[var(--color-gs-border)] pt-4">
+            <StatusBadge tone="red">bottom 5</StatusBadge>
+            <div className="mt-2 space-y-2">
+              {bottom5.map((product, index) => (
+                <button
+                  key={product.mlb}
+                  onClick={() => navigate(`/terminal?sku=${product.sku}&mlb=${product.mlb}`)}
+                  className="grid w-full grid-cols-[28px_1fr_auto] items-center gap-2 rounded-[6px] border border-[var(--color-gs-border)] p-2 text-left hover:bg-[var(--color-gs-hover-overlay)]"
+                >
+                  <span className="font-heading text-lg font-black text-[var(--color-gs-red)]">
+                    {index + 1}
+                  </span>
+                  <span className="truncate font-mono text-[11px] font-bold text-[var(--color-gs-text)]">
+                    {product.sku}
+                  </span>
+                  <span className="font-mono text-[10px] text-[var(--color-gs-red)]">
+                    {shortCurrency(product.receita7d)}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </DataPanel>
       </div>
 
       {drawerMlb && (
@@ -608,6 +515,6 @@ export function OperationHub() {
           onClose={() => setDrawerMlb(null)}
         />
       )}
-    </div>
+    </PageShell>
   );
 }
